@@ -1,7 +1,18 @@
-import { Box, Button, Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  HStack,
+  IconButton,
+  Text,
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { FiInfo } from "react-icons/fi";
 import { useAdvancePhase } from "../hooks/useGameData";
 import type { GamePhase } from "../lib/database.types";
 import { PhaseTimer } from "./PhaseTimer";
+import { SetupTips } from "./SetupTips.tsx";
 import { toaster } from "./ui/toaster";
 
 interface GameStateDisplayProps {
@@ -16,6 +27,7 @@ export function GameStateDisplay({
   version,
 }: GameStateDisplayProps) {
   const advancePhase = useAdvancePhase();
+  const [tipsOpen, setTipsOpen] = useState(true);
 
   const handleAdvancePhase = async () => {
     try {
@@ -51,7 +63,13 @@ export function GameStateDisplay({
       <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
         <Box flex="1" minW="300px">
           <Heading size="xl" mb={2} color="gray.900">
-            Round {round} - {phase} Phase
+            {phase === "Setup" ? (
+              <>Setup Phase</>
+            ) : (
+              <>
+                Round {round} - {phase} Phase
+              </>
+            )}
           </Heading>
           <Text color="gray.700" fontSize="sm" fontWeight="medium">
             Version: {version}
@@ -59,7 +77,17 @@ export function GameStateDisplay({
         </Box>
 
         <HStack gap={4} flexShrink={0}>
-          <PhaseTimer round={round} phase={phase} />
+          {phase !== "Setup" && <PhaseTimer round={round} phase={phase} />}
+
+          {phase === "Setup" && (
+            <IconButton
+              aria-label="Setup tips"
+              onClick={() => setTipsOpen(true)}
+              variant="subtle"
+            >
+              <FiInfo />
+            </IconButton>
+          )}
 
           <Button
             onClick={handleAdvancePhase}
@@ -67,10 +95,14 @@ export function GameStateDisplay({
             colorPalette="blue"
             size="lg"
           >
-            Next Phase
+            {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
           </Button>
         </HStack>
       </Flex>
+
+      {phase === "Setup" && (
+        <SetupTips open={tipsOpen} onClose={() => setTipsOpen(false)} />
+      )}
     </Box>
   );
 }

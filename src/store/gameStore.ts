@@ -40,8 +40,8 @@ interface GameStore {
 }
 
 const initialState = {
-  currentRound: 1,
-  currentPhase: "Governance" as GamePhase,
+  currentRound: 0,
+  currentPhase: "Setup" as GamePhase,
   version: 0,
   dashboardData: null,
   timers: {} as Record<PhaseKey, PhaseTimerState>,

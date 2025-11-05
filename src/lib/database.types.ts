@@ -7,23 +7,23 @@ export type Json =
   | Json[];
 
 export type Specialization =
-  | 'Resource Extractor'
-  | 'Infrastructure Provider'
-  | 'Operations Manager';
+  | "Resource Extractor"
+  | "Infrastructure Provider"
+  | "Operations Manager";
 
-export type GamePhase = 'Governance' | 'Operations';
+export type GamePhase = "Setup" | "Governance" | "Operations";
 
 export type TransactionType =
-  | 'EV_GAIN'
-  | 'EV_LOSS'
-  | 'REP_GAIN'
-  | 'REP_LOSS'
-  | 'BUILD_INFRASTRUCTURE'
-  | 'MAINTENANCE'
-  | 'YIELD'
-  | 'MANUAL_ADJUSTMENT'
-  | 'GAME_START'
-  | 'COMMONS_MAINTENANCE';
+  | "EV_GAIN"
+  | "EV_LOSS"
+  | "REP_GAIN"
+  | "REP_LOSS"
+  | "BUILD_INFRASTRUCTURE"
+  | "MAINTENANCE"
+  | "YIELD"
+  | "MANUAL_ADJUSTMENT"
+  | "GAME_START"
+  | "COMMONS_MAINTENANCE";
 
 export interface Database {
   public: {
@@ -214,13 +214,13 @@ export interface Database {
 }
 
 // Derived types for easier use
-export type GameState = Database['public']['Tables']['game_state']['Row'];
-export type Player = Database['public']['Tables']['players']['Row'];
+export type GameState = Database["public"]["Tables"]["game_state"]["Row"];
+export type Player = Database["public"]["Tables"]["players"]["Row"];
 export type InfrastructureDefinition =
-  Database['public']['Tables']['infrastructure_definitions']['Row'];
+  Database["public"]["Tables"]["infrastructure_definitions"]["Row"];
 export type PlayerInfrastructure =
-  Database['public']['Tables']['player_infrastructure']['Row'];
-export type LedgerEntry = Database['public']['Tables']['ledger_entries']['Row'];
+  Database["public"]["Tables"]["player_infrastructure"]["Row"];
+export type LedgerEntry = Database["public"]["Tables"]["ledger_entries"]["Row"];
 
 // Dashboard summary types
 export interface PlayerInfrastructureItem {

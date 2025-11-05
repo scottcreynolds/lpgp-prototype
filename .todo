@@ -304,3 +304,82 @@
 ---
 
 Last Updated: November 5, 2025
+
+---
+
+## Dark/Light Mode Color Audit – 2025-11-05
+
+Goal: Replace hardcoded color values with Chakra v3 semantic tokens (e.g., `bg`, `fg`, `fg.muted`, `border`) or component `colorPalette` usage so the UI adapts to dark/light modes automatically.
+
+Guidelines:
+
+- Prefer semantic tokens: `bg`, `fg`, `fg.muted`, `border`, etc.
+- For statuses (success/warning/danger/info), prefer `colorPalette` on supported components and avoid raw `red.50`/`green.700`.
+- For icons (react-icons), prefer `color="currentColor"` by wrapping in a Chakra component with a token color or use Chakra's `Icon` with tokens.
+
+### Components to update (file and props)
+
+- [ ] `src/components/GameStateDisplay.tsx`
+  - [ ] Replace `bg="white"` with `bg="bg"` (container surface)
+  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
+  - [ ] Replace heading `color="gray.900"` with `color="fg"`
+  - [ ] Replace meta text `color="gray.700"` with `color="fg.muted"`
+
+- [ ] `src/components/PhaseTimer.tsx`
+  - [ ] Replace `bg="gray.100"` with `bg="bg"` (or a `subtle` surface if defined)
+  - [ ] Replace `borderColor="gray.300"` with `borderColor="border"`
+  - [ ] Replace label `color="gray.800"` with `color="fg"`
+  - [ ] Replace `timeColor` from `'red.600' | 'gray.900'` to tokens (e.g., `color="fg"` normally and apply `colorPalette="red"` + variant or `color="fg"` with emphasis and an error badge)
+
+- [ ] `src/components/PlayerRankings.tsx`
+  - [ ] Replace card `bg="white"` with `bg="bg"`
+  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
+  - [ ] Replace heading `color="gray.900"` with `color="fg"`
+  - [ ] Replace header row `bg="gray.100"` with semantic surface (e.g., `bg="bg"` and use font weight for emphasis)
+  - [ ] Replace column header `color="gray.900"` with `color="fg"`
+  - [ ] Replace winner EV `color='green.600'` with a token or `colorPalette="green"` on a badge/text
+  - [ ] Replace REP negative `color='red.700'` with token or `colorPalette="red"`
+
+- [ ] `src/components/EditPlayerModal.tsx`
+  - [ ] Replace helper text `color="gray.700"` with `color="fg.muted"`
+
+- [ ] `src/components/InfrastructureCards.tsx`
+  - [ ] Replace section heading `color="gray.900"` with `color="fg"`
+  - [ ] Replace card `bg="white"` with `bg="bg"`
+  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
+  - [ ] Replace title/text `color="gray.900"` with `color="fg"`
+  - [ ] Replace labels `color="gray.800"`/`gray.600` with `fg`/`fg.muted`
+  - [ ] Replace power alert backgrounds `red.50`/`blue.50`, borders `red.200`/`blue.200`, and icon hex `#C53030`/`#3182CE` with semantic or `colorPalette`-based styling
+  - [ ] Replace crew alert backgrounds `red.50`/`green.50`, borders `red.200`/`green.200`, and icon hex `#C53030`/`#38A169` similarly
+  - [ ] Replace EV/Income boxes `orange.50`/`orange.200` and `green.50`/`green.200` with semantic or `colorPalette` tokens
+  - [ ] Replace yield `color="green.700"` with token or `colorPalette="green"`
+  - [ ] Replace misc `color="gray.800"` with `fg`
+
+- [ ] `src/components/AddPlayerModal.tsx`
+  - [ ] Replace helper text `color="gray.600"` with `color="fg.muted"`
+
+- [ ] `src/components/DashboardHeader.tsx`
+  - [ ] Replace header bar `bg="white"` with `bg="bg"`
+  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
+
+- [ ] `src/components/Dashboard.tsx`
+  - [ ] Replace error panel `bg="red.50"`, `borderColor="red.200"`, `color="red.700"/"red.600"` with an `Alert` using `colorPalette="red"` or semantic tokens
+  - [ ] Replace page `bg="gray.50"` with `bg="bg"`
+  - [ ] Replace section heading `color="gray.900"` with `color="fg"`
+
+- [ ] `src/components/GameStateDisplay.tsx` (post-Setup adjustments if any remain)
+  - [ ] Ensure any remaining hardcoded grays/whites are swapped for semantic tokens
+
+Notes:
+
+- Keep contrast in dark mode (avoid overly subtle tokens for critical text).
+- Verify existing custom theme exposes `bg`, `fg`, `fg.muted`, `border` (usage is present elsewhere in repo).
+- Where component-level `colorPalette` isn’t available, apply token colors via `color`/`bg` on a wrapper Box.
+
+## New: Setup Phase & Round Start
+
+- [x] Add explicit Setup phase (pre-first-round) with no timer
+- [x] Default new game to Setup (round 0)
+- [x] Show "Begin Round 1" button in Setup that advances to Round 1 – Governance
+- [x] Add Setup tips modal (defaults open) with icon toggle
+- [ ] Update docs/rules to mention Setup workflow
