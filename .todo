@@ -3,6 +3,7 @@
 ## Immediate Tasks
 
 ### Infrastructure Setup
+
 - [ ] Decide on mock data vs real Supabase for initial development
 - [ ] If mock: Implement localStorage-based mock data provider
 - [ ] If real: Set up Supabase project and run migrations
@@ -11,17 +12,20 @@
 ## Phase 1: Core Gameplay Features (Week 1-2)
 
 ### Player Management
+
 - [ ] Add inline player name editing in rankings table
 - [ ] Add player color assignment for better visual distinction
 - [ ] Add confirmation dialog for "Start New Game"
 
 ### Game Flow
+
 - [ ] Implement Governance phase countdown timer
 - [ ] Add timer configuration (default 3 minutes, adjustable)
 - [ ] Add visual/audio alert when timer expires
 - [ ] Add option to auto-advance phase when timer ends
 
 ### Manual Adjustments
+
 - [ ] Create modal for manual EV adjustments
 - [ ] Create modal for manual REP adjustments
 - [ ] Add reason field (required) for audit trail
@@ -29,6 +33,7 @@
 - [ ] Add undo/rollback capability for last adjustment
 
 ### Commons Infrastructure
+
 - [ ] Display shared commons infrastructure in separate card
 - [ ] Show commons capacity usage across all players
 - [ ] Track 10 EV/round commons maintenance cost
@@ -37,6 +42,7 @@
 ## Phase 2: Infrastructure System (Week 3-4)
 
 ### Building Infrastructure
+
 - [ ] Create "Build Infrastructure" modal with type selector
 - [ ] Show available infrastructure based on player specialization
 - [ ] Validate player has sufficient EV before building
@@ -45,6 +51,7 @@
 - [ ] Update dashboard cards to reflect new infrastructure
 
 ### Power & Crew Management
+
 - [ ] Add toggle switches to infrastructure cards for power on/off
 - [ ] Add toggle switches for crew allocation
 - [ ] Update capacity calculations in real-time
@@ -52,6 +59,7 @@
 - [ ] Show yield reduction when infrastructure is off
 
 ### Infrastructure Details
+
 - [ ] Create detailed view modal for infrastructure cards
 - [ ] Show per-item breakdown with status indicators
 - [ ] Add ability to sell/remove infrastructure
@@ -60,6 +68,7 @@
 ## Phase 3: Activity & History (Week 4-5)
 
 ### Activity Feed
+
 - [ ] Create sidebar/panel for recent activity
 - [ ] Show last 10-20 actions with timestamps
 - [ ] Add filter by player
@@ -68,6 +77,7 @@
 - [ ] Make feed scrollable/paginated for older actions
 
 ### Round Summary
+
 - [ ] Create end-of-round summary modal
 - [ ] Show EV/REP changes per player
 - [ ] Show infrastructure built this round
@@ -77,6 +87,7 @@
 ## Phase 4: Contracts System (Month 2)
 
 ### Contract Creation
+
 - [ ] Design contract data model (parties, terms, duration)
 - [ ] Create contract creation modal
 - [ ] Support resource sharing agreements
@@ -85,6 +96,7 @@
 - [ ] Add contract to database with all parties' agreement
 
 ### Contract Management
+
 - [ ] Display active contracts per player
 - [ ] Show contract terms and remaining duration
 - [ ] Add ability to fulfill contract obligations
@@ -93,6 +105,7 @@
 - [ ] Auto-expire contracts after duration
 
 ### Contract Enforcement
+
 - [ ] Add "Vote to Penalize" mechanism in Governance phase
 - [ ] Show violated contracts with evidence
 - [ ] Allow players to vote on penalties
@@ -102,6 +115,7 @@
 ## Phase 5: World Events (Month 2)
 
 ### Event System
+
 - [ ] Create world_events table in database
 - [ ] Seed initial event cards
 - [ ] Implement random event draw at round start
@@ -110,6 +124,7 @@
 - [ ] Log event occurrences
 
 ### Event Types
+
 - [ ] Resource scarcity events (reduced yields)
 - [ ] Equipment failure events (maintenance spikes)
 - [ ] Opportunity events (bonus EV available)
@@ -119,6 +134,7 @@
 ## Phase 6: Advanced Features (Month 3+)
 
 ### Territory System
+
 - [ ] Design lunar map grid/regions
 - [ ] Create territory claiming mechanism
 - [ ] Add territory ownership to database
@@ -127,6 +143,7 @@
 - [ ] Add visual map component
 
 ### Skill Trees
+
 - [ ] Design skill point system
 - [ ] Create skill tree UI
 - [ ] Implement skill point allocation
@@ -134,6 +151,7 @@
 - [ ] Balance skill progression
 
 ### Analytics Dashboard
+
 - [ ] Create research analytics view
 - [ ] Add charts for EV/REP over time
 - [ ] Show cooperation patterns
@@ -141,6 +159,7 @@
 - [ ] Export charts as images
 
 ### Multi-Game Support
+
 - [ ] Add game_sessions table
 - [ ] Generate unique game URLs
 - [ ] Support multiple concurrent games
@@ -148,6 +167,7 @@
 - [ ] Add game archival
 
 ### Turn Planner
+
 - [ ] Create turn planning UI for Operations phase
 - [ ] Show turn order queue
 - [ ] Add "End Turn" button
@@ -157,6 +177,7 @@
 ## Technical Debt & Improvements
 
 ### Testing
+
 - [ ] Set up Vitest for unit tests
 - [ ] Write tests for RPC functions
 - [ ] Write tests for hooks
@@ -165,6 +186,7 @@
 - [ ] Aim for 70%+ code coverage
 
 ### Error Handling
+
 - [ ] Add React Error Boundaries
 - [ ] Implement global error handler
 - [ ] Add retry logic for failed mutations
@@ -172,6 +194,7 @@
 - [ ] Add Sentry or similar error tracking
 
 ### Performance
+
 - [ ] Add React.memo to expensive components
 - [ ] Implement virtual scrolling for long lists
 - [ ] Optimize dashboard RPC function for 20+ players
@@ -179,6 +202,7 @@
 - [ ] Measure and log performance metrics
 
 ### Developer Experience
+
 - [ ] Set up Storybook for component development
 - [ ] Add CONTRIBUTING.md with patterns
 - [ ] Generate types from Supabase schema automatically
@@ -186,6 +210,7 @@
 - [ ] Improve inline code documentation
 
 ### Security
+
 - [ ] Add game-specific access codes (auth)
 - [ ] Implement facilitator role (admin permissions)
 - [ ] Add rate limiting to mutations
@@ -193,6 +218,7 @@
 - [ ] Add CORS configuration
 
 ### UX Polish
+
 - [ ] Add keyboard shortcuts
 - [ ] Improve mobile responsiveness
 - [ ] Add dark mode support
@@ -203,6 +229,7 @@
 ## Data Export & Research Tools
 
 ### Export Functionality
+
 - [ ] Add CSV export for players table
 - [ ] Add CSV export for ledger_entries
 - [ ] Add JSON export for complete game state
@@ -210,6 +237,7 @@
 - [ ] Add export button to dashboard header
 
 ### Replay & Analysis
+
 - [ ] Create game replay viewer
 - [ ] Show state changes over time
 - [ ] Add timeline scrubber
@@ -246,3 +274,33 @@
 ---
 
 *Last Updated: November 4, 2025*
+
+---
+
+## Notes & Next Steps – Phase Timer (Appended)
+
+### Timer Notes
+
+- Timer state is managed client-side in Zustand and keyed per phase per round (e.g., `${round}:${phase}`).
+- Default duration is 5 minutes; users can edit minutes. Editing pauses the timer and clamps remaining time if needed.
+- While running, remaining time updates every second; when it reaches 0 the display turns red, the timer auto-pauses, and a dialog is shown.
+
+### Timer Next Steps
+
+- Persistence options:
+  - Add Zustand persist middleware to store timers in localStorage (survives reloads, single-client scope).
+  - Or add DB schema + RPCs for timers to sync across clients and hook into real-time invalidations.
+- Auto-advance (optional):
+  - On expiry, prompt to advance phase automatically and call `advance_phase` (respect optimistic locking using `version`).
+- UX enhancements:
+  - Add audio alert on expiry and a toast message.
+  - Provide quick duration presets (e.g., 3/5/10 minutes) and a “+1 min” button.
+- Testing:
+  - Unit tests for timer store actions (start, pause, reset, duration edit, expiry).
+  - Component tests for `PhaseTimer` interactions and dialog behavior.
+- Lint cleanup:
+  - Fix existing `react-refresh/only-export-components` and empty-interface errors in `src/components/ui/color-mode.tsx` and `src/components/ui/toaster.tsx` by moving shared constants/functions to separate files.
+
+---
+
+Last Updated: November 5, 2025

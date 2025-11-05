@@ -1,15 +1,8 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  HStack,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
-import { useAdvancePhase } from '../hooks/useGameData';
-import type { GamePhase } from '../lib/database.types';
-import { toaster } from './ui/toaster';
+import { Box, Button, Flex, Heading, HStack, Text } from "@chakra-ui/react";
+import { useAdvancePhase } from "../hooks/useGameData";
+import type { GamePhase } from "../lib/database.types";
+import { PhaseTimer } from "./PhaseTimer";
+import { toaster } from "./ui/toaster";
 
 interface GameStateDisplayProps {
   round: number;
@@ -28,19 +21,19 @@ export function GameStateDisplay({
     try {
       const result = await advancePhase.mutateAsync();
       toaster.create({
-        title: 'Phase Advanced',
+        title: "Phase Advanced",
         description: `Now in Round ${result.new_round} - ${result.new_phase} Phase`,
-        type: 'success',
+        type: "success",
         duration: 3000,
       });
     } catch (error) {
       toaster.create({
-        title: 'Failed to Advance',
+        title: "Failed to Advance",
         description:
           error instanceof Error
             ? error.message
-            : 'Failed to advance phase - please try again',
-        type: 'error',
+            : "Failed to advance phase - please try again",
+        type: "error",
         duration: 5000,
       });
     }
@@ -66,24 +59,7 @@ export function GameStateDisplay({
         </Box>
 
         <HStack gap={4} flexShrink={0}>
-          <Box
-            px={4}
-            py={3}
-            bg="gray.100"
-            borderRadius="md"
-            borderWidth={1}
-            borderColor="gray.300"
-          >
-            <Text fontSize="sm" color="gray.800" mb={1} fontWeight="semibold">
-              Timer
-            </Text>
-            <Text fontSize="2xl" fontWeight="bold" fontFamily="mono" color="gray.900">
-              --:--
-            </Text>
-            <Text fontSize="xs" color="gray.700" fontWeight="medium">
-              (Coming Soon)
-            </Text>
-          </Box>
+          <PhaseTimer round={round} phase={phase} />
 
           <Button
             onClick={handleAdvancePhase}

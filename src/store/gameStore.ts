@@ -1,5 +1,17 @@
-import { create } from 'zustand';
-import type { DashboardSummary, GamePhase } from '../lib/database.types';
+import { create } from "zustand";
+import type { DashboardSummary, GamePhase } from "../lib/database.types";
+
+// Timer defaults
+const DEFAULT_TIMER_SECONDS = 5 * 60; // 5 minutes
+
+type PhaseKey = string; // `${round}:${phase}`
+
+interface PhaseTimerState {
+  durationSec: number; // configured duration
+  remainingSec: number; // remaining when paused or at last start
+  startedAt: number | null; // epoch ms when started
+  isRunning: boolean;
+}
 
 interface GameStore {
   // Current game state
@@ -10,20 +22,32 @@ interface GameStore {
   // Dashboard data
   dashboardData: DashboardSummary | null;
 
+  // Phase timers keyed by `${round}:${phase}`
+  timers: Record<PhaseKey, PhaseTimerState>;
+
   // Actions
   setGameState: (round: number, phase: GamePhase, version: number) => void;
   setDashboardData: (data: DashboardSummary) => void;
   reset: () => void;
+
+  // Timer actions
+  ensureTimer: (round: number, phase: GamePhase) => void;
+  setTimerMinutes: (round: number, phase: GamePhase, minutes: number) => void;
+  startTimer: (round: number, phase: GamePhase) => void;
+  pauseTimer: (round: number, phase: GamePhase) => void;
+  resetTimer: (round: number, phase: GamePhase) => void;
+  getRemainingSeconds: (round: number, phase: GamePhase) => number;
 }
 
 const initialState = {
   currentRound: 1,
-  currentPhase: 'Governance' as GamePhase,
+  currentPhase: "Governance" as GamePhase,
   version: 0,
   dashboardData: null,
+  timers: {} as Record<PhaseKey, PhaseTimerState>,
 };
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   setGameState: (round, phase, version) =>
@@ -42,4 +66,115 @@ export const useGameStore = create<GameStore>((set) => ({
     }),
 
   reset: () => set(initialState),
+
+  // Ensure a timer entry exists for a given round/phase
+  ensureTimer: (round, phase) =>
+    set((state) => {
+      const key = `${round}:${phase}`;
+      if (state.timers[key]) return {};
+      return {
+        timers: {
+          ...state.timers,
+          [key]: {
+            durationSec: DEFAULT_TIMER_SECONDS,
+            remainingSec: DEFAULT_TIMER_SECONDS,
+            startedAt: null,
+            isRunning: false,
+          },
+        },
+      };
+    }),
+
+  setTimerMinutes: (round, phase, minutes) =>
+    set((state) => {
+      const key = `${round}:${phase}`;
+      const seconds = Math.max(0, Math.floor(minutes * 60));
+      const prev = state.timers[key];
+      const next: PhaseTimerState = prev
+        ? {
+            ...prev,
+            durationSec: seconds,
+            // If remaining exceeds new duration, clamp it
+            remainingSec: Math.min(prev.remainingSec, seconds),
+          }
+        : {
+            durationSec: seconds,
+            remainingSec: seconds,
+            startedAt: null,
+            isRunning: false,
+          };
+      return { timers: { ...state.timers, [key]: next } };
+    }),
+
+  startTimer: (round, phase) =>
+    set((state) => {
+      const key = `${round}:${phase}`;
+      const t = state.timers[key] ?? {
+        durationSec: DEFAULT_TIMER_SECONDS,
+        remainingSec: DEFAULT_TIMER_SECONDS,
+        startedAt: null,
+        isRunning: false,
+      };
+      if (t.isRunning || t.remainingSec <= 0) {
+        return { timers: { ...state.timers, [key]: t } };
+      }
+      return {
+        timers: {
+          ...state.timers,
+          [key]: { ...t, isRunning: true, startedAt: Date.now() },
+        },
+      };
+    }),
+
+  pauseTimer: (round, phase) =>
+    set((state) => {
+      const key = `${round}:${phase}`;
+      const t = state.timers[key];
+      if (!t) return {};
+      if (!t.isRunning) return {};
+      const elapsed = t.startedAt
+        ? Math.floor((Date.now() - t.startedAt) / 1000)
+        : 0;
+      const remaining = Math.max(0, t.remainingSec - elapsed);
+      return {
+        timers: {
+          ...state.timers,
+          [key]: {
+            ...t,
+            isRunning: false,
+            startedAt: null,
+            remainingSec: remaining,
+          },
+        },
+      };
+    }),
+
+  resetTimer: (round, phase) =>
+    set((state) => {
+      const key = `${round}:${phase}`;
+      const t = state.timers[key];
+      const duration = t?.durationSec ?? DEFAULT_TIMER_SECONDS;
+      return {
+        timers: {
+          ...state.timers,
+          [key]: {
+            durationSec: duration,
+            remainingSec: duration,
+            startedAt: null,
+            isRunning: false,
+          },
+        },
+      };
+    }),
+
+  getRemainingSeconds: (round, phase) => {
+    const key = `${round}:${phase}`;
+    const t = get().timers[key];
+    if (!t) return DEFAULT_TIMER_SECONDS;
+    if (!t.isRunning) return t.remainingSec;
+    const elapsed = t.startedAt
+      ? Math.floor((Date.now() - t.startedAt) / 1000)
+      : 0;
+    return Math.max(0, t.remainingSec - elapsed);
+  },
 }));

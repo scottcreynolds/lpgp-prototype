@@ -1,18 +1,18 @@
-import type { GamePhase, Specialization } from './database.types';
+import type { GamePhase, Player, Specialization } from "./database.types";
 import {
-  initialGameState,
-  initialPlayers,
-  initialPlayerInfrastructure,
-  initialLedger,
-  infrastructureDefinitions,
   buildDashboardSummary,
-} from './mockData';
+  infrastructureDefinitions,
+  initialGameState,
+  initialLedger,
+  initialPlayerInfrastructure,
+  initialPlayers,
+} from "./mockData";
 
 const STORAGE_KEYS = {
-  GAME_STATE: 'lpgp_game_state',
-  PLAYERS: 'lpgp_players',
-  PLAYER_INFRASTRUCTURE: 'lpgp_player_infrastructure',
-  LEDGER: 'lpgp_ledger',
+  GAME_STATE: "lpgp_game_state",
+  PLAYERS: "lpgp_players",
+  PLAYER_INFRASTRUCTURE: "lpgp_player_infrastructure",
+  LEDGER: "lpgp_ledger",
 } as const;
 
 // Initialize localStorage with seed data if empty
@@ -50,7 +50,7 @@ function getPlayerInfrastructure() {
 // Save data to localStorage
 function saveGameState(state: typeof initialGameState) {
   localStorage.setItem(STORAGE_KEYS.GAME_STATE, JSON.stringify(state));
-  notifySubscribers('game_state');
+  notifySubscribers("game_state");
 }
 
 // TODO: Add save functions for players, infrastructure, and ledger when needed
@@ -111,7 +111,7 @@ async function rpcAdvancePhase(currentVersion: number) {
           new_round: gameState.current_round,
           new_phase: gameState.current_phase as GamePhase,
           new_version: gameState.version,
-          error_message: 'Version mismatch - another update occurred',
+          error_message: "Version mismatch - another update occurred",
         },
       ],
       error: null,
@@ -122,11 +122,11 @@ async function rpcAdvancePhase(currentVersion: number) {
   let newRound = gameState.current_round;
   let newPhase: GamePhase;
 
-  if (gameState.current_phase === 'Governance') {
-    newPhase = 'Operations';
+  if (gameState.current_phase === "Governance") {
+    newPhase = "Operations";
   } else {
     newRound += 1;
-    newPhase = 'Governance';
+    newPhase = "Governance";
   }
 
   // Update game state
@@ -168,15 +168,15 @@ async function rpcResetGame() {
   localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(initialLedger));
 
   // Notify all subscribers
-  notifySubscribers('game_state');
-  notifySubscribers('players');
-  notifySubscribers('player_infrastructure');
+  notifySubscribers("game_state");
+  notifySubscribers("players");
+  notifySubscribers("player_infrastructure");
 
   return {
     data: [
       {
         success: true,
-        message: 'Game reset successfully',
+        message: "Game reset successfully",
         player_count: 1,
       },
     ],
@@ -206,18 +206,18 @@ async function rpcAddPlayer(name: string, specialization: Specialization) {
 
   // Determine starter infrastructure based on specialization
   let starterInfraId: string;
-  if (specialization === 'Resource Extractor') {
+  if (specialization === "Resource Extractor") {
     starterInfraId = infrastructureDefinitions.find(
-      (d) => d.type === 'Starter H2O Extractor'
+      (d) => d.type === "Starter H2O Extractor"
     )!.id;
-  } else if (specialization === 'Infrastructure Provider') {
+  } else if (specialization === "Infrastructure Provider") {
     starterInfraId = infrastructureDefinitions.find(
-      (d) => d.type === 'Starter Solar Array'
+      (d) => d.type === "Starter Solar Array"
     )!.id;
   } else {
     // Operations Manager
     starterInfraId = infrastructureDefinitions.find(
-      (d) => d.type === 'Starter Habitat'
+      (d) => d.type === "Starter Habitat"
     )!.id;
   }
 
@@ -237,9 +237,9 @@ async function rpcAddPlayer(name: string, specialization: Specialization) {
     id: `ledger-${newPlayerId}`,
     player_id: newPlayerId,
     round: gameState.current_round,
-    transaction_type: 'GAME_START' as const,
+    transaction_type: "GAME_START" as const,
     amount: 50,
-    reason: 'Initial EV',
+    reason: "Initial EV",
     metadata: null,
     created_at: new Date().toISOString(),
   };
@@ -257,14 +257,14 @@ async function rpcAddPlayer(name: string, specialization: Specialization) {
   localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
-  notifySubscribers('players');
-  notifySubscribers('player_infrastructure');
+  notifySubscribers("players");
+  notifySubscribers("player_infrastructure");
 
   return {
     data: [
       {
         success: true,
-        message: 'Player added successfully',
+        message: "Player added successfully",
         player_id: newPlayerId,
       },
     ],
@@ -280,14 +280,14 @@ async function rpcEditPlayer(
   const players = getPlayers();
 
   // Find the player
-  const playerIndex = players.findIndex((p) => p.id === playerId);
+  const playerIndex = players.findIndex((p: Player) => p.id === playerId);
 
   if (playerIndex === -1) {
     return {
       data: [
         {
           success: false,
-          message: 'Player not found',
+          message: "Player not found",
         },
       ],
       error: null,
@@ -306,13 +306,13 @@ async function rpcEditPlayer(
   localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
 
   // Notify subscribers
-  notifySubscribers('players');
+  notifySubscribers("players");
 
   return {
     data: [
       {
         success: true,
-        message: 'Player updated successfully',
+        message: "Player updated successfully",
       },
     ],
     error: null,
@@ -323,18 +323,18 @@ async function rpcEditPlayer(
 export const mockSupabaseClient = {
   rpc: (functionName: string, params?: Record<string, unknown>) => {
     switch (functionName) {
-      case 'get_dashboard_summary':
+      case "get_dashboard_summary":
         return rpcGetDashboardSummary();
-      case 'advance_phase':
+      case "advance_phase":
         return rpcAdvancePhase(params?.current_version as number);
-      case 'reset_game':
+      case "reset_game":
         return rpcResetGame();
-      case 'add_player':
+      case "add_player":
         return rpcAddPlayer(
           params?.player_name as string,
           params?.player_specialization as Specialization
         );
-      case 'edit_player':
+      case "edit_player":
         return rpcEditPlayer(
           params?.p_player_id as string,
           params?.p_player_name as string,
@@ -348,7 +348,7 @@ export const mockSupabaseClient = {
     }
   },
 
-  channel: (_channelName: string) => {
+  channel: () => {
     const handlers: Map<string, SubscriptionCallback> = new Map();
 
     const channelObj = {
@@ -363,11 +363,11 @@ export const mockSupabaseClient = {
         return channelObj;
       },
       subscribe: () => {
-        return Promise.resolve('SUBSCRIBED');
+        return Promise.resolve("SUBSCRIBED");
       },
       unsubscribe: () => {
         handlers.forEach((callback, key) => {
-          const table = key.split(':')[0];
+          const table = key.split(":")[0];
           subscribers.get(table)?.delete(callback);
         });
       },
@@ -377,10 +377,10 @@ export const mockSupabaseClient = {
   },
 
   removeChannel: (channel: unknown) => {
-    if (channel && typeof channel === 'object' && 'unsubscribe' in channel) {
+    if (channel && typeof channel === "object" && "unsubscribe" in channel) {
       (channel as { unsubscribe: () => void }).unsubscribe();
     }
-    return Promise.resolve('ok');
+    return Promise.resolve("ok");
   },
 };
 

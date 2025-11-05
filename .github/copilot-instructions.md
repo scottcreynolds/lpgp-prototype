@@ -51,6 +51,12 @@ These notes help AI agents work productively in this repo. Keep guidance concret
 - Dashboard composition: `Dashboard` fetches data via `useDashboardData`, renders sections (`GameStateDisplay`, `PlayerRankings`, `InfrastructureCards`). Keep data shaping in hooks or helpers, not in components.
 - Styling and layout: use Chakra UI components; avoid Tailwind. Prefer the design tokens and variants already in use.
 
+## Documentation and Rules
+
+- After implementing features, update relevant docs in `doc/` (e.g., `implementation-log-mock-data.md`, `status.md`) or add a new one as necessary.
+- After implementing features, update `.todo` with remaining tasks or next steps.
+- If there are any updates that should be made to either the game rules or the PRD, prompt to update `doc/rules.md` or `doc/PRD.md` accordingly.
+
 ## Gotchas and tips
 
 - Do not import `@supabase/supabase-js` directly in components; always use the facade `supabase` from `src/lib/supabase.ts`.
