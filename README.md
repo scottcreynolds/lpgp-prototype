@@ -1,73 +1,124 @@
-# React + TypeScript + Vite
+# Lunar Policy Gaming Platform (LPGP)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A serious-game simulation for cooperative lunar development, built for university research on cooperation patterns under resource constraints.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Option 1: Mock Data (Recommended for Initial Development)
 
-## React Compiler
+Start developing immediately without any backend setup:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm install
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The app will automatically use localStorage-based mock data. You'll see:
 ```
+🎭 Using mock data (localStorage-based)
+```
+
+### Option 2: Real Supabase Backend
+
+For real-time multi-user features:
+
+1. Set up Supabase (see [SETUP.md](./SETUP.md))
+2. Create `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   # Add your Supabase credentials
+   ```
+3. Run the app:
+   ```bash
+   pnpm dev
+   ```
+
+## Project Structure
+
+```
+lpgp-prototype/
+├── src/
+│   ├── components/     # React components
+│   ├── hooks/          # TanStack Query hooks
+│   ├── lib/            # Supabase client & types
+│   └── store/          # Zustand state management
+├── database/
+│   └── migrations/     # SQL schema & seed data
+├── doc/                # Documentation & implementation logs
+└── .todo               # Development task list
+```
+
+## Key Features
+
+- **Real-time Dashboard** - Live updates of game state, player rankings, and infrastructure
+- **Mock Data Layer** - Develop without backend setup using localStorage
+- **Optimistic Locking** - Race condition protection for concurrent updates
+- **Research Integration** - Complete audit trail via ledger entries
+
+## Tech Stack
+
+- **Frontend:** React 19, TypeScript, Chakra UI v3
+- **State:** TanStack Query, Zustand
+- **Backend:** Supabase (Postgres + real-time subscriptions)
+- **Build:** Vite, pnpm
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start dev server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Type checking
+pnpm exec tsc --noEmit
+
+# Lint
+pnpm lint
+```
+
+## Documentation
+
+- **[SETUP.md](./SETUP.md)** - Complete setup guide with Supabase
+- **[doc/PRD.md](./doc/PRD.md)** - Product requirements
+- **[doc/rules.md](./doc/rules.md)** - Game rules and mechanics
+- **[doc/implementation-log-dashboard-v1.md](./doc/implementation-log-dashboard-v1.md)** - Dashboard implementation details
+- **[doc/implementation-log-mock-data.md](./doc/implementation-log-mock-data.md)** - Mock data architecture
+- **[.todo](./.todo)** - Development roadmap
+
+## Architecture Highlights
+
+### Facade Pattern
+
+Data source selection happens in **one place**: `src/lib/supabase.ts`
+
+```typescript
+// Automatic detection - no environment checks anywhere else
+export const supabase = !envVarsPresent
+  ? mockSupabaseClient      // localStorage
+  : createClient(...);       // Supabase
+```
+
+Components and hooks remain completely unaware of the data source.
+
+### State Management
+
+- **TanStack Query** - Server state with real-time subscriptions
+- **Zustand** - Lightweight client state
+- **localStorage** - Mock data persistence
+
+### Real-time Updates
+
+Game state changes trigger automatic refetches across all connected clients (or tabs in mock mode).
+
+## Contributing
+
+See [CLAUDE.md](./CLAUDE.md) for coding standards and architectural principles.
+
+## License
+
+This is a research project for educational purposes.

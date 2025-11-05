@@ -1,0 +1,248 @@
+# LPGP Development TODO
+
+## Immediate Tasks
+
+### Infrastructure Setup
+- [ ] Decide on mock data vs real Supabase for initial development
+- [ ] If mock: Implement localStorage-based mock data provider
+- [ ] If real: Set up Supabase project and run migrations
+- [ ] Test dashboard with data layer of choice
+
+## Phase 1: Core Gameplay Features (Week 1-2)
+
+### Player Management
+- [ ] Add inline player name editing in rankings table
+- [ ] Add player color assignment for better visual distinction
+- [ ] Add confirmation dialog for "Start New Game"
+
+### Game Flow
+- [ ] Implement Governance phase countdown timer
+- [ ] Add timer configuration (default 3 minutes, adjustable)
+- [ ] Add visual/audio alert when timer expires
+- [ ] Add option to auto-advance phase when timer ends
+
+### Manual Adjustments
+- [ ] Create modal for manual EV adjustments
+- [ ] Create modal for manual REP adjustments
+- [ ] Add reason field (required) for audit trail
+- [ ] Log all manual adjustments to ledger_entries
+- [ ] Add undo/rollback capability for last adjustment
+
+### Commons Infrastructure
+- [ ] Display shared commons infrastructure in separate card
+- [ ] Show commons capacity usage across all players
+- [ ] Track 10 EV/round commons maintenance cost
+- [ ] Distribute commons costs fairly (or make configurable)
+
+## Phase 2: Infrastructure System (Week 3-4)
+
+### Building Infrastructure
+- [ ] Create "Build Infrastructure" modal with type selector
+- [ ] Show available infrastructure based on player specialization
+- [ ] Validate player has sufficient EV before building
+- [ ] Deduct EV and create ledger entry on build
+- [ ] Add new infrastructure to player_infrastructure table
+- [ ] Update dashboard cards to reflect new infrastructure
+
+### Power & Crew Management
+- [ ] Add toggle switches to infrastructure cards for power on/off
+- [ ] Add toggle switches for crew allocation
+- [ ] Update capacity calculations in real-time
+- [ ] Highlight when infrastructure is unpowered/uncrewed
+- [ ] Show yield reduction when infrastructure is off
+
+### Infrastructure Details
+- [ ] Create detailed view modal for infrastructure cards
+- [ ] Show per-item breakdown with status indicators
+- [ ] Add ability to sell/remove infrastructure
+- [ ] Add infrastructure upgrade paths (future)
+
+## Phase 3: Activity & History (Week 4-5)
+
+### Activity Feed
+- [ ] Create sidebar/panel for recent activity
+- [ ] Show last 10-20 actions with timestamps
+- [ ] Add filter by player
+- [ ] Add filter by action type
+- [ ] Add real-time updates to activity feed
+- [ ] Make feed scrollable/paginated for older actions
+
+### Round Summary
+- [ ] Create end-of-round summary modal
+- [ ] Show EV/REP changes per player
+- [ ] Show infrastructure built this round
+- [ ] Show total yields and costs
+- [ ] Add ability to view previous round summaries
+
+## Phase 4: Contracts System (Month 2)
+
+### Contract Creation
+- [ ] Design contract data model (parties, terms, duration)
+- [ ] Create contract creation modal
+- [ ] Support resource sharing agreements
+- [ ] Support EV/REP exchanges
+- [ ] Support multi-round contracts
+- [ ] Add contract to database with all parties' agreement
+
+### Contract Management
+- [ ] Display active contracts per player
+- [ ] Show contract terms and remaining duration
+- [ ] Add ability to fulfill contract obligations
+- [ ] Track contract breaches
+- [ ] Apply REP penalties for breaches
+- [ ] Auto-expire contracts after duration
+
+### Contract Enforcement
+- [ ] Add "Vote to Penalize" mechanism in Governance phase
+- [ ] Show violated contracts with evidence
+- [ ] Allow players to vote on penalties
+- [ ] Apply penalties based on vote outcome
+- [ ] Log all contract actions to ledger
+
+## Phase 5: World Events (Month 2)
+
+### Event System
+- [ ] Create world_events table in database
+- [ ] Seed initial event cards
+- [ ] Implement random event draw at round start
+- [ ] Display current event prominently on dashboard
+- [ ] Apply event effects to relevant players
+- [ ] Log event occurrences
+
+### Event Types
+- [ ] Resource scarcity events (reduced yields)
+- [ ] Equipment failure events (maintenance spikes)
+- [ ] Opportunity events (bonus EV available)
+- [ ] Reputation events (REP adjustments)
+- [ ] Add event configuration/customization
+
+## Phase 6: Advanced Features (Month 3+)
+
+### Territory System
+- [ ] Design lunar map grid/regions
+- [ ] Create territory claiming mechanism
+- [ ] Add territory ownership to database
+- [ ] Show contested territories
+- [ ] Implement territory benefits/resources
+- [ ] Add visual map component
+
+### Skill Trees
+- [ ] Design skill point system
+- [ ] Create skill tree UI
+- [ ] Implement skill point allocation
+- [ ] Add skill bonuses to calculations
+- [ ] Balance skill progression
+
+### Analytics Dashboard
+- [ ] Create research analytics view
+- [ ] Add charts for EV/REP over time
+- [ ] Show cooperation patterns
+- [ ] Add infrastructure distribution analysis
+- [ ] Export charts as images
+
+### Multi-Game Support
+- [ ] Add game_sessions table
+- [ ] Generate unique game URLs
+- [ ] Support multiple concurrent games
+- [ ] Add game browser/lobby
+- [ ] Add game archival
+
+### Turn Planner
+- [ ] Create turn planning UI for Operations phase
+- [ ] Show turn order queue
+- [ ] Add "End Turn" button
+- [ ] Track whose turn it is
+- [ ] Add turn timer
+
+## Technical Debt & Improvements
+
+### Testing
+- [ ] Set up Vitest for unit tests
+- [ ] Write tests for RPC functions
+- [ ] Write tests for hooks
+- [ ] Set up Playwright for E2E tests
+- [ ] Add component tests with Testing Library
+- [ ] Aim for 70%+ code coverage
+
+### Error Handling
+- [ ] Add React Error Boundaries
+- [ ] Implement global error handler
+- [ ] Add retry logic for failed mutations
+- [ ] Improve error messages
+- [ ] Add Sentry or similar error tracking
+
+### Performance
+- [ ] Add React.memo to expensive components
+- [ ] Implement virtual scrolling for long lists
+- [ ] Optimize dashboard RPC function for 20+ players
+- [ ] Add loading skeletons instead of spinners
+- [ ] Measure and log performance metrics
+
+### Developer Experience
+- [ ] Set up Storybook for component development
+- [ ] Add CONTRIBUTING.md with patterns
+- [ ] Generate types from Supabase schema automatically
+- [ ] Add pre-commit hooks (lint, format, typecheck)
+- [ ] Improve inline code documentation
+
+### Security
+- [ ] Add game-specific access codes (auth)
+- [ ] Implement facilitator role (admin permissions)
+- [ ] Add rate limiting to mutations
+- [ ] Validate all inputs on backend
+- [ ] Add CORS configuration
+
+### UX Polish
+- [ ] Add keyboard shortcuts
+- [ ] Improve mobile responsiveness
+- [ ] Add dark mode support
+- [ ] Add sound effects (optional)
+- [ ] Add celebration animation for winner
+- [ ] Improve loading states across the board
+
+## Data Export & Research Tools
+
+### Export Functionality
+- [ ] Add CSV export for players table
+- [ ] Add CSV export for ledger_entries
+- [ ] Add JSON export for complete game state
+- [ ] Add ability to export specific round ranges
+- [ ] Add export button to dashboard header
+
+### Replay & Analysis
+- [ ] Create game replay viewer
+- [ ] Show state changes over time
+- [ ] Add timeline scrubber
+- [ ] Visualize cooperation patterns
+- [ ] Generate summary statistics
+
+## Documentation
+
+- [ ] Create API documentation for RPC functions
+- [ ] Document component patterns
+- [ ] Add JSDoc comments to key functions
+- [ ] Create video walkthrough of setup
+- [ ] Write research methodology docs
+
+## Deployment
+
+- [ ] Set up production Supabase project
+- [ ] Configure environment variables for production
+- [ ] Set up Vercel/Netlify deployment
+- [ ] Add CI/CD pipeline
+- [ ] Set up monitoring and alerts
+- [ ] Create backup strategy for research data
+
+---
+
+## Notes
+
+- Prioritize features based on research needs
+- Get feedback from test players after each phase
+- Keep game mechanics configurable for iteration
+- Focus on data quality for research purposes
+- Document all rule changes and their rationale
+
+---
+
+*Last Updated: November 4, 2025*
