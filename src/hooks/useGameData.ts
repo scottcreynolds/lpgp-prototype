@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useGameStore } from '../store/gameStore';
-import type { DashboardSummary } from '../lib/database.types';
+import type { DashboardSummary, Specialization } from '../lib/database.types';
 
 // Query key factory
 export const gameKeys = {
@@ -161,6 +161,93 @@ export function useResetGame() {
       resetStore();
       // Refetch all game data
       queryClient.invalidateQueries({ queryKey: gameKeys.all });
+    },
+  });
+}
+
+/**
+ * Adds a new player to the game
+ */
+export function useAddPlayer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      name,
+      specialization,
+    }: {
+      name: string;
+      specialization: Specialization;
+    }) => {
+      const { data, error } = await supabase.rpc('add_player', {
+        player_name: name,
+        player_specialization: specialization,
+      });
+
+      if (error) {
+        throw new Error(`Failed to add player: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from add_player');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to add player');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      // Refetch dashboard to show new player
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+    },
+  });
+}
+
+/**
+ * Edits an existing player's name and specialization
+ */
+export function useEditPlayer() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      playerId,
+      name,
+      specialization,
+    }: {
+      playerId: string;
+      name: string;
+      specialization: Specialization;
+    }) => {
+      const { data, error } = await supabase.rpc('edit_player', {
+        p_player_id: playerId,
+        p_player_name: name,
+        p_player_specialization: specialization,
+      });
+
+      if (error) {
+        throw new Error(`Failed to edit player: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from edit_player');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to edit player');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      // Refetch dashboard to show updated player
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
     },
   });
 }

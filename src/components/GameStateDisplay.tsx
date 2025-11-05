@@ -55,17 +55,17 @@ export function GameStateDisplay({
       borderColor="gray.200"
       shadow="sm"
     >
-      <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
-        <VStack align="flex-start" gap={2}>
-          <Heading size="2xl">
+      <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
+        <Box flex="1" minW="300px">
+          <Heading size="xl" mb={2} color="gray.900">
             Round {round} - {phase} Phase
           </Heading>
-          <Text color="gray.600" fontSize="sm">
+          <Text color="gray.700" fontSize="sm" fontWeight="medium">
             Version: {version}
           </Text>
-        </VStack>
+        </Box>
 
-        <HStack gap={4}>
+        <HStack gap={4} flexShrink={0}>
           <Box
             px={4}
             py={3}
@@ -74,13 +74,13 @@ export function GameStateDisplay({
             borderWidth={1}
             borderColor="gray.300"
           >
-            <Text fontSize="sm" color="gray.600" mb={1}>
+            <Text fontSize="sm" color="gray.800" mb={1} fontWeight="semibold">
               Timer
             </Text>
-            <Text fontSize="2xl" fontWeight="bold" fontFamily="mono">
+            <Text fontSize="2xl" fontWeight="bold" fontFamily="mono" color="gray.900">
               --:--
             </Text>
-            <Text fontSize="xs" color="gray.500">
+            <Text fontSize="xs" color="gray.700" fontWeight="medium">
               (Coming Soon)
             </Text>
           </Box>

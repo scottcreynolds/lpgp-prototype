@@ -1,6 +1,7 @@
 import {
   Badge,
   Box,
+  Flex,
   Grid,
   Heading,
   HStack,
@@ -9,13 +10,18 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { FaBolt, FaUsers, FaCoins, FaChartLine, FaHome, FaSolarPanel, FaTint, FaAtom } from 'react-icons/fa';
-import type { DashboardPlayer } from '../lib/database.types';
+import { useEditPlayer } from '../hooks/useGameData';
+import { EditPlayerModal } from './EditPlayerModal';
+import { toaster } from './ui/toaster';
+import type { DashboardPlayer, Specialization } from '../lib/database.types';
 
 interface InfrastructureCardsProps {
   players: DashboardPlayer[];
 }
 
 export function InfrastructureCards({ players }: InfrastructureCardsProps) {
+  const editPlayer = useEditPlayer();
+
   const getInfrastructureIcon = (type: string) => {
     if (type.includes('Habitat')) return <FaHome />;
     if (type.includes('Solar')) return <FaSolarPanel />;
@@ -33,9 +39,33 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
     return counts;
   };
 
+  const handleEditPlayer = async (
+    playerId: string,
+    name: string,
+    specialization: Specialization
+  ) => {
+    try {
+      await editPlayer.mutateAsync({ playerId, name, specialization });
+      toaster.create({
+        title: 'Player Updated',
+        description: `${name} updated successfully`,
+        type: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      toaster.create({
+        title: 'Failed to Update Player',
+        description:
+          error instanceof Error ? error.message : 'Failed to update player',
+        type: 'error',
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <Box>
-      <Heading size="lg" mb={4}>
+      <Heading size="lg" mb={4} color="gray.900">
         Infrastructure Overview
       </Heading>
 
@@ -60,27 +90,36 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
             >
               <VStack align="stretch" gap={4}>
                 {/* Player Header */}
-                <Box>
-                  <Text fontWeight="bold" fontSize="lg">
-                    {player.name}
-                  </Text>
-                  <Badge size="sm" colorPalette="gray">
-                    {player.specialization}
-                  </Badge>
-                </Box>
+                <Flex justify="space-between" align="flex-start">
+                  <Box>
+                    <Text fontWeight="bold" fontSize="lg" color="gray.900">
+                      {player.name}
+                    </Text>
+                    <Badge size="sm" colorPalette="gray">
+                      {player.specialization}
+                    </Badge>
+                  </Box>
+                  <EditPlayerModal
+                    playerId={player.id}
+                    currentName={player.name}
+                    currentSpecialization={player.specialization}
+                    onEditPlayer={handleEditPlayer}
+                    isPending={editPlayer.isPending}
+                  />
+                </Flex>
 
                 {/* Infrastructure Counts */}
                 <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.600">
+                  <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.800">
                     Infrastructure
                   </Text>
                   <SimpleGrid columns={2} gap={2}>
                     {Object.entries(infrastructureCounts).map(([type, count]) => (
                       <HStack key={type} gap={2}>
-                        <Box color="gray.500" fontSize="sm">
+                        <Box color="gray.600" fontSize="sm">
                           {getInfrastructureIcon(type)}
                         </Box>
-                        <Text fontSize="sm">
+                        <Text fontSize="sm" color="gray.900">
                           {type}: {count}
                         </Text>
                       </HStack>
@@ -100,19 +139,19 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   >
                     <HStack gap={2} mb={1}>
                       <FaBolt color={powerShortage ? '#C53030' : '#3182CE'} />
-                      <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
                         Power
                       </Text>
                     </HStack>
                     <Text
                       fontSize="lg"
                       fontWeight="bold"
-                      color={powerShortage ? 'red.600' : 'inherit'}
+                      color={powerShortage ? 'red.700' : 'gray.900'}
                     >
                       {totals.total_power_used}/{totals.total_power_capacity}
                     </Text>
                     {powerShortage && (
-                      <Text fontSize="xs" color="red.600" fontWeight="semibold">
+                      <Text fontSize="xs" color="red.700" fontWeight="bold">
                         SHORTAGE
                       </Text>
                     )}
@@ -128,19 +167,19 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   >
                     <HStack gap={2} mb={1}>
                       <FaUsers color={crewShortage ? '#C53030' : '#38A169'} />
-                      <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
                         Crew
                       </Text>
                     </HStack>
                     <Text
                       fontSize="lg"
                       fontWeight="bold"
-                      color={crewShortage ? 'red.600' : 'inherit'}
+                      color={crewShortage ? 'red.700' : 'gray.900'}
                     >
                       {totals.total_crew_used}/{totals.total_crew_capacity}
                     </Text>
                     {crewShortage && (
-                      <Text fontSize="xs" color="red.600" fontWeight="semibold">
+                      <Text fontSize="xs" color="red.700" fontWeight="bold">
                         SHORTAGE
                       </Text>
                     )}
@@ -152,11 +191,11 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   <Box p={3} bg="orange.50" borderRadius="md" borderWidth={1} borderColor="orange.200">
                     <HStack gap={2} mb={1}>
                       <FaCoins color="#DD6B20" />
-                      <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
                         Maintenance
                       </Text>
                     </HStack>
-                    <Text fontSize="lg" fontWeight="bold">
+                    <Text fontSize="lg" fontWeight="bold" color="gray.900">
                       {totals.total_maintenance_cost} EV
                     </Text>
                   </Box>
@@ -164,11 +203,11 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   <Box p={3} bg="green.50" borderRadius="md" borderWidth={1} borderColor="green.200">
                     <HStack gap={2} mb={1}>
                       <FaChartLine color="#38A169" />
-                      <Text fontSize="xs" fontWeight="semibold" color="gray.600">
+                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
                         Yield
                       </Text>
                     </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="green.600">
+                    <Text fontSize="lg" fontWeight="bold" color="green.700">
                       +{totals.total_yield} EV
                     </Text>
                   </Box>
@@ -181,7 +220,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   borderRadius="md"
                   textAlign="center"
                 >
-                  <Text fontSize="xs" color="gray.600" mb={1}>
+                  <Text fontSize="xs" color="gray.800" mb={1} fontWeight="bold">
                     Net Per Round
                   </Text>
                   <Text
@@ -189,8 +228,8 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                     fontWeight="bold"
                     color={
                       totals.total_yield - totals.total_maintenance_cost > 0
-                        ? 'green.600'
-                        : 'red.600'
+                        ? 'green.700'
+                        : 'red.700'
                     }
                   >
                     {totals.total_yield - totals.total_maintenance_cost > 0

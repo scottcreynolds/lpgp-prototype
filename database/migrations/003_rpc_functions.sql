@@ -70,7 +70,7 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- RESET GAME
 -- ============================================================================
--- Resets the game to initial state with 4 default players
+-- Resets the game to initial state with 1 default player
 CREATE OR REPLACE FUNCTION reset_game()
 RETURNS TABLE (
   success BOOLEAN,
@@ -78,13 +78,8 @@ RETURNS TABLE (
   player_count INTEGER
 ) AS $$
 DECLARE
-  v_player1_id UUID;
-  v_player2_id UUID;
-  v_player3_id UUID;
-  v_player4_id UUID;
+  v_player_id UUID;
   v_starter_h2o_id UUID;
-  v_starter_solar_id UUID;
-  v_starter_habitat_id UUID;
 BEGIN
   -- Clear existing data
   DELETE FROM ledger_entries;
@@ -100,68 +95,27 @@ BEGIN
     updated_at = NOW()
   WHERE id = 1;
 
-  -- Get starter infrastructure IDs
+  -- Get starter infrastructure ID
   SELECT id INTO v_starter_h2o_id
   FROM infrastructure_definitions
   WHERE type = 'Starter H2O Extractor';
 
-  SELECT id INTO v_starter_solar_id
-  FROM infrastructure_definitions
-  WHERE type = 'Starter Solar Array';
-
-  SELECT id INTO v_starter_habitat_id
-  FROM infrastructure_definitions
-  WHERE type = 'Starter Habitat';
-
-  -- Create Player 1: Resource Extractor
+  -- Create default player: Resource Extractor
   INSERT INTO players (name, specialization, ev, rep)
-  VALUES ('Player 1', 'Resource Extractor', 50, 10)
-  RETURNING id INTO v_player1_id;
+  VALUES ('Luna Corp', 'Resource Extractor', 50, 10)
+  RETURNING id INTO v_player_id;
 
   INSERT INTO player_infrastructure (player_id, infrastructure_id, is_powered, is_crewed, is_starter)
-  VALUES (v_player1_id, v_starter_h2o_id, true, true, true);
+  VALUES (v_player_id, v_starter_h2o_id, true, true, true);
 
   INSERT INTO ledger_entries (player_id, round, transaction_type, amount, reason)
-  VALUES (v_player1_id, 1, 'GAME_START', 50, 'Initial EV');
-
-  -- Create Player 2: Infrastructure Provider
-  INSERT INTO players (name, specialization, ev, rep)
-  VALUES ('Player 2', 'Infrastructure Provider', 50, 10)
-  RETURNING id INTO v_player2_id;
-
-  INSERT INTO player_infrastructure (player_id, infrastructure_id, is_powered, is_crewed, is_starter)
-  VALUES (v_player2_id, v_starter_solar_id, true, true, true);
-
-  INSERT INTO ledger_entries (player_id, round, transaction_type, amount, reason)
-  VALUES (v_player2_id, 1, 'GAME_START', 50, 'Initial EV');
-
-  -- Create Player 3: Operations Manager
-  INSERT INTO players (name, specialization, ev, rep)
-  VALUES ('Player 3', 'Operations Manager', 50, 10)
-  RETURNING id INTO v_player3_id;
-
-  INSERT INTO player_infrastructure (player_id, infrastructure_id, is_powered, is_crewed, is_starter)
-  VALUES (v_player3_id, v_starter_habitat_id, true, true, true);
-
-  INSERT INTO ledger_entries (player_id, round, transaction_type, amount, reason)
-  VALUES (v_player3_id, 1, 'GAME_START', 50, 'Initial EV');
-
-  -- Create Player 4: Resource Extractor (variation)
-  INSERT INTO players (name, specialization, ev, rep)
-  VALUES ('Player 4', 'Resource Extractor', 50, 10)
-  RETURNING id INTO v_player4_id;
-
-  INSERT INTO player_infrastructure (player_id, infrastructure_id, is_powered, is_crewed, is_starter)
-  VALUES (v_player4_id, v_starter_h2o_id, true, true, true);
-
-  INSERT INTO ledger_entries (player_id, round, transaction_type, amount, reason)
-  VALUES (v_player4_id, 1, 'GAME_START', 50, 'Initial EV');
+  VALUES (v_player_id, 1, 'GAME_START', 50, 'Initial EV');
 
   -- Return success
   RETURN QUERY SELECT
     true,
     'Game reset successfully'::TEXT,
-    4;
+    1;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -236,6 +190,105 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================================================
+-- ADD PLAYER
+-- ============================================================================
+-- Adds a new player to the game with starter infrastructure
+CREATE OR REPLACE FUNCTION add_player(
+  player_name TEXT,
+  player_specialization TEXT
+)
+RETURNS TABLE (
+  success BOOLEAN,
+  message TEXT,
+  player_id UUID
+) AS $$
+DECLARE
+  v_player_id UUID;
+  v_starter_infra_id UUID;
+  v_current_round INTEGER;
+BEGIN
+  -- Get current round
+  SELECT current_round INTO v_current_round
+  FROM game_state
+  WHERE id = 1;
+
+  -- Create new player
+  INSERT INTO players (name, specialization, ev, rep)
+  VALUES (player_name, player_specialization, 50, 10)
+  RETURNING id INTO v_player_id;
+
+  -- Determine and add starter infrastructure
+  IF player_specialization = 'Resource Extractor' THEN
+    SELECT id INTO v_starter_infra_id
+    FROM infrastructure_definitions
+    WHERE type = 'Starter H2O Extractor';
+  ELSIF player_specialization = 'Infrastructure Provider' THEN
+    SELECT id INTO v_starter_infra_id
+    FROM infrastructure_definitions
+    WHERE type = 'Starter Solar Array';
+  ELSE
+    -- Operations Manager
+    SELECT id INTO v_starter_infra_id
+    FROM infrastructure_definitions
+    WHERE type = 'Starter Habitat';
+  END IF;
+
+  -- Add starter infrastructure
+  INSERT INTO player_infrastructure (player_id, infrastructure_id, is_powered, is_crewed, is_starter)
+  VALUES (v_player_id, v_starter_infra_id, true, true, true);
+
+  -- Add ledger entry
+  INSERT INTO ledger_entries (player_id, round, transaction_type, amount, reason)
+  VALUES (v_player_id, v_current_round, 'GAME_START', 50, 'Initial EV');
+
+  -- Return success
+  RETURN QUERY SELECT
+    true,
+    'Player added successfully'::TEXT,
+    v_player_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- EDIT PLAYER
+-- ============================================================================
+-- Updates an existing player's name and/or specialization
+CREATE OR REPLACE FUNCTION edit_player(
+  p_player_id UUID,
+  p_player_name TEXT,
+  p_player_specialization TEXT
+)
+RETURNS TABLE (
+  success BOOLEAN,
+  message TEXT
+) AS $$
+BEGIN
+  -- Update player information
+  UPDATE players
+  SET
+    name = p_player_name,
+    specialization = p_player_specialization,
+    updated_at = NOW()
+  WHERE id = p_player_id;
+
+  -- Check if player was found and updated
+  IF NOT FOUND THEN
+    RETURN QUERY SELECT
+      false,
+      'Player not found'::TEXT;
+    RETURN;
+  END IF;
+
+  -- Return success
+  RETURN QUERY SELECT
+    true,
+    'Player updated successfully'::TEXT;
+END;
+$$ LANGUAGE plpgsql;
+
 COMMENT ON FUNCTION advance_phase IS 'Advances game phase with optimistic locking to prevent race conditions';
-COMMENT ON FUNCTION reset_game IS 'Resets game to initial state with 4 default players';
+COMMENT ON FUNCTION reset_game IS 'Resets game to initial state with 1 default player';
 COMMENT ON FUNCTION get_dashboard_summary IS 'Returns complete dashboard data including game state and player summaries';
+COMMENT ON FUNCTION add_player IS 'Adds a new player to the game with appropriate starter infrastructure';
+COMMENT ON FUNCTION edit_player IS 'Updates an existing player''s name and specialization';

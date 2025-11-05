@@ -1,0 +1,149 @@
+import { useState } from 'react';
+import {
+  Button,
+  DialogActionTrigger,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+  DialogTrigger,
+  Field,
+  IconButton,
+  Input,
+  NativeSelect,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+import { FaEdit } from 'react-icons/fa';
+import type { Specialization } from '../lib/database.types';
+
+interface EditPlayerModalProps {
+  playerId: string;
+  currentName: string;
+  currentSpecialization: Specialization;
+  onEditPlayer: (
+    playerId: string,
+    name: string,
+    specialization: Specialization
+  ) => Promise<void>;
+  isPending?: boolean;
+}
+
+const specializations: Specialization[] = [
+  'Resource Extractor',
+  'Infrastructure Provider',
+  'Operations Manager',
+];
+
+const specializationDescriptions: Record<Specialization, string> = {
+  'Resource Extractor':
+    'Specializes in mining and resource acquisition. Starts with H2O Extractor.',
+  'Infrastructure Provider':
+    'Specializes in construction and energy systems. Starts with Solar Array.',
+  'Operations Manager':
+    'Specializes in logistics and human resources. Starts with Habitat.',
+};
+
+export function EditPlayerModal({
+  playerId,
+  currentName,
+  currentSpecialization,
+  onEditPlayer,
+  isPending,
+}: EditPlayerModalProps) {
+  const [open, setOpen] = useState(false);
+  const [companyName, setCompanyName] = useState(currentName || '');
+  const [specialization, setSpecialization] =
+    useState<Specialization>(currentSpecialization);
+
+  // Reset form when modal opens
+  const handleOpenChange = (details: { open: boolean }) => {
+    setOpen(details.open);
+    if (details.open) {
+      setCompanyName(currentName || '');
+      setSpecialization(currentSpecialization);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!companyName?.trim()) {
+      return;
+    }
+
+    await onEditPlayer(playerId, companyName.trim(), specialization);
+
+    // Close modal
+    setOpen(false);
+  };
+
+  return (
+    <DialogRoot open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <IconButton variant="ghost" size="sm" aria-label="Edit player">
+          <FaEdit />
+        </IconButton>
+      </DialogTrigger>
+
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Player</DialogTitle>
+        </DialogHeader>
+
+        <DialogBody>
+          <VStack gap={4} align="stretch">
+            <Field.Root>
+              <Field.Label>Company Name</Field.Label>
+              <Input
+                placeholder="Enter company name"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                autoFocus
+              />
+            </Field.Root>
+
+            <Field.Root>
+              <Field.Label>Specialization</Field.Label>
+              <NativeSelect.Root>
+                <NativeSelect.Field
+                  value={specialization}
+                  onChange={(e) =>
+                    setSpecialization(e.target.value as Specialization)
+                  }
+                >
+                  {specializations.map((spec) => (
+                    <option key={spec} value={spec}>
+                      {spec}
+                    </option>
+                  ))}
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+              <Text fontSize="sm" color="gray.700" mt={2} fontWeight="medium">
+                {specializationDescriptions[specialization]}
+              </Text>
+            </Field.Root>
+          </VStack>
+        </DialogBody>
+
+        <DialogFooter>
+          <DialogActionTrigger asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogActionTrigger>
+          <Button
+            colorPalette="blue"
+            onClick={handleSubmit}
+            loading={isPending}
+            disabled={!companyName?.trim()}
+          >
+            Save Changes
+          </Button>
+        </DialogFooter>
+
+        <DialogCloseTrigger />
+      </DialogContent>
+    </DialogRoot>
+  );
+}

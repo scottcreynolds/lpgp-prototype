@@ -10,9 +10,6 @@ import type {
 // Generate stable UUIDs for mock data
 const playerIds = [
   '11111111-1111-1111-1111-111111111111',
-  '22222222-2222-2222-2222-222222222222',
-  '33333333-3333-3333-3333-333333333333',
-  '44444444-4444-4444-4444-444444444444',
 ];
 
 const infraIds = {
@@ -134,34 +131,7 @@ export const infrastructureDefinitions: InfrastructureDefinition[] = [
 export const initialPlayers: Player[] = [
   {
     id: playerIds[0],
-    name: 'Player 1',
-    specialization: 'Resource Extractor',
-    ev: 50,
-    rep: 10,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: playerIds[1],
-    name: 'Player 2',
-    specialization: 'Infrastructure Provider',
-    ev: 50,
-    rep: 10,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: playerIds[2],
-    name: 'Player 3',
-    specialization: 'Operations Manager',
-    ev: 50,
-    rep: 10,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: playerIds[3],
-    name: 'Player 4',
+    name: 'Luna Corp',
     specialization: 'Resource Extractor',
     ev: 50,
     rep: 10,
@@ -181,33 +151,6 @@ export const initialPlayerInfrastructure: PlayerInfrastructure[] = [
     is_starter: true,
     created_at: new Date().toISOString(),
   },
-  {
-    id: 'pi-2',
-    player_id: playerIds[1],
-    infrastructure_id: infraIds.starterSolar,
-    is_powered: true,
-    is_crewed: true,
-    is_starter: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'pi-3',
-    player_id: playerIds[2],
-    infrastructure_id: infraIds.starterHabitat,
-    is_powered: true,
-    is_crewed: true,
-    is_starter: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'pi-4',
-    player_id: playerIds[3],
-    infrastructure_id: infraIds.starterH2O,
-    is_powered: true,
-    is_crewed: true,
-    is_starter: true,
-    created_at: new Date().toISOString(),
-  },
 ];
 
 // Ledger Entries
@@ -215,36 +158,6 @@ export const initialLedger: LedgerEntry[] = [
   {
     id: 'ledger-1',
     player_id: playerIds[0],
-    round: 1,
-    transaction_type: 'GAME_START',
-    amount: 50,
-    reason: 'Initial EV',
-    metadata: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'ledger-2',
-    player_id: playerIds[1],
-    round: 1,
-    transaction_type: 'GAME_START',
-    amount: 50,
-    reason: 'Initial EV',
-    metadata: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'ledger-3',
-    player_id: playerIds[2],
-    round: 1,
-    transaction_type: 'GAME_START',
-    amount: 50,
-    reason: 'Initial EV',
-    metadata: null,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'ledger-4',
-    player_id: playerIds[3],
     round: 1,
     transaction_type: 'GAME_START',
     amount: 50,

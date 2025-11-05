@@ -121,7 +121,7 @@ When instructed to enter **Plan Mode**:
 - Announce what was completed.
 - Summarize remaining steps.
 - Indicate next action.
-
+- always add post-implementation outputs to a file in the doc folder and add any todo items for me in a .todo file in root
 
 ## Project Details
 

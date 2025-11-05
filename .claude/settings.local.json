@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm exec tsc:*)",
       "Bash(pnpm build:*)",
-      "Bash(pnpm dev)"
+      "Bash(pnpm dev)",
+      "mcp__context7__resolve-library-id"
     ],
     "deny": [],
     "ask": []

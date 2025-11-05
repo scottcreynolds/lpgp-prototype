@@ -1,4 +1,4 @@
-import { Box, Container, Spinner, Text, VStack } from '@chakra-ui/react';
+import { Box, Container, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
 import { useDashboardData } from '../hooks/useGameData';
 import { DashboardHeader } from './DashboardHeader';
 import { GameStateDisplay } from './GameStateDisplay';
@@ -58,15 +58,27 @@ export function Dashboard() {
 
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">
-          <GameStateDisplay
-            round={data.game_state.round}
-            phase={data.game_state.phase}
-            version={data.game_state.version}
-          />
+          {/* Game Status Section */}
+          <Box>
+            <Heading size="md" mb={3} color="gray.900">
+              Game Status
+            </Heading>
+            <GameStateDisplay
+              round={data.game_state.round}
+              phase={data.game_state.phase}
+              version={data.game_state.version}
+            />
+          </Box>
 
-          <PlayerRankings players={data.players} />
+          {/* Player Rankings Section */}
+          <Box>
+            <PlayerRankings players={data.players} />
+          </Box>
 
-          <InfrastructureCards players={data.players} />
+          {/* Infrastructure Section */}
+          <Box>
+            <InfrastructureCards players={data.players} />
+          </Box>
         </VStack>
       </Container>
     </Box>

@@ -1,4 +1,4 @@
-import type { GamePhase } from './database.types';
+import type { GamePhase, Specialization } from './database.types';
 import {
   initialGameState,
   initialPlayers,
@@ -177,7 +177,142 @@ async function rpcResetGame() {
       {
         success: true,
         message: 'Game reset successfully',
-        player_count: 4,
+        player_count: 1,
+      },
+    ],
+    error: null,
+  };
+}
+
+async function rpcAddPlayer(name: string, specialization: Specialization) {
+  const players = getPlayers();
+  const playerInfra = getPlayerInfrastructure();
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+  const gameState = getGameState();
+
+  // Generate new player ID
+  const newPlayerId = crypto.randomUUID();
+
+  // Create new player
+  const newPlayer = {
+    id: newPlayerId,
+    name,
+    specialization,
+    ev: 50,
+    rep: 10,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  // Determine starter infrastructure based on specialization
+  let starterInfraId: string;
+  if (specialization === 'Resource Extractor') {
+    starterInfraId = infrastructureDefinitions.find(
+      (d) => d.type === 'Starter H2O Extractor'
+    )!.id;
+  } else if (specialization === 'Infrastructure Provider') {
+    starterInfraId = infrastructureDefinitions.find(
+      (d) => d.type === 'Starter Solar Array'
+    )!.id;
+  } else {
+    // Operations Manager
+    starterInfraId = infrastructureDefinitions.find(
+      (d) => d.type === 'Starter Habitat'
+    )!.id;
+  }
+
+  // Add starter infrastructure
+  const newInfra = {
+    id: `pi-${newPlayerId}`,
+    player_id: newPlayerId,
+    infrastructure_id: starterInfraId,
+    is_powered: true,
+    is_crewed: true,
+    is_starter: true,
+    created_at: new Date().toISOString(),
+  };
+
+  // Add ledger entry
+  const newLedgerEntry = {
+    id: `ledger-${newPlayerId}`,
+    player_id: newPlayerId,
+    round: gameState.current_round,
+    transaction_type: 'GAME_START' as const,
+    amount: 50,
+    reason: 'Initial EV',
+    metadata: null,
+    created_at: new Date().toISOString(),
+  };
+
+  // Save updated data
+  players.push(newPlayer);
+  playerInfra.push(newInfra);
+  ledger.push(newLedgerEntry);
+
+  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(
+    STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
+    JSON.stringify(playerInfra)
+  );
+  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+
+  // Notify subscribers
+  notifySubscribers('players');
+  notifySubscribers('player_infrastructure');
+
+  return {
+    data: [
+      {
+        success: true,
+        message: 'Player added successfully',
+        player_id: newPlayerId,
+      },
+    ],
+    error: null,
+  };
+}
+
+async function rpcEditPlayer(
+  playerId: string,
+  name: string,
+  specialization: Specialization
+) {
+  const players = getPlayers();
+
+  // Find the player
+  const playerIndex = players.findIndex((p) => p.id === playerId);
+
+  if (playerIndex === -1) {
+    return {
+      data: [
+        {
+          success: false,
+          message: 'Player not found',
+        },
+      ],
+      error: null,
+    };
+  }
+
+  // Update player
+  players[playerIndex] = {
+    ...players[playerIndex],
+    name,
+    specialization,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Save updated players
+  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+
+  // Notify subscribers
+  notifySubscribers('players');
+
+  return {
+    data: [
+      {
+        success: true,
+        message: 'Player updated successfully',
       },
     ],
     error: null,
@@ -194,6 +329,17 @@ export const mockSupabaseClient = {
         return rpcAdvancePhase(params?.current_version as number);
       case 'reset_game':
         return rpcResetGame();
+      case 'add_player':
+        return rpcAddPlayer(
+          params?.player_name as string,
+          params?.player_specialization as Specialization
+        );
+      case 'edit_player':
+        return rpcEditPlayer(
+          params?.p_player_id as string,
+          params?.p_player_name as string,
+          params?.p_player_specialization as Specialization
+        );
       default:
         return Promise.resolve({
           data: null,
