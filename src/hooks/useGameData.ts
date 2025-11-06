@@ -1,17 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useGameStore } from '../store/gameStore';
-import type { DashboardSummary, Specialization } from '../lib/database.types';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import type { DashboardSummary, Specialization } from "../lib/database.types";
+import { supabase } from "../lib/supabase";
+import { useGameStore } from "../store/gameStore";
 
 // Query key factory
 export const gameKeys = {
-  all: ['game'] as const,
-  dashboard: () => [...gameKeys.all, 'dashboard'] as const,
-  state: () => [...gameKeys.all, 'state'] as const,
-  infrastructure: () => [...gameKeys.all, 'infrastructure'] as const,
-  contracts: () => [...gameKeys.all, 'contracts'] as const,
-  ledger: () => [...gameKeys.all, 'ledger'] as const,
+  all: ["game"] as const,
+  dashboard: () => [...gameKeys.all, "dashboard"] as const,
+  state: () => [...gameKeys.all, "state"] as const,
+  infrastructure: () => [...gameKeys.all, "infrastructure"] as const,
+  contracts: () => [...gameKeys.all, "contracts"] as const,
+  ledger: () => [...gameKeys.all, "ledger"] as const,
 };
 
 /**
@@ -24,14 +24,14 @@ export function useDashboardData() {
   const query = useQuery({
     queryKey: gameKeys.dashboard(),
     queryFn: async (): Promise<DashboardSummary> => {
-      const { data, error } = await supabase.rpc('get_dashboard_summary');
+      const { data, error } = await supabase.rpc("get_dashboard_summary");
 
       if (error) {
         throw new Error(`Failed to fetch dashboard: ${error.message}`);
       }
 
       if (!data) {
-        throw new Error('No dashboard data returned');
+        throw new Error("No dashboard data returned");
       }
 
       return data as DashboardSummary;
@@ -49,13 +49,13 @@ export function useDashboardData() {
   // Set up real-time subscription to game_state changes
   useEffect(() => {
     const channel = supabase
-      .channel('game-state-changes')
+      .channel("game-state-changes")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'game_state',
+          event: "*",
+          schema: "public",
+          table: "game_state",
         },
         () => {
           // Refetch dashboard when game state changes
@@ -63,22 +63,22 @@ export function useDashboardData() {
         }
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'players',
+          event: "*",
+          schema: "public",
+          table: "players",
         },
         () => {
           queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
         }
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'player_infrastructure',
+          event: "*",
+          schema: "public",
+          table: "player_infrastructure",
         },
         () => {
           queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
@@ -103,7 +103,7 @@ export function useAdvancePhase() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('advance_phase', {
+      const { data, error } = await supabase.rpc("advance_phase", {
         current_version: version,
       });
 
@@ -112,14 +112,14 @@ export function useAdvancePhase() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from advance_phase');
+        throw new Error("No response from advance_phase");
       }
 
       const result = data[0];
 
       if (!result.success) {
         throw new Error(
-          result.error_message || 'Failed to advance phase - unknown error'
+          result.error_message || "Failed to advance phase - unknown error"
         );
       }
 
@@ -133,6 +133,53 @@ export function useAdvancePhase() {
 }
 
 /**
+ * Processes end-of-round and advances to next round Governance (single RPC)
+ */
+export function useAdvanceRound() {
+  const queryClient = useQueryClient();
+  const version = useGameStore((state) => state.version);
+  const startTimer = useGameStore((s) => s.startTimer);
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("advance_round", {
+        current_version: version,
+      });
+
+      if (error) {
+        throw new Error(`Failed to advance round: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("No response from advance_round");
+      }
+
+      const result = data[0] as {
+        success: boolean;
+        new_round: number;
+        new_phase: string;
+        new_version: number;
+        message?: string | null;
+      };
+
+      if (!result.success) {
+        throw new Error(result.message || "Failed to advance round");
+      }
+
+      return result;
+    },
+    onSuccess: (result) => {
+      // Start the next Governance timer automatically
+      if (result?.new_phase === "Governance") {
+        startTimer(result.new_round, "Governance");
+      }
+      // Refresh everything
+      queryClient.invalidateQueries({ queryKey: gameKeys.all });
+    },
+  });
+}
+
+/**
  * Resets the game to initial state
  */
 export function useResetGame() {
@@ -141,20 +188,20 @@ export function useResetGame() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('reset_game');
+      const { data, error } = await supabase.rpc("reset_game");
 
       if (error) {
         throw new Error(`Failed to reset game: ${error.message}`);
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from reset_game');
+        throw new Error("No response from reset_game");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error('Failed to reset game');
+        throw new Error("Failed to reset game");
       }
 
       return result;
@@ -182,7 +229,7 @@ export function useAddPlayer() {
       name: string;
       specialization: Specialization;
     }) => {
-      const { data, error } = await supabase.rpc('add_player', {
+      const { data, error } = await supabase.rpc("add_player", {
         player_name: name,
         player_specialization: specialization,
       });
@@ -192,13 +239,13 @@ export function useAddPlayer() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from add_player');
+        throw new Error("No response from add_player");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to add player');
+        throw new Error(result.message || "Failed to add player");
       }
 
       return result;
@@ -226,7 +273,7 @@ export function useEditPlayer() {
       name: string;
       specialization: Specialization;
     }) => {
-      const { data, error } = await supabase.rpc('edit_player', {
+      const { data, error } = await supabase.rpc("edit_player", {
         p_player_id: playerId,
         p_player_name: name,
         p_player_specialization: specialization,
@@ -237,13 +284,13 @@ export function useEditPlayer() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from edit_player');
+        throw new Error("No response from edit_player");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to edit player');
+        throw new Error(result.message || "Failed to edit player");
       }
 
       return result;
@@ -263,10 +310,10 @@ export function useInfrastructureDefinitions() {
     queryKey: gameKeys.infrastructure(),
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('infrastructure_definitions')
-        .select('*')
-        .eq('is_starter', false)
-        .order('type');
+        .from("infrastructure_definitions")
+        .select("*")
+        .eq("is_starter", false)
+        .order("type");
 
       if (error) {
         throw new Error(`Failed to fetch infrastructure: ${error.message}`);
@@ -295,7 +342,7 @@ export function useBuildInfrastructure() {
       infrastructureType: string;
       location: string | null;
     }) => {
-      const { data, error } = await supabase.rpc('build_infrastructure', {
+      const { data, error } = await supabase.rpc("build_infrastructure", {
         p_builder_id: builderId,
         p_owner_id: ownerId,
         p_infrastructure_type: infrastructureType,
@@ -307,13 +354,13 @@ export function useBuildInfrastructure() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from build_infrastructure');
+        throw new Error("No response from build_infrastructure");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to build infrastructure');
+        throw new Error(result.message || "Failed to build infrastructure");
       }
 
       return result;
@@ -339,23 +386,26 @@ export function useToggleInfrastructureStatus() {
       infrastructureId: string;
       targetStatus: boolean;
     }) => {
-      const { data, error } = await supabase.rpc('toggle_infrastructure_status', {
-        p_infrastructure_id: infrastructureId,
-        p_target_status: targetStatus,
-      });
+      const { data, error } = await supabase.rpc(
+        "toggle_infrastructure_status",
+        {
+          p_infrastructure_id: infrastructureId,
+          p_target_status: targetStatus,
+        }
+      );
 
       if (error) {
         throw new Error(`Failed to toggle infrastructure: ${error.message}`);
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from toggle_infrastructure_status');
+        throw new Error("No response from toggle_infrastructure_status");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to toggle infrastructure');
+        throw new Error(result.message || "Failed to toggle infrastructure");
       }
 
       return result;
@@ -374,9 +424,11 @@ export function useContracts(playerId?: string) {
     queryKey: [...gameKeys.contracts(), playerId],
     queryFn: async () => {
       let query = supabase
-        .from('contracts')
-        .select('*, party_a:players!party_a_id(name), party_b:players!party_b_id(name)')
-        .order('created_at', { ascending: false });
+        .from("contracts")
+        .select(
+          "*, party_a:players!party_a_id(name), party_b:players!party_b_id(name)"
+        )
+        .order("created_at", { ascending: false });
 
       if (playerId) {
         query = query.or(`party_a_id.eq.${playerId},party_b_id.eq.${playerId}`);
@@ -423,7 +475,7 @@ export function useCreateContract() {
       crewFromBToA?: number;
       durationRounds?: number | null;
     }) => {
-      const { data, error } = await supabase.rpc('create_contract', {
+      const { data, error } = await supabase.rpc("create_contract", {
         p_party_a_id: partyAId,
         p_party_b_id: partyBId,
         p_ev_from_a_to_b: evFromAToB,
@@ -441,13 +493,13 @@ export function useCreateContract() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from create_contract');
+        throw new Error("No response from create_contract");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to create contract');
+        throw new Error(result.message || "Failed to create contract");
       }
 
       return result;
@@ -476,7 +528,7 @@ export function useEndContract() {
       isBroken?: boolean;
       reason?: string | null;
     }) => {
-      const { data, error } = await supabase.rpc('end_contract', {
+      const { data, error } = await supabase.rpc("end_contract", {
         p_contract_id: contractId,
         p_is_broken: isBroken,
         p_reason: reason,
@@ -487,13 +539,13 @@ export function useEndContract() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from end_contract');
+        throw new Error("No response from end_contract");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to end contract');
+        throw new Error(result.message || "Failed to end contract");
       }
 
       return result;
@@ -517,14 +569,14 @@ export function useManualAdjustment() {
       playerId,
       evChange = 0,
       repChange = 0,
-      reason = 'Manual adjustment',
+      reason = "Manual adjustment",
     }: {
       playerId: string;
       evChange?: number;
       repChange?: number;
       reason?: string;
     }) => {
-      const { data, error } = await supabase.rpc('manual_adjustment', {
+      const { data, error } = await supabase.rpc("manual_adjustment", {
         p_player_id: playerId,
         p_ev_change: evChange,
         p_rep_change: repChange,
@@ -536,13 +588,13 @@ export function useManualAdjustment() {
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from manual_adjustment');
+        throw new Error("No response from manual_adjustment");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to make adjustment');
+        throw new Error(result.message || "Failed to make adjustment");
       }
 
       return result;
@@ -562,17 +614,17 @@ export function useLedger(playerId?: string, round?: number) {
     queryKey: [...gameKeys.ledger(), playerId, round],
     queryFn: async () => {
       let query = supabase
-        .from('ledger_entries')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .from("ledger_entries")
+        .select("*")
+        .order("created_at", { ascending: false })
         .limit(100);
 
       if (playerId) {
-        query = query.eq('player_id', playerId);
+        query = query.eq("player_id", playerId);
       }
 
       if (round !== undefined) {
-        query = query.eq('round', round);
+        query = query.eq("round", round);
       }
 
       const { data, error } = await query;
@@ -594,20 +646,20 @@ export function useProcessRoundEnd() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('process_round_end');
+      const { data, error } = await supabase.rpc("process_round_end");
 
       if (error) {
         throw new Error(`Failed to process round end: ${error.message}`);
       }
 
       if (!data || data.length === 0) {
-        throw new Error('No response from process_round_end');
+        throw new Error("No response from process_round_end");
       }
 
       const result = data[0];
 
       if (!result.success) {
-        throw new Error(result.message || 'Failed to process round end');
+        throw new Error(result.message || "Failed to process round end");
       }
 
       return result;

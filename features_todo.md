@@ -29,9 +29,21 @@
 
 - ✅ **Player infra view active/inactive** - Modal to view and manage infrastructure status
 
-## Priority
+- ✅ **End-of-round processing + Advance Round**
+  - "Advance Round" button appears during Operations (replaces "Next Phase")
+  - Advances current round and sets phase to Governance with optimistic locking
+  - Maintenance processed: rolled up per player for active, non-starter infrastructure; single MAINTENANCE ledger entry per player; EV can go negative
+  - Per-round contract EV exchanges processed with double-entry ledger entries (payer loss + payee gain) and clear notes (e.g., "Round N contract payment: A → B")
+  - Marks any remaining unprocessed ledger entries for that round as processed
+  - Auto-starts the next round's Governance timer
+  - Shows highest rep label in the round info (unique leader gets first issue and tiebreak; otherwise "No High Rep Bonus Active")
 
-- end of round calculations (contracts need per-round EV payments processed)
+## Up Next
+
+TBD — pick next item from High Priority (e.g., turn order in each phase, multiplayers).
+
+## High Priority
+
 - unique gameid
 - multiplayers
 - turn order in each phase
@@ -51,7 +63,6 @@
 - values editor
 - limit who can build what based on spec
 - player turns
-- explicit end of round
 - assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces)
 
 ### Bugs

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import type { DashboardSummary, GamePhase } from "../lib/database.types";
 
 // Timer defaults
-const DEFAULT_TIMER_SECONDS = 5 * 60; // 5 minutes
+const DEFAULT_TIMER_SECONDS = 3 * 60; // 5 minutes
 
 type PhaseKey = string; // `${round}:${phase}`
 

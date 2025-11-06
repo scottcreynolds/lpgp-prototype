@@ -100,6 +100,7 @@ pnpm dev
 ```
 
 Console shows:
+
 ```
 🎭 Using mock data (localStorage-based). To use real Supabase, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local
 ```
@@ -143,18 +144,21 @@ pnpm build
 ### ✅ RPC Functions
 
 **get_dashboard_summary:**
+
 - Returns proper JSON structure
 - Aggregates player infrastructure
 - Calculates totals correctly
 - Matches real RPC function output
 
 **advance_phase:**
+
 - Governance → Operations works
 - Operations → Next Round works
 - Version increments
 - Optimistic locking catches conflicts
 
 **reset_game:**
+
 - Restores initial state
 - Notifies all subscribers
 - Returns success message
@@ -182,12 +186,14 @@ pnpm build
 ### Maintainability
 
 **Pros:**
+
 - Single decision point (facade pattern)
 - Easy to add new RPC functions
 - Mock data stays in sync with schema
 - No conditional logic scattered across codebase
 
 **Cons:**
+
 - Manual type casting (`as any`) in facade
 - Mock client doesn't implement full Supabase API (only what we use)
 
@@ -251,6 +257,7 @@ pnpm build
 ### Starting Development
 
 **Before:**
+
 1. Read Supabase docs
 2. Create project (5 mins)
 3. Run 3 SQL migration files
@@ -260,6 +267,7 @@ pnpm build
 7. **Total: ~15-20 minutes**
 
 **After:**
+
 1. `pnpm dev`
 2. **Total: 5 seconds**
 
@@ -272,6 +280,7 @@ To add a new RPC function:
 3. Done
 
 Example:
+
 ```typescript
 // In mockSupabaseClient.ts
 async function rpcBuildInfrastructure(playerId, infraType) {
@@ -356,12 +365,14 @@ When ready to switch:
 ## Metrics
 
 **Lines of Code:**
+
 - Mock data: 290 lines
 - Mock client: 250 lines
 - Facade logic: 5 lines
 - **Total: ~545 lines**
 
 **Time Investment:**
+
 - Design: 15 minutes
 - Implementation: 2 hours
 - Testing: 30 minutes
@@ -369,6 +380,7 @@ When ready to switch:
 - **Total: ~3.25 hours**
 
 **Developer Time Saved:**
+
 - Per developer setup: 15-20 minutes
 - Per new developer onboarding: 15-20 minutes
 - Offline development: Priceless
@@ -385,6 +397,7 @@ When ready to switch:
 **Documentation:** Complete
 
 **Recommendation:** Keep this mock layer even after Supabase is set up. It's useful for:
+
 - New developer onboarding
 - Offline work
 - Faster tests
@@ -392,4 +405,31 @@ When ready to switch:
 
 ---
 
-*Last Updated: November 4, 2025*
+## Update: Advance Round RPC and Round-End Processing (Mock)
+
+Date: November 6, 2025
+
+Summary:
+
+- Added a single-call end-of-round flow via `advance_round(current_version)` in the real SQL and mirrored in the mock client.
+- Rolled up maintenance to a single ledger entry per player per round: reason "Round N Maintenance"; only active, non-starter infra counted.
+- Applied per-round contract EV exchanges with double-entry ledger rows and proper reasons: "Round N contract payment: A → B".
+- Decremented finite contracts and auto-expired them with paired `CONTRACT_ENDED` entries.
+- Marked any remaining unprocessed ledger entries for the processed round as processed.
+- Advanced to next round Governance and bumped version. The UI auto-starts the Governance timer.
+
+Mock details:
+
+- Implemented `advance_round` in `mockSupabaseClient.ts` with localStorage persistence and subscriber notifications (`players`, `contracts`, `ledger_entries`, `game_state`).
+- Kept `process_round_end` stub for backwards compatibility, but UI now uses `advance_round`.
+
+Verification:
+
+- Built successfully (`pnpm build`).
+- Manual run-through: create per-round contract, set to Operations, click Advance Round; EV and ledger entries update; round increments to Governance; timer starts.
+
+Notes:
+
+- Some legacy mock ledger rows have minimal fields; new rows include `player_name`, `ev_change`, `processed`, and `contract_id` when applicable.
+
+Last Updated: November 6, 2025

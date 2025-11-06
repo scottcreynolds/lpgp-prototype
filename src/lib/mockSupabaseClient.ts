@@ -1,4 +1,9 @@
-import type { GamePhase, Player, Specialization } from "./database.types";
+import type {
+  Contract,
+  GamePhase,
+  Player,
+  Specialization,
+} from "./database.types";
 import {
   buildDashboardSummary,
   infrastructureDefinitions,
@@ -88,7 +93,9 @@ async function rpcGetDashboardSummary() {
   const gameState = getGameState();
   const players = getPlayers();
   const playerInfra = getPlayerInfrastructure();
-  const contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS) || '[]');
+  const contracts: Contract[] = JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
+  );
 
   const summary = buildDashboardSummary(
     gameState,
@@ -338,7 +345,9 @@ async function rpcBuildInfrastructure(
   // Find builder and infrastructure definition
   const builderIndex = players.findIndex((p: Player) => p.id === builderId);
   const owner = players.find((p: Player) => p.id === ownerId);
-  const infraDef = infrastructureDefinitions.find((d) => d.type === infrastructureType);
+  const infraDef = infrastructureDefinitions.find(
+    (d) => d.type === infrastructureType
+  );
 
   if (builderIndex === -1) {
     return {
@@ -398,7 +407,9 @@ async function rpcBuildInfrastructure(
     amount: infraDef.cost,
     ev_change: -infraDef.cost,
     rep_change: 0,
-    reason: `Built ${infrastructureType}${location ? ` at ${location}` : ''} for ${owner.name}`,
+    reason: `Built ${infrastructureType}${
+      location ? ` at ${location}` : ""
+    } for ${owner.name}`,
     processed: true,
     infrastructure_id: newInfra.id,
     contract_id: null,
@@ -410,7 +421,10 @@ async function rpcBuildInfrastructure(
 
   // Save all updates
   localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
-  localStorage.setItem(STORAGE_KEYS.PLAYER_INFRASTRUCTURE, JSON.stringify(playerInfra));
+  localStorage.setItem(
+    STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
+    JSON.stringify(playerInfra)
+  );
   localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
@@ -508,8 +522,10 @@ async function rpcCreateContract(
 ) {
   initializeStorage();
   const players = getPlayers();
-  const contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS) || '[]');
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || '[]');
+  const contracts = JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
+  );
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
   const gameState = getGameState();
 
   // Validate players
@@ -528,7 +544,9 @@ async function rpcCreateContract(
     if (evFromAToB > 0) {
       if (partyA.ev < evFromAToB) {
         return {
-          data: [{ success: false, message: `${partyA.name} has insufficient EV` }],
+          data: [
+            { success: false, message: `${partyA.name} has insufficient EV` },
+          ],
           error: null,
         };
       }
@@ -538,7 +556,9 @@ async function rpcCreateContract(
     if (evFromBToA > 0) {
       if (partyB.ev < evFromBToA) {
         return {
-          data: [{ success: false, message: `${partyB.name} has insufficient EV` }],
+          data: [
+            { success: false, message: `${partyB.name} has insufficient EV` },
+          ],
           error: null,
         };
       }
@@ -691,8 +711,10 @@ async function rpcEndContract(
   reason: string | null
 ) {
   initializeStorage();
-  const contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS) || '[]');
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || '[]');
+  const contracts = JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
+  );
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
   const players = getPlayers();
   const gameState = getGameState();
 
@@ -780,7 +802,11 @@ async function rpcEndContract(
     amount: 0,
     ev_change: 0,
     rep_change: 0,
-    reason: reason || `Contract ${isBroken ? 'broken' : 'ended'} between ${partyA?.name || 'Unknown'} and ${partyB?.name || 'Unknown'}`,
+    reason:
+      reason ||
+      `Contract ${isBroken ? "broken" : "ended"} between ${
+        partyA?.name || "Unknown"
+      } and ${partyB?.name || "Unknown"}`,
     processed: true,
     infrastructure_id: null,
     contract_id: contractId,
@@ -802,7 +828,280 @@ async function rpcEndContract(
     data: [
       {
         success: true,
-        message: `Contract ${isBroken ? 'broken' : 'ended'} successfully`,
+        message: `Contract ${isBroken ? "broken" : "ended"} successfully`,
+      },
+    ],
+    error: null,
+  };
+}
+
+async function rpcAdvanceRound(currentVersion: number) {
+  initializeStorage();
+  const gameState = getGameState();
+  const players: Player[] = getPlayers();
+  const infra = getPlayerInfrastructure();
+  const contracts = JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
+  );
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
+
+  // Version / phase checks
+  if (gameState.version !== currentVersion) {
+    return {
+      data: [
+        {
+          success: false,
+          new_round: gameState.current_round,
+          new_phase: gameState.current_phase as GamePhase,
+          new_version: gameState.version,
+          message: "Version mismatch - another update occurred",
+        },
+      ],
+      error: null,
+    };
+  }
+
+  if (gameState.current_phase !== "Operations") {
+    return {
+      data: [
+        {
+          success: false,
+          new_round: gameState.current_round,
+          new_phase: gameState.current_phase as GamePhase,
+          new_version: gameState.version,
+          message: "Advance Round is only allowed from Operations phase",
+        },
+      ],
+      error: null,
+    };
+  }
+
+  const round = gameState.current_round;
+
+  // 1) Maintenance (rolled up per player for active, non-starter infra)
+  const maintenanceByPlayer = new Map<
+    string,
+    { name: string; total: number }
+  >();
+  for (const pi of infra) {
+    if (!pi.is_active || pi.is_starter) continue;
+    const def = infrastructureDefinitions.find(
+      (d) => d.id === pi.infrastructure_id
+    );
+    const cost = def?.maintenance_cost ?? 0;
+    if (cost <= 0) continue;
+    const player = players.find((p) => p.id === pi.player_id);
+    if (!player) continue;
+    const prev = maintenanceByPlayer.get(pi.player_id) || {
+      name: player.name,
+      total: 0,
+    };
+    prev.total += cost;
+    maintenanceByPlayer.set(pi.player_id, prev);
+  }
+
+  maintenanceByPlayer.forEach((val, playerId) => {
+    const idx = players.findIndex((p) => p.id === playerId);
+    if (idx >= 0 && val.total > 0) {
+      players[idx].ev -= val.total;
+      players[idx].updated_at = new Date().toISOString();
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: playerId,
+        player_name: val.name,
+        round,
+        transaction_type: "MAINTENANCE",
+        amount: val.total,
+        ev_change: -val.total,
+        rep_change: 0,
+        reason: `Round ${round} Maintenance`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: null,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+  });
+
+  // 2) Per-round contract payments (double-entry)
+  const activeContracts = contracts.filter(
+    (c: Contract) => c.status === "active" && c.ev_is_per_round
+  );
+  for (const c of activeContracts) {
+    const partyA = players.find((p) => p.id === c.party_a_id);
+    const partyB = players.find((p) => p.id === c.party_b_id);
+    if (!partyA || !partyB) continue;
+
+    if (c.ev_from_a_to_b > 0) {
+      partyA.ev -= c.ev_from_a_to_b;
+      partyB.ev += c.ev_from_a_to_b;
+      partyA.updated_at = new Date().toISOString();
+      partyB.updated_at = new Date().toISOString();
+
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyA.id,
+        player_name: partyA.name,
+        round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: c.ev_from_a_to_b,
+        ev_change: -c.ev_from_a_to_b,
+        rep_change: 0,
+        reason: `Round ${round} contract payment: ${partyA.name} → ${partyB.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyB.id,
+        player_name: partyB.name,
+        round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: c.ev_from_a_to_b,
+        ev_change: c.ev_from_a_to_b,
+        rep_change: 0,
+        reason: `Round ${round} contract payment: ${partyA.name} → ${partyB.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    if (c.ev_from_b_to_a > 0) {
+      partyB.ev -= c.ev_from_b_to_a;
+      partyA.ev += c.ev_from_b_to_a;
+      partyA.updated_at = new Date().toISOString();
+      partyB.updated_at = new Date().toISOString();
+
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyB.id,
+        player_name: partyB.name,
+        round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: c.ev_from_b_to_a,
+        ev_change: -c.ev_from_b_to_a,
+        rep_change: 0,
+        reason: `Round ${round} contract payment: ${partyB.name} → ${partyA.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyA.id,
+        player_name: partyA.name,
+        round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: c.ev_from_b_to_a,
+        ev_change: c.ev_from_b_to_a,
+        rep_change: 0,
+        reason: `Round ${round} contract payment: ${partyB.name} → ${partyA.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  // 3) Decrement finite contracts and expire
+  for (const c of contracts) {
+    if (c.status === "active" && typeof c.rounds_remaining === "number") {
+      c.rounds_remaining -= 1;
+    }
+  }
+
+  for (const c of contracts) {
+    if (
+      c.status === "active" &&
+      typeof c.rounds_remaining === "number" &&
+      c.rounds_remaining <= 0
+    ) {
+      c.status = "ended";
+      c.ended_in_round = round;
+      c.reason_for_ending = "Duration expired";
+      const partyA = players.find((p) => p.id === c.party_a_id);
+      const partyB = players.find((p) => p.id === c.party_b_id);
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: c.party_a_id,
+        player_name: partyA?.name ?? null,
+        round,
+        transaction_type: "CONTRACT_ENDED",
+        amount: 0,
+        ev_change: 0,
+        rep_change: 0,
+        reason: `Contract with ${partyB?.name ?? "Unknown"} expired`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: c.party_b_id,
+        player_name: partyB?.name ?? null,
+        round,
+        transaction_type: "CONTRACT_ENDED",
+        amount: 0,
+        ev_change: 0,
+        rep_change: 0,
+        reason: `Contract with ${partyA?.name ?? "Unknown"} expired`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  // 4) Mark any remaining unprocessed entries for this round as processed
+  for (const entry of ledger) {
+    if (entry.round === round && entry.processed === false) {
+      entry.processed = true;
+    }
+  }
+
+  // 5) Advance to next round Governance, bump version
+  const updatedState = {
+    ...gameState,
+    current_round: round + 1,
+    current_phase: "Governance" as GamePhase,
+    version: gameState.version + 1,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Save
+  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
+  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  saveGameState(updatedState);
+
+  // Notify
+  notifySubscribers("players");
+  notifySubscribers("contracts");
+  notifySubscribers("ledger_entries");
+
+  return {
+    data: [
+      {
+        success: true,
+        new_round: updatedState.current_round,
+        new_phase: updatedState.current_phase,
+        new_version: updatedState.version,
+        message: "Advanced to next round Governance",
       },
     ],
     error: null,
@@ -840,7 +1139,9 @@ export const mockSupabaseClient = {
             limitValue = n;
             return selectBuilder;
           },
-          then: (resolve: (value: { data: unknown; error: unknown | null }) => void) => {
+          then: (
+            resolve: (value: { data: unknown; error: unknown | null }) => void
+          ) => {
             // Execute the query
             if (tableName === "infrastructure_definitions") {
               // Filter to only non-starter infrastructure
@@ -852,11 +1153,15 @@ export const mockSupabaseClient = {
                 error: null,
               });
             } else if (tableName === "ledger_entries") {
-              let ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+              let ledger = JSON.parse(
+                localStorage.getItem(STORAGE_KEYS.LEDGER)!
+              );
 
               // Apply filter if specified
               if (filterColumn && filterValue !== null) {
-                ledger = ledger.filter((entry: any) => entry[filterColumn!] === filterValue);
+                ledger = ledger.filter(
+                  (entry: any) => entry[filterColumn!] === filterValue
+                );
               }
 
               // Apply ordering
@@ -880,14 +1185,16 @@ export const mockSupabaseClient = {
                 error: null,
               });
             } else if (tableName === "contracts") {
-              let contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS)!);
+              let contracts = JSON.parse(
+                localStorage.getItem(STORAGE_KEYS.CONTRACTS)!
+              );
 
               // Apply .or() filter if specified (e.g., "party_a_id.eq.uuid,party_b_id.eq.uuid")
               if (orFilter) {
-                const conditions = orFilter.split(',');
+                const conditions = orFilter.split(",");
                 contracts = contracts.filter((contract: any) => {
                   return conditions.some((condition) => {
-                    const [columnPath, value] = condition.split('.eq.');
+                    const [columnPath, value] = condition.split(".eq.");
                     return contract[columnPath] === value;
                   });
                 });
@@ -895,7 +1202,9 @@ export const mockSupabaseClient = {
 
               // Apply .eq() filter if specified
               if (filterColumn && filterValue !== null) {
-                contracts = contracts.filter((contract: any) => contract[filterColumn!] === filterValue);
+                contracts = contracts.filter(
+                  (contract: any) => contract[filterColumn!] === filterValue
+                );
               }
 
               // Apply ordering
@@ -921,7 +1230,9 @@ export const mockSupabaseClient = {
             } else {
               resolve({
                 data: [],
-                error: { message: `Table ${tableName} not implemented in mock` },
+                error: {
+                  message: `Table ${tableName} not implemented in mock`,
+                },
               });
             }
           },
@@ -938,6 +1249,8 @@ export const mockSupabaseClient = {
         return rpcGetDashboardSummary();
       case "advance_phase":
         return rpcAdvancePhase(params?.current_version as number);
+      case "advance_round":
+        return rpcAdvanceRound(params?.current_version as number);
       case "reset_game":
         return rpcResetGame();
       case "add_player":
@@ -988,7 +1301,12 @@ export const mockSupabaseClient = {
       case "toggle_infrastructure_status":
       case "process_round_end":
         return Promise.resolve({
-          data: [{ success: true, message: `Mock ${functionName} - not yet implemented` }],
+          data: [
+            {
+              success: true,
+              message: `Mock ${functionName} - not yet implemented`,
+            },
+          ],
           error: null,
         });
       default:

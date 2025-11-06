@@ -281,6 +281,16 @@ export interface Database {
       };
     };
     Functions: {
+      advance_round: {
+        Args: { current_version: number };
+        Returns: {
+          success: boolean;
+          new_round: number;
+          new_phase: GamePhase;
+          new_version: number;
+          message: string | null;
+        }[];
+      };
       advance_phase: {
         Args: { current_version: number };
         Returns: {

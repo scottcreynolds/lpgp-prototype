@@ -9,11 +9,11 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FiInfo } from "react-icons/fi";
-import { useAdvancePhase } from "../hooks/useGameData";
-import type { GamePhase, DashboardPlayer } from "../lib/database.types";
+import { useAdvancePhase, useAdvanceRound } from "../hooks/useGameData";
+import type { DashboardPlayer, GamePhase } from "../lib/database.types";
+import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { SetupTips } from "./SetupTips.tsx";
-import { CreateContractModal } from "./CreateContractModal";
 import { toaster } from "./ui/toaster";
 
 interface GameStateDisplayProps {
@@ -30,6 +30,7 @@ export function GameStateDisplay({
   players,
 }: GameStateDisplayProps) {
   const advancePhase = useAdvancePhase();
+  const advanceRound = useAdvanceRound();
   const [tipsOpen, setTipsOpen] = useState(true);
 
   const handleAdvancePhase = async () => {
@@ -54,6 +55,28 @@ export function GameStateDisplay({
     }
   };
 
+  const handleAdvanceRound = async () => {
+    try {
+      const result = await advanceRound.mutateAsync();
+      toaster.create({
+        title: "Round Advanced",
+        description: `Advanced to Round ${result.new_round} - ${result.new_phase} Phase`,
+        type: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toaster.create({
+        title: "Failed to Advance Round",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to advance round - please try again",
+        type: "error",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <Box
       bg="white"
@@ -65,7 +88,7 @@ export function GameStateDisplay({
     >
       <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
         <Box flex="1" minW="300px">
-          <Heading size="xl" mb={2} color="gray.900">
+          <Heading size="xl" mb={1} color="gray.900">
             {phase === "Setup" ? (
               <>Setup Phase</>
             ) : (
@@ -74,6 +97,19 @@ export function GameStateDisplay({
               </>
             )}
           </Heading>
+          {/* Highest Rep label */}
+          {players && players.length > 0 && phase !== "Setup" && (
+            <Text color="gray.700" fontSize="sm" fontWeight="medium" mb={1}>
+              {(() => {
+                const maxRep = Math.max(...players.map((p) => p.rep));
+                const leaders = players.filter((p) => p.rep === maxRep);
+                if (leaders.length === 1) {
+                  return `Highest Rep: ${leaders[0].name} (first issue, tiebreak)`;
+                }
+                return "No High Rep Bonus Active";
+              })()}
+            </Text>
+          )}
           <Text color="gray.700" fontSize="sm" fontWeight="medium">
             Version: {version}
           </Text>
@@ -100,14 +136,25 @@ export function GameStateDisplay({
             />
           )}
 
-          <Button
-            onClick={handleAdvancePhase}
-            loading={advancePhase.isPending}
-            colorPalette="blue"
-            size="lg"
-          >
-            {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
-          </Button>
+          {phase === "Operations" ? (
+            <Button
+              onClick={handleAdvanceRound}
+              loading={advanceRound.isPending}
+              colorPalette="blue"
+              size="lg"
+            >
+              Advance Round
+            </Button>
+          ) : (
+            <Button
+              onClick={handleAdvancePhase}
+              loading={advancePhase.isPending}
+              colorPalette="blue"
+              size="lg"
+            >
+              {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
+            </Button>
+          )}
         </HStack>
       </Flex>
 
