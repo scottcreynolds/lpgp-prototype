@@ -18,6 +18,7 @@ In your Supabase project, navigate to the SQL Editor and run the migration files
 1. `001_initial_schema.sql` - Creates tables and indexes
 2. `002_seed_data.sql` - Populates infrastructure definitions
 3. `003_rpc_functions.sql` - Creates RPC functions
+4. `012_multigame_support.sql` - Adds multi-game scoping (game_id) and updates RPCs
 
 ### 2. Configure Environment Variables
 
@@ -30,7 +31,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 
 ### 3. Initialize Game State
 
-The game will automatically initialize when you click "Start New Game" in the dashboard, which calls the `reset_game()` RPC function.
+The app passes a game id via the URL (`?game=<uuid>`). On first load or when creating a new game, the client calls `ensure_game(p_game_id uuid)` and uses scoped RPCs. Clicking "Start New Game" in the header navigates to a new `?game=` and resets just that game's data via `reset_game(p_game_id uuid)`.
 
 ## Database Schema
 
@@ -44,9 +45,18 @@ The game will automatically initialize when you click "Start New Game" in the da
 
 ### RPC Functions
 
-- **advance_phase(current_version)** - Advances game phase with race condition protection
-- **reset_game()** - Resets to initial state with 4 players
-- **get_dashboard_summary()** - Returns aggregated dashboard data
+- advance_phase(p_game_id uuid, current_version int) - Advances phase with optimistic locking
+- advance_round(p_game_id uuid, current_version int) - Processes round end and advances to next round governance
+- reset_game(p_game_id uuid) - Resets only the specified game's data (initial Setup, 1 starter player)
+- ensure_game(p_game_id uuid) - Ensures a game_state row exists for the provided game id
+- get_dashboard_summary(p_game_id uuid) - Returns aggregated dashboard data for the game
+- add_player(p_game_id uuid, player_name text, player_specialization text)
+- build_infrastructure(p_game_id uuid, ...)
+- toggle_infrastructure_status(p_game_id uuid, ...)
+- create_contract(p_game_id uuid, ...)
+- end_contract(p_game_id uuid, ...)
+- manual_adjustment(p_game_id uuid, ...)
+- process_round_end(p_game_id uuid)
 
 ## Development Notes
 

@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import { ensureGameInUrl } from "./lib/gameSession";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -13,6 +14,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Ensure a game id exists in the URL before app renders
+ensureGameInUrl();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

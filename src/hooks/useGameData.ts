@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import type { DashboardSummary, Specialization } from "../lib/database.types";
+import { getCurrentGameId } from "../lib/gameSession";
 import { supabase } from "../lib/supabase";
 import { useGameStore } from "../store/gameStore";
 
@@ -24,7 +25,9 @@ export function useDashboardData() {
   const query = useQuery({
     queryKey: gameKeys.dashboard(),
     queryFn: async (): Promise<DashboardSummary> => {
-      const { data, error } = await supabase.rpc("get_dashboard_summary");
+      const { data, error } = await supabase.rpc("get_dashboard_summary", {
+        p_game_id: getCurrentGameId(),
+      });
 
       if (error) {
         throw new Error(`Failed to fetch dashboard: ${error.message}`);
@@ -48,6 +51,7 @@ export function useDashboardData() {
 
   // Set up real-time subscription to game_state changes
   useEffect(() => {
+    const gameId = getCurrentGameId();
     const channel = supabase
       .channel("game-state-changes")
       .on(
@@ -56,6 +60,7 @@ export function useDashboardData() {
           event: "*",
           schema: "public",
           table: "game_state",
+          filter: gameId ? `game_id=eq.${gameId}` : undefined,
         },
         () => {
           // Refetch dashboard when game state changes
@@ -68,6 +73,7 @@ export function useDashboardData() {
           event: "*",
           schema: "public",
           table: "players",
+          filter: gameId ? `game_id=eq.${gameId}` : undefined,
         },
         () => {
           queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
@@ -79,6 +85,7 @@ export function useDashboardData() {
           event: "*",
           schema: "public",
           table: "player_infrastructure",
+          filter: gameId ? `game_id=eq.${gameId}` : undefined,
         },
         () => {
           queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
@@ -104,6 +111,7 @@ export function useAdvancePhase() {
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("advance_phase", {
+        p_game_id: getCurrentGameId(),
         current_version: version,
       });
 
@@ -143,6 +151,7 @@ export function useAdvanceRound() {
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc("advance_round", {
+        p_game_id: getCurrentGameId(),
         current_version: version,
       });
 
@@ -188,7 +197,9 @@ export function useResetGame() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc("reset_game");
+      const { data, error } = await supabase.rpc("reset_game", {
+        p_game_id: getCurrentGameId(),
+      });
 
       if (error) {
         throw new Error(`Failed to reset game: ${error.message}`);
@@ -230,6 +241,7 @@ export function useAddPlayer() {
       specialization: Specialization;
     }) => {
       const { data, error } = await supabase.rpc("add_player", {
+        p_game_id: getCurrentGameId(),
         player_name: name,
         player_specialization: specialization,
       });
@@ -343,6 +355,7 @@ export function useBuildInfrastructure() {
       location: string | null;
     }) => {
       const { data, error } = await supabase.rpc("build_infrastructure", {
+        p_game_id: getCurrentGameId(),
         p_builder_id: builderId,
         p_owner_id: ownerId,
         p_infrastructure_type: infrastructureType,
@@ -389,6 +402,7 @@ export function useToggleInfrastructureStatus() {
       const { data, error } = await supabase.rpc(
         "toggle_infrastructure_status",
         {
+          p_game_id: getCurrentGameId(),
           p_infrastructure_id: infrastructureId,
           p_target_status: targetStatus,
         }
@@ -428,6 +442,7 @@ export function useContracts(playerId?: string) {
         .select(
           "*, party_a:players!party_a_id(name), party_b:players!party_b_id(name)"
         )
+        .eq("game_id", getCurrentGameId() as string)
         .order("created_at", { ascending: false });
 
       if (playerId) {
@@ -476,6 +491,7 @@ export function useCreateContract() {
       durationRounds?: number | null;
     }) => {
       const { data, error } = await supabase.rpc("create_contract", {
+        p_game_id: getCurrentGameId(),
         p_party_a_id: partyAId,
         p_party_b_id: partyBId,
         p_ev_from_a_to_b: evFromAToB,
@@ -529,6 +545,7 @@ export function useEndContract() {
       reason?: string | null;
     }) => {
       const { data, error } = await supabase.rpc("end_contract", {
+        p_game_id: getCurrentGameId(),
         p_contract_id: contractId,
         p_is_broken: isBroken,
         p_reason: reason,
@@ -577,6 +594,7 @@ export function useManualAdjustment() {
       reason?: string;
     }) => {
       const { data, error } = await supabase.rpc("manual_adjustment", {
+        p_game_id: getCurrentGameId(),
         p_player_id: playerId,
         p_ev_change: evChange,
         p_rep_change: repChange,
@@ -616,6 +634,7 @@ export function useLedger(playerId?: string, round?: number) {
       let query = supabase
         .from("ledger_entries")
         .select("*, players(name)")
+        .eq("game_id", getCurrentGameId() as string)
         .order("created_at", { ascending: false })
         .limit(100);
 
@@ -646,7 +665,9 @@ export function useProcessRoundEnd() {
 
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc("process_round_end");
+      const { data, error } = await supabase.rpc("process_round_end", {
+        p_game_id: getCurrentGameId(),
+      });
 
       if (error) {
         throw new Error(`Failed to process round end: ${error.message}`);

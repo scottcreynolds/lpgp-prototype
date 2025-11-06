@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useEditPlayer } from "../hooks/useGameData";
 import type { DashboardPlayer, Specialization } from "../lib/database.types";
+import { getSession } from "../lib/gameSession";
 import { useGameStore } from "../store/gameStore";
 import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
 import { EditPlayerModal } from "./EditPlayerModal";
@@ -23,6 +24,8 @@ interface PlayerRankingsProps {
 export function PlayerRankings({ players }: PlayerRankingsProps) {
   const editPlayer = useEditPlayer();
   const currentPhase = useGameStore((state) => state.currentPhase);
+  const mySession = getSession();
+  const myPlayerId = mySession?.playerId;
 
   const getSpecializationBadge = (specialization: string) => {
     const colorMap: Record<string, string> = {
@@ -111,7 +114,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                 <Table.Cell>
                   <HStack gap={2}>
                     <Text fontWeight="semibold" color="fg">
-                      {player.name}
+                      {player.name} {myPlayerId === player.id ? "(You)" : ""}
                     </Text>
                     {isWinner(player.ev) && (
                       <Badge colorPalette="green" size="sm">

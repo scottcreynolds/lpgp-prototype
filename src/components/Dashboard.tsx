@@ -12,6 +12,7 @@ import { ContractsListView } from "./ContractsListView";
 import { DashboardHeader } from "./DashboardHeader";
 import { GameStateDisplay } from "./GameStateDisplay";
 import { InfrastructureCards } from "./InfrastructureCards";
+import { JoinGamePrompt } from "./JoinGamePrompt";
 import { LedgerDisplay } from "./LedgerDisplay";
 import { PlayerRankings } from "./PlayerRankings";
 
@@ -59,6 +60,9 @@ export function Dashboard() {
 
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">
+          {/* Join prompt for players/observers */}
+          <JoinGamePrompt phase={data.game_state.phase} />
+
           {/* Game Status Section */}
           <Box>
             <Heading size="md" mb={3} color="fg">

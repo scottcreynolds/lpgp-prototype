@@ -3,8 +3,10 @@ import type {
   GamePhase,
   LedgerEntry,
   Player,
+  PlayerInfrastructure,
   Specialization,
 } from "./database.types";
+import { getCurrentGameId } from "./gameSession";
 import {
   buildDashboardSummary,
   infrastructureDefinitions,
@@ -14,50 +16,61 @@ import {
   initialPlayers,
 } from "./mockData";
 
-const STORAGE_KEYS = {
-  GAME_STATE: "lpgp_game_state",
-  PLAYERS: "lpgp_players",
-  PLAYER_INFRASTRUCTURE: "lpgp_player_infrastructure",
-  LEDGER: "lpgp_ledger",
-  CONTRACTS: "lpgp_contracts",
-} as const;
+// Storage key helper scoped by game id
+function getKeys(gameId: string) {
+  return {
+    GAME_STATE: `lpgp:${gameId}:game_state`,
+    PLAYERS: `lpgp:${gameId}:players`,
+    PLAYER_INFRASTRUCTURE: `lpgp:${gameId}:player_infrastructure`,
+    LEDGER: `lpgp:${gameId}:ledger`,
+    CONTRACTS: `lpgp:${gameId}:contracts`,
+  } as const;
+}
 
 // Initialize localStorage with seed data if empty
 function initializeStorage() {
-  if (!localStorage.getItem(STORAGE_KEYS.GAME_STATE)) {
+  const gid = getCurrentGameId();
+  if (!gid) return; // Will be set by app bootstrap
+  const KEYS = getKeys(gid);
+  if (!localStorage.getItem(KEYS.GAME_STATE)) {
+    localStorage.setItem(KEYS.GAME_STATE, JSON.stringify(initialGameState));
+    localStorage.setItem(KEYS.PLAYERS, JSON.stringify(initialPlayers));
     localStorage.setItem(
-      STORAGE_KEYS.GAME_STATE,
-      JSON.stringify(initialGameState)
-    );
-    localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(initialPlayers));
-    localStorage.setItem(
-      STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
+      KEYS.PLAYER_INFRASTRUCTURE,
       JSON.stringify(initialPlayerInfrastructure)
     );
-    localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(initialLedger));
-    localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify([]));
+    localStorage.setItem(KEYS.LEDGER, JSON.stringify(initialLedger));
+    localStorage.setItem(KEYS.CONTRACTS, JSON.stringify([]));
   }
 }
 
 // Get data from localStorage
 function getGameState() {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.GAME_STATE)!);
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  return JSON.parse(localStorage.getItem(KEYS.GAME_STATE)!);
 }
 
 function getPlayers() {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAYERS)!);
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  return JSON.parse(localStorage.getItem(KEYS.PLAYERS)!);
 }
 
 function getPlayerInfrastructure() {
   initializeStorage();
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.PLAYER_INFRASTRUCTURE)!);
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  return JSON.parse(localStorage.getItem(KEYS.PLAYER_INFRASTRUCTURE)!);
 }
 
 // Save data to localStorage
 function saveGameState(state: typeof initialGameState) {
-  localStorage.setItem(STORAGE_KEYS.GAME_STATE, JSON.stringify(state));
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  localStorage.setItem(KEYS.GAME_STATE, JSON.stringify(state));
   notifySubscribers("game_state");
 }
 
@@ -94,8 +107,10 @@ async function rpcGetDashboardSummary() {
   const gameState = getGameState();
   const players = getPlayers();
   const playerInfra = getPlayerInfrastructure();
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
   const contracts: Contract[] = JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
+    localStorage.getItem(KEYS.CONTRACTS) || "[]"
   );
 
   const summary = buildDashboardSummary(
@@ -169,16 +184,20 @@ async function rpcAdvancePhase(currentVersion: number) {
 
 async function rpcResetGame() {
   // Reset to initial state
+  const gid = getCurrentGameId();
+  if (!gid)
+    return {
+      data: [{ success: false, message: "No game id", player_count: 0 }],
+      error: null,
+    };
+  const KEYS = getKeys(gid);
+  localStorage.setItem(KEYS.GAME_STATE, JSON.stringify(initialGameState));
+  localStorage.setItem(KEYS.PLAYERS, JSON.stringify(initialPlayers));
   localStorage.setItem(
-    STORAGE_KEYS.GAME_STATE,
-    JSON.stringify(initialGameState)
-  );
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(initialPlayers));
-  localStorage.setItem(
-    STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
+    KEYS.PLAYER_INFRASTRUCTURE,
     JSON.stringify(initialPlayerInfrastructure)
   );
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(initialLedger));
+  localStorage.setItem(KEYS.LEDGER, JSON.stringify(initialLedger));
 
   // Notify all subscribers
   notifySubscribers("game_state");
@@ -197,11 +216,34 @@ async function rpcResetGame() {
   };
 }
 
-async function rpcAddPlayer(name: string, specialization: Specialization) {
+async function rpcAddPlayer(
+  name: string,
+  specialization: Specialization
+): Promise<{
+  data: { success: boolean; message: string; player_id: string | null }[];
+  error: null;
+}> {
   const players = getPlayers();
   const playerInfra = getPlayerInfrastructure();
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  const ledger = JSON.parse(localStorage.getItem(KEYS.LEDGER)!);
   const gameState = getGameState();
+
+  // Enforce join only during Setup phase before Round 1
+  if (!(gameState.current_phase === "Setup" && gameState.current_round === 0)) {
+    return {
+      data: [
+        {
+          success: false,
+          message:
+            "Joining as a new player is only allowed during Setup before Round 1",
+          player_id: null,
+        },
+      ],
+      error: null,
+    };
+  }
 
   // Generate new player ID
   const newPlayerId = crypto.randomUUID();
@@ -262,12 +304,9 @@ async function rpcAddPlayer(name: string, specialization: Specialization) {
   playerInfra.push(newInfra);
   ledger.push(newLedgerEntry);
 
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
-  localStorage.setItem(
-    STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
-    JSON.stringify(playerInfra)
-  );
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  localStorage.setItem(KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(KEYS.PLAYER_INFRASTRUCTURE, JSON.stringify(playerInfra));
+  localStorage.setItem(KEYS.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
   notifySubscribers("players");
@@ -316,7 +355,9 @@ async function rpcEditPlayer(
   };
 
   // Save updated players
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  const gidEdit = getCurrentGameId();
+  const KEYSEdit = getKeys(gidEdit!);
+  localStorage.setItem(KEYSEdit.PLAYERS, JSON.stringify(players));
 
   // Notify subscribers
   notifySubscribers("players");
@@ -340,7 +381,9 @@ async function rpcBuildInfrastructure(
 ) {
   const players = getPlayers();
   const playerInfra = getPlayerInfrastructure();
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  const ledger = JSON.parse(localStorage.getItem(KEYS.LEDGER)!);
   const gameState = getGameState();
 
   // Find builder and infrastructure definition
@@ -421,12 +464,9 @@ async function rpcBuildInfrastructure(
   ledger.push(newLedgerEntry);
 
   // Save all updates
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
-  localStorage.setItem(
-    STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
-    JSON.stringify(playerInfra)
-  );
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  localStorage.setItem(KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(KEYS.PLAYER_INFRASTRUCTURE, JSON.stringify(playerInfra));
+  localStorage.setItem(KEYS.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
   notifySubscribers("players");
@@ -451,7 +491,9 @@ async function rpcManualAdjustment(
   reason: string
 ) {
   const players = getPlayers();
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  const ledger = JSON.parse(localStorage.getItem(KEYS.LEDGER)!);
   const gameState = getGameState();
 
   // Find player
@@ -490,8 +532,8 @@ async function rpcManualAdjustment(
   ledger.push(newLedgerEntry);
 
   // Save updates
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  localStorage.setItem(KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(KEYS.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
   notifySubscribers("players");
@@ -523,10 +565,10 @@ async function rpcCreateContract(
 ) {
   initializeStorage();
   const players = getPlayers();
-  const contracts = JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
-  );
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
+  const contracts = JSON.parse(localStorage.getItem(KEYS.CONTRACTS) || "[]");
+  const ledger = JSON.parse(localStorage.getItem(KEYS.LEDGER) || "[]");
   const gameState = getGameState();
 
   // Validate players
@@ -685,9 +727,9 @@ async function rpcCreateContract(
   });
 
   // Save all updates
-  localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  localStorage.setItem(KEYS.CONTRACTS, JSON.stringify(contracts));
+  localStorage.setItem(KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(KEYS.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
   notifySubscribers("contracts");
@@ -712,10 +754,12 @@ async function rpcEndContract(
   reason: string | null
 ) {
   initializeStorage();
+  const gid = getCurrentGameId();
+  const KEYS = getKeys(gid!);
   const contracts = JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
+    localStorage.getItem(KEYS.CONTRACTS) || "[]"
   ) as Contract[];
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
+  const ledger = JSON.parse(localStorage.getItem(KEYS.LEDGER) || "[]");
   const players = getPlayers();
   const gameState = getGameState();
 
@@ -790,7 +834,9 @@ async function rpcEndContract(
       created_at: new Date().toISOString(),
     });
 
-    localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+    const gid2 = getCurrentGameId();
+    const KEYS2 = getKeys(gid2!);
+    localStorage.setItem(KEYS2.PLAYERS, JSON.stringify(players));
   }
 
   // Create ledger entry for contract ending
@@ -816,8 +862,10 @@ async function rpcEndContract(
   });
 
   // Save updates
-  localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  const gid3 = getCurrentGameId();
+  const KEYS3 = getKeys(gid3!);
+  localStorage.setItem(KEYS3.CONTRACTS, JSON.stringify(contracts));
+  localStorage.setItem(KEYS3.LEDGER, JSON.stringify(ledger));
 
   // Notify subscribers
   notifySubscribers("contracts");
@@ -841,10 +889,10 @@ async function rpcAdvanceRound(currentVersion: number) {
   const gameState = getGameState();
   const players: Player[] = getPlayers();
   const infra = getPlayerInfrastructure();
-  const contracts = JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
-  );
-  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
+  const gid4 = getCurrentGameId();
+  const KEYS4 = getKeys(gid4!);
+  const contracts = JSON.parse(localStorage.getItem(KEYS4.CONTRACTS) || "[]");
+  const ledger = JSON.parse(localStorage.getItem(KEYS4.LEDGER) || "[]");
 
   // Version / phase checks
   if (gameState.version !== currentVersion) {
@@ -1085,9 +1133,11 @@ async function rpcAdvanceRound(currentVersion: number) {
   };
 
   // Save
-  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
-  localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
-  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+  const gid5 = getCurrentGameId();
+  const KEYS5 = getKeys(gid5!);
+  localStorage.setItem(KEYS5.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(KEYS5.CONTRACTS, JSON.stringify(contracts));
+  localStorage.setItem(KEYS5.LEDGER, JSON.stringify(ledger));
   saveGameState(updatedState);
 
   // Notify
@@ -1154,8 +1204,10 @@ export const mockSupabaseClient = {
                 error: null,
               });
             } else if (tableName === "ledger_entries") {
+              const gidT = getCurrentGameId();
+              const KEYST = getKeys(gidT!);
               let ledger = JSON.parse(
-                localStorage.getItem(STORAGE_KEYS.LEDGER)!
+                localStorage.getItem(KEYST.LEDGER)!
               ) as LedgerEntry[];
 
               // Apply filter if specified
@@ -1194,8 +1246,10 @@ export const mockSupabaseClient = {
                 error: null,
               });
             } else if (tableName === "contracts") {
+              const gidT = getCurrentGameId();
+              const KEYST = getKeys(gidT!);
               let contracts = JSON.parse(
-                localStorage.getItem(STORAGE_KEYS.CONTRACTS)!
+                localStorage.getItem(KEYST.CONTRACTS)!
               ) as Contract[];
 
               // Apply .or() filter if specified (e.g., "party_a_id.eq.uuid,party_b_id.eq.uuid")
@@ -1275,7 +1329,9 @@ export const mockSupabaseClient = {
       targetStatus: boolean
     ) {
       const playerInfra = getPlayerInfrastructure();
-      const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+      const gidTog = getCurrentGameId();
+      const KEYSTog = getKeys(gidTog!);
+      const ledger = JSON.parse(localStorage.getItem(KEYSTog.LEDGER)!);
       const gameState = getGameState();
       const players = getPlayers();
 
@@ -1334,7 +1390,7 @@ export const mockSupabaseClient = {
 
       // Save changes
       localStorage.setItem(
-        STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
+        KEYSTog.PLAYER_INFRASTRUCTURE,
         JSON.stringify(playerInfra)
       );
 
@@ -1356,7 +1412,9 @@ export const mockSupabaseClient = {
         amount: 0,
         ev_change: 0,
         rep_change: 0,
-        reason: `${targetStatus ? "Activated" : "Deactivated"} ${infraDef?.type || "infrastructure"}`,
+        reason: `${targetStatus ? "Activated" : "Deactivated"} ${
+          infraDef?.type || "infrastructure"
+        }`,
         processed: true,
         infrastructure_id: infrastructureId,
         contract_id: null,
@@ -1365,7 +1423,7 @@ export const mockSupabaseClient = {
       };
 
       ledger.push(ledgerEntry);
-      localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+      localStorage.setItem(KEYSTog.LEDGER, JSON.stringify(ledger));
 
       notifySubscribers("player_infrastructure");
       notifySubscribers("ledger_entries");

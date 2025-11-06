@@ -38,9 +38,24 @@
   - Auto-starts the next round's Governance timer
   - Shows highest rep label in the round info (unique leader gets first issue and tiebreak; otherwise "No High Rep Bonus Active")
 
+- ✅ **Multiplayer sessions (mock mode)**
+  - Shareable link displayed in header with one-click copy (uses `?game=ID`)
+  - New Game creates a fresh game ID and URL without extra deps (no router)
+  - First-time visitors are prompted to join as a player or observe-only
+  - Joining as a player is allowed only during Setup before Round 1
+  - All mock data (players, infra, ledger, contracts) is scoped per game ID
+  - Note: Supabase (real backend) parity to be added in a follow-up migration (add game_id, update RPCs)
+
+- ✅ **Supabase parity for multiplayer scoping**
+  - Added `game_id` to game tables and indexed
+  - Updated RPCs to accept `p_game_id` and filter by it (advance_phase/round, get_dashboard_summary, add_player, build/toggle infrastructure, contracts, manual_adjustment, process_round_end, reset_game)
+  - Added `ensure_game(p_game_id)`
+  - Frontend hooks now pass `p_game_id` and scope table queries/subscriptions by `game_id`
+  - Migration file: `database/migrations/012_multigame_support.sql`
+
 ## Up Next
 
-TBD — pick next item from High Priority (e.g., turn order in each phase, multiplayers).
+- Apply the new migration to your Supabase project and smoke-test real-time updates across two browsers using the same `?game=` link
 
 ## High Priority
 

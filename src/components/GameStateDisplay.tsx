@@ -9,8 +9,16 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FiInfo } from "react-icons/fi";
-import { useAdvancePhase, useAdvanceRound, useAddPlayer } from "../hooks/useGameData";
-import type { DashboardPlayer, GamePhase, Specialization } from "../lib/database.types";
+import {
+  useAddPlayer,
+  useAdvancePhase,
+  useAdvanceRound,
+} from "../hooks/useGameData";
+import type {
+  DashboardPlayer,
+  GamePhase,
+  Specialization,
+} from "../lib/database.types";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
@@ -182,11 +190,13 @@ export function GameStateDisplay({
           />
         )}
 
-        {/* Add Player Button */}
-        <AddPlayerModal
-          onAddPlayer={handleAddPlayer}
-          isPending={addPlayer.isPending}
-        />
+        {/* Add Player Button (only during Setup) */}
+        {phase === "Setup" && (
+          <AddPlayerModal
+            onAddPlayer={handleAddPlayer}
+            isPending={addPlayer.isPending}
+          />
+        )}
 
         {/* Spacer to push next button to the right on desktop */}
         <Box flex={{ base: "0", md: "1" }} />

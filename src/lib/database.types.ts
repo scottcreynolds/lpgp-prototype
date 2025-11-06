@@ -44,6 +44,7 @@ export interface Database {
           version: number;
           created_at: string;
           updated_at: string;
+          game_id: string;
         };
         Insert: {
           id?: number;
@@ -52,6 +53,7 @@ export interface Database {
           version?: number;
           created_at?: string;
           updated_at?: string;
+          game_id?: string;
         };
         Update: {
           id?: number;
@@ -60,6 +62,7 @@ export interface Database {
           version?: number;
           created_at?: string;
           updated_at?: string;
+          game_id?: string;
         };
       };
       players: {
@@ -71,6 +74,7 @@ export interface Database {
           rep: number;
           created_at: string;
           updated_at: string;
+          game_id: string;
         };
         Insert: {
           id?: string;
@@ -80,6 +84,7 @@ export interface Database {
           rep?: number;
           created_at?: string;
           updated_at?: string;
+          game_id?: string;
         };
         Update: {
           id?: string;
@@ -89,6 +94,7 @@ export interface Database {
           rep?: number;
           created_at?: string;
           updated_at?: string;
+          game_id?: string;
         };
       };
       infrastructure_definitions: {
@@ -143,6 +149,7 @@ export interface Database {
           location: string | null;
           is_active: boolean;
           created_at: string;
+          game_id: string;
         };
         Insert: {
           id?: string;
@@ -154,6 +161,7 @@ export interface Database {
           location?: string | null;
           is_active?: boolean;
           created_at?: string;
+          game_id?: string;
         };
         Update: {
           id?: string;
@@ -165,6 +173,7 @@ export interface Database {
           location?: string | null;
           is_active?: boolean;
           created_at?: string;
+          game_id?: string;
         };
       };
       ledger_entries: {
@@ -183,6 +192,7 @@ export interface Database {
           contract_id: string | null;
           metadata: Json | null;
           created_at: string;
+          game_id: string;
         };
         Insert: {
           id?: string;
@@ -199,6 +209,7 @@ export interface Database {
           contract_id?: string | null;
           metadata?: Json | null;
           created_at?: string;
+          game_id?: string;
         };
         Update: {
           id?: string;
@@ -215,6 +226,7 @@ export interface Database {
           contract_id?: string | null;
           metadata?: Json | null;
           created_at?: string;
+          game_id?: string;
         };
       };
       contracts: {
@@ -237,6 +249,7 @@ export interface Database {
           reason_for_ending: string | null;
           created_at: string;
           updated_at: string;
+          game_id: string;
         };
         Insert: {
           id?: string;
@@ -257,6 +270,7 @@ export interface Database {
           reason_for_ending?: string | null;
           created_at?: string;
           updated_at?: string;
+          game_id?: string;
         };
         Update: {
           id?: string;
@@ -277,12 +291,13 @@ export interface Database {
           reason_for_ending?: string | null;
           created_at?: string;
           updated_at?: string;
+          game_id?: string;
         };
       };
     };
     Functions: {
       advance_round: {
-        Args: { current_version: number };
+        Args: { p_game_id: string; current_version: number };
         Returns: {
           success: boolean;
           new_round: number;
@@ -292,7 +307,7 @@ export interface Database {
         }[];
       };
       advance_phase: {
-        Args: { current_version: number };
+        Args: { p_game_id: string; current_version: number };
         Returns: {
           success: boolean;
           new_round: number;
@@ -302,7 +317,7 @@ export interface Database {
         }[];
       };
       reset_game: {
-        Args: Record<string, never>;
+        Args: { p_game_id: string };
         Returns: {
           success: boolean;
           message: string;
@@ -310,11 +325,12 @@ export interface Database {
         }[];
       };
       get_dashboard_summary: {
-        Args: Record<string, never>;
+        Args: { p_game_id: string };
         Returns: Json;
       };
       build_infrastructure: {
         Args: {
+          p_game_id: string;
           p_builder_id: string;
           p_owner_id: string;
           p_infrastructure_type: string;
@@ -329,6 +345,7 @@ export interface Database {
       };
       toggle_infrastructure_status: {
         Args: {
+          p_game_id: string;
           p_infrastructure_id: string;
           p_target_status: boolean;
         };
@@ -348,6 +365,7 @@ export interface Database {
       };
       create_contract: {
         Args: {
+          p_game_id: string;
           p_party_a_id: string;
           p_party_b_id: string;
           p_ev_from_a_to_b?: number;
@@ -367,6 +385,7 @@ export interface Database {
       };
       end_contract: {
         Args: {
+          p_game_id: string;
           p_contract_id: string;
           p_is_broken?: boolean;
           p_reason?: string | null;
@@ -378,6 +397,7 @@ export interface Database {
       };
       manual_adjustment: {
         Args: {
+          p_game_id: string;
           p_player_id: string;
           p_ev_change?: number;
           p_rep_change?: number;
@@ -391,12 +411,16 @@ export interface Database {
         }[];
       };
       process_round_end: {
-        Args: Record<string, never>;
+        Args: { p_game_id: string };
         Returns: {
           success: boolean;
           message: string;
           summary: Json;
         }[];
+      };
+      ensure_game: {
+        Args: { p_game_id: string };
+        Returns: void;
       };
     };
   };
@@ -409,9 +433,10 @@ export type InfrastructureDefinition =
   Database["public"]["Tables"]["infrastructure_definitions"]["Row"];
 export type PlayerInfrastructure =
   Database["public"]["Tables"]["player_infrastructure"]["Row"];
-export type LedgerEntry = Database["public"]["Tables"]["ledger_entries"]["Row"] & {
-  players?: { name: string } | null;
-};
+export type LedgerEntry =
+  Database["public"]["Tables"]["ledger_entries"]["Row"] & {
+    players?: { name: string } | null;
+  };
 export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
 
 // Dashboard summary types

@@ -29,6 +29,7 @@ export const initialGameState: GameState = {
   version: 0,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
+  game_id: "mock-default",
 };
 
 // Infrastructure Definitions
@@ -136,6 +137,7 @@ export const initialPlayers: Player[] = [
     rep: 10,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
+    game_id: "mock-default",
   },
 ];
 
@@ -151,6 +153,7 @@ export const initialPlayerInfrastructure: PlayerInfrastructure[] = [
     location: null,
     is_active: true,
     created_at: new Date().toISOString(),
+    game_id: "mock-default",
   },
 ];
 
@@ -171,6 +174,7 @@ export const initialLedger: LedgerEntry[] = [
     contract_id: null,
     metadata: null,
     created_at: new Date().toISOString(),
+    game_id: "mock-default",
   },
 ];
 
@@ -198,106 +202,107 @@ export function buildDashboardSummary(
         return b.rep - a.rep;
       })
       .map((player) => {
-      const playerInfrastructure = playerInfra.filter(
-        (pi) => pi.player_id === player.id
-      );
+        const playerInfrastructure = playerInfra.filter(
+          (pi) => pi.player_id === player.id
+        );
 
-      const infrastructure = playerInfrastructure.map((pi) => {
-        const def = infraDefs.find((d) => d.id === pi.infrastructure_id)!;
-        return {
-          id: pi.id,
-          type: def.type,
-          cost: def.cost,
-          maintenance_cost: def.maintenance_cost,
-          capacity: def.capacity,
-          yield: def.yield,
-          power_requirement: def.power_requirement,
-          crew_requirement: def.crew_requirement,
-          is_powered: pi.is_powered,
-          is_crewed: pi.is_crewed,
-          is_starter: pi.is_starter,
-          location: pi.location,
-          is_active: pi.is_active,
-        };
-      });
+        const infrastructure = playerInfrastructure.map((pi) => {
+          const def = infraDefs.find((d) => d.id === pi.infrastructure_id)!;
+          return {
+            id: pi.id,
+            type: def.type,
+            cost: def.cost,
+            maintenance_cost: def.maintenance_cost,
+            capacity: def.capacity,
+            yield: def.yield,
+            power_requirement: def.power_requirement,
+            crew_requirement: def.crew_requirement,
+            is_powered: pi.is_powered,
+            is_crewed: pi.is_crewed,
+            is_starter: pi.is_starter,
+            location: pi.location,
+            is_active: pi.is_active,
+          };
+        });
 
-      // Calculate base totals from infrastructure
-      const total_power_capacity = infrastructure.reduce(
-        (sum, i) =>
-          sum +
-          (i.capacity && i.type.includes("Solar") && i.is_active
-            ? i.capacity
-            : 0),
-        0
-      );
-
-      const total_power_used = infrastructure.reduce(
-        (sum, i) =>
-          sum + (i.is_active && i.power_requirement ? i.power_requirement : 0),
-        0
-      );
-
-      const total_crew_capacity = infrastructure.reduce(
-        (sum, i) =>
-          sum +
-          (i.capacity && i.type.includes("Habitat") && i.is_active
-            ? i.capacity
-            : 0),
-        0
-      );
-
-      const total_crew_used = infrastructure.reduce(
-        (sum, i) =>
-          sum + (i.is_active && i.crew_requirement ? i.crew_requirement : 0),
-        0
-      );
-
-      // Calculate contract adjustments for this player
-      let contractPowerAdjustment = 0;
-      let contractCrewAdjustment = 0;
-
-      activeContracts.forEach((contract) => {
-        if (contract.party_a_id === player.id) {
-          // Player is Party A: receives B->A, gives A->B
-          contractPowerAdjustment +=
-            contract.power_from_b_to_a - contract.power_from_a_to_b;
-          contractCrewAdjustment +=
-            contract.crew_from_b_to_a - contract.crew_from_a_to_b;
-        } else if (contract.party_b_id === player.id) {
-          // Player is Party B: receives A->B, gives B->A
-          contractPowerAdjustment +=
-            contract.power_from_a_to_b - contract.power_from_b_to_a;
-          contractCrewAdjustment +=
-            contract.crew_from_a_to_b - contract.crew_from_b_to_a;
-        }
-      });
-
-      const totals = {
-        total_power_capacity,
-        total_power_used,
-        total_crew_capacity,
-        total_crew_used,
-        total_maintenance_cost: infrastructure.reduce(
+        // Calculate base totals from infrastructure
+        const total_power_capacity = infrastructure.reduce(
           (sum, i) =>
-            sum + (i.is_starter || !i.is_active ? 0 : i.maintenance_cost),
+            sum +
+            (i.capacity && i.type.includes("Solar") && i.is_active
+              ? i.capacity
+              : 0),
           0
-        ),
-        total_yield: infrastructure.reduce(
-          (sum, i) => sum + (i.is_active && i.yield ? i.yield : 0),
-          0
-        ),
-        infrastructure_count: infrastructure.length,
-        available_power:
-          total_power_capacity - total_power_used + contractPowerAdjustment,
-        available_crew:
-          total_crew_capacity - total_crew_used + contractCrewAdjustment,
-      };
+        );
 
-      return {
-        ...player,
-        infrastructure,
-        totals,
-      };
-    }),
+        const total_power_used = infrastructure.reduce(
+          (sum, i) =>
+            sum +
+            (i.is_active && i.power_requirement ? i.power_requirement : 0),
+          0
+        );
+
+        const total_crew_capacity = infrastructure.reduce(
+          (sum, i) =>
+            sum +
+            (i.capacity && i.type.includes("Habitat") && i.is_active
+              ? i.capacity
+              : 0),
+          0
+        );
+
+        const total_crew_used = infrastructure.reduce(
+          (sum, i) =>
+            sum + (i.is_active && i.crew_requirement ? i.crew_requirement : 0),
+          0
+        );
+
+        // Calculate contract adjustments for this player
+        let contractPowerAdjustment = 0;
+        let contractCrewAdjustment = 0;
+
+        activeContracts.forEach((contract) => {
+          if (contract.party_a_id === player.id) {
+            // Player is Party A: receives B->A, gives A->B
+            contractPowerAdjustment +=
+              contract.power_from_b_to_a - contract.power_from_a_to_b;
+            contractCrewAdjustment +=
+              contract.crew_from_b_to_a - contract.crew_from_a_to_b;
+          } else if (contract.party_b_id === player.id) {
+            // Player is Party B: receives A->B, gives B->A
+            contractPowerAdjustment +=
+              contract.power_from_a_to_b - contract.power_from_b_to_a;
+            contractCrewAdjustment +=
+              contract.crew_from_a_to_b - contract.crew_from_b_to_a;
+          }
+        });
+
+        const totals = {
+          total_power_capacity,
+          total_power_used,
+          total_crew_capacity,
+          total_crew_used,
+          total_maintenance_cost: infrastructure.reduce(
+            (sum, i) =>
+              sum + (i.is_starter || !i.is_active ? 0 : i.maintenance_cost),
+            0
+          ),
+          total_yield: infrastructure.reduce(
+            (sum, i) => sum + (i.is_active && i.yield ? i.yield : 0),
+            0
+          ),
+          infrastructure_count: infrastructure.length,
+          available_power:
+            total_power_capacity - total_power_used + contractPowerAdjustment,
+          available_crew:
+            total_crew_capacity - total_crew_used + contractCrewAdjustment,
+        };
+
+        return {
+          ...player,
+          infrastructure,
+          totals,
+        };
+      }),
   };
 }
