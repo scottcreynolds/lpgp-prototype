@@ -131,6 +131,7 @@ In the operations phase, players can:
 **Rounds** — summarize EV/REP deltas and events.  
 **Admin** — reset to seed data; import/export CSVs; initialize new rounds.
 **Dashboard** - display realtime stats on the game in progress for all players
+**Ledger** - the log of all meaningful actions taken in the game.
 
 ---
 
@@ -142,6 +143,19 @@ We will build this out but the key entities are:
 - ledger: tracks every transation and action in the game including any currency changes and which round it occurred in
 - contracts: agreements players have entered into and associated values of rep, resources, or EV changing hands and for how many rounds
 - infrastructure: tracks available infrastructure that can be built by players and associated costs and yields
+
+### 6.1 Ledger
+
+the ledger is a log of every major action taken by and on behalf of players (automated or otherwise) such that the entire state of the game can be recreated, somewhat like an accounting ledger or blockchain idea.
+	
+any exchanges, build actions, end of round points additions/deductions, per round turn order, should all go in the ledger
+	
+ledger items can be "processed" or "unprocessed", meaning that some actions only impact points at the end of a round and should therefore be unprocessed until then, and then be marked as processed when they're accounted for.
+	
+calculating yield from built infrastructure, maintenance costs, per-round contraxt transactions, all of these happen at end of round and should generate ledger entries.
+
+ledger entries can track changes in EV or Rep or both or neither
+
 
 ---
 

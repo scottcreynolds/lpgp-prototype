@@ -38,6 +38,17 @@ The starting equipment is assumed to be powered/serviced by the starting commons
 
 Players can build infrastructure based on their specialty. Each piece of infrastructure provides benefits to the player or other players and has associated costs, yields, and capacity.
 
+### 4.0.1 Associated Values
+
+Each piece of infrastructure has several associated values. This is what they mean:
+
+- cost to build: how much EV should be immediately deducted as a purchase price
+- per round maintenance: how much EV should be deducted at the end of every round for maintenance costs.
+- capacity: how much of an available resource the infrastructure can provide. this is for Habitats and Solar arrays only.
+- yield: how much EV the player gets per round for operating the machinery. Applies to extractors only
+- power requirement: how much unused power the player must have available to operate this infrastructure
+- crew rquiremet: how much unused habitat space the player must have available to house the crew to operate the infrastructure.
+
 ### 4.1 Habitats
 
 Habitats serve as housing and medical facilities for crew. Each piece of infrastructure has as a constraint the number of crew required to operate it, and so each player must have access to an amount of habitat capacity to support that crew. Players who own habitats can lease or trade access to crew space to other players.
@@ -138,7 +149,17 @@ Low REP limits future access to shared resources or joint missions.
 
 ---
 
-## 8. Commons Infrastructure
+## 8. Constraint Mechanics
+
+In addition to the currencies, there are constraint mechanics placed on the building and operating of infrastructure.
+
+Each piece of infrastructure has associated requirements of how much power the player must have access to for it to run and how much habitat (crew) space the player must have to operate it.
+
+These capacities are inherent to Solar Arrays and Habitats, respectively, and the player can have access to them either by owning their own facilities or entering contracts with other players who have excess capacity.
+
+If, for instance, a player has access to a total of 20 power, and already has infrastructure built that requires 20 power, then they can build additional infrastructure but it will be dormant until either they get more power through building or trade or deallocate power from another piece they own.
+
+## 9. Commons Infrastructure
 
 Commons assets are owned collectively and available to all players.
 
@@ -153,7 +174,7 @@ Players utilizing the commons infrastructure will pay 10 EV total per round as m
 
 ---
 
-## 9. Victory and Endgame
+## 10. Victory and Endgame
 
 **Win Condition:**  
 - First player to reach **500 EV** wins the simulation.  
@@ -166,7 +187,7 @@ The facilitator may also designate **collective victory** if all players achieve
 
 ---
 
-## 10. Research Integration Rules
+## 11. Research Integration Rules
 
 - Every state change triggers two writes:  
   - `events` → qualitative log  
@@ -178,7 +199,7 @@ The facilitator may also designate **collective victory** if all players achieve
 
 ---
 
-## 11. Facilitator Controls
+## 12. Facilitator Controls
 
 Facilitators can:
 - Reset the simulation to seed data.  
@@ -188,7 +209,7 @@ Facilitators can:
 
 ---
 
-## 12. Data Export Rules
+## 13. Data Export Rules
 
 At the end of a session:
 - Export all tables (`players`, `infrastructure`, `territories`, `events`, `ledger_entries`, `rounds`) as JSON or CSV.  
