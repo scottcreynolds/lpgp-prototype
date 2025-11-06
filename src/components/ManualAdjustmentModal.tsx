@@ -46,6 +46,16 @@ export function ManualAdjustmentModal({
   const newEv = currentEv + evChange;
   const newRep = currentRep + repChange;
 
+  const handleOpenChange = (details: { open: boolean }) => {
+    setOpen(details.open);
+    if (!details.open) {
+      // Reset form when modal closes
+      setEvChange(0);
+      setRepChange(0);
+      setReason('');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!reason.trim()) {
       toaster.create({
@@ -99,7 +109,7 @@ export function ManualAdjustmentModal({
   };
 
   return (
-    <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)}>
+    <DialogRoot open={open} onOpenChange={handleOpenChange} size="lg">
       <DialogTrigger asChild>
         <Button colorPalette="orange" variant="outline" size="sm">
           Adjust
@@ -114,6 +124,8 @@ export function ManualAdjustmentModal({
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
+            maxHeight: '90vh',
+            overflow: 'auto',
           }}
         >
         <DialogHeader>
@@ -125,27 +137,27 @@ export function ManualAdjustmentModal({
             {/* Current Values */}
             <Box
               p={3}
-              bg="orange.50"
+              bg="bg.muted"
               borderRadius="md"
               borderWidth={1}
-              borderColor="orange.200"
+              borderColor="border"
             >
-              <Text fontSize="sm" fontWeight="semibold" color="orange.900" mb={2}>
+              <Text fontSize="sm" fontWeight="semibold" color="fg.emphasized" mb={2}>
                 Current Values:
               </Text>
               <HStack justify="space-between">
-                <Text fontSize="sm" color="orange.700">
+                <Text fontSize="sm" color="fg.muted">
                   EV:
                 </Text>
-                <Text fontSize="sm" fontWeight="semibold">
+                <Text fontSize="sm" fontWeight="semibold" color="fg">
                   {currentEv}
                 </Text>
               </HStack>
               <HStack justify="space-between">
-                <Text fontSize="sm" color="orange.700">
+                <Text fontSize="sm" color="fg.muted">
                   REP:
                 </Text>
-                <Text fontSize="sm" fontWeight="semibold">
+                <Text fontSize="sm" fontWeight="semibold" color="fg">
                   {currentRep}
                 </Text>
               </HStack>
@@ -189,23 +201,23 @@ export function ManualAdjustmentModal({
             {(evChange !== 0 || repChange !== 0) && (
               <Box
                 p={3}
-                bg="blue.50"
+                bg="bg.muted"
                 borderRadius="md"
                 borderWidth={1}
-                borderColor="blue.200"
+                borderColor="border"
               >
-                <Text fontSize="sm" fontWeight="semibold" color="blue.900" mb={2}>
+                <Text fontSize="sm" fontWeight="semibold" color="fg.emphasized" mb={2}>
                   Preview:
                 </Text>
                 {evChange !== 0 && (
                   <HStack justify="space-between">
-                    <Text fontSize="sm" color="blue.700">
+                    <Text fontSize="sm" color="fg.muted">
                       EV:
                     </Text>
                     <Text
                       fontSize="sm"
                       fontWeight="semibold"
-                      color={evChange > 0 ? 'green.600' : 'red.600'}
+                      color="fg"
                     >
                       {currentEv} {evChange > 0 ? '+' : ''}
                       {evChange} = {newEv}
@@ -214,13 +226,13 @@ export function ManualAdjustmentModal({
                 )}
                 {repChange !== 0 && (
                   <HStack justify="space-between">
-                    <Text fontSize="sm" color="blue.700">
+                    <Text fontSize="sm" color="fg.muted">
                       REP:
                     </Text>
                     <Text
                       fontSize="sm"
                       fontWeight="semibold"
-                      color={repChange > 0 ? 'green.600' : 'red.600'}
+                      color="fg"
                     >
                       {currentRep} {repChange > 0 ? '+' : ''}
                       {repChange} = {newRep}

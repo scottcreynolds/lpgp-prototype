@@ -156,7 +156,7 @@ export function CreateContractModal({
   const netCrew = crewFromBToA - crewFromAToB;
 
   return (
-    <DialogRoot open={open} onOpenChange={handleOpenChange}>
+    <DialogRoot open={open} onOpenChange={handleOpenChange} size="xl">
       <DialogTrigger asChild>
         <Button
           colorPalette="purple"
@@ -176,6 +176,8 @@ export function CreateContractModal({
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
+            maxHeight: '90vh',
+            overflow: 'auto',
           }}
         >
           <DialogHeader>
@@ -186,7 +188,7 @@ export function CreateContractModal({
             <VStack gap={4} align="stretch">
               {/* Party Selection */}
               <Box>
-                <Heading size="sm" mb={2} color="gray.900">
+                <Heading size="sm" mb={2} color="fg.emphasized">
                   Parties
                 </Heading>
                 <VStack gap={2} align="stretch">

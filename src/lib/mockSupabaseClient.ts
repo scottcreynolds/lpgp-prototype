@@ -424,6 +424,71 @@ async function rpcBuildInfrastructure(
   };
 }
 
+async function rpcManualAdjustment(
+  playerId: string,
+  evChange: number,
+  repChange: number,
+  reason: string
+) {
+  const players = getPlayers();
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+  const gameState = getGameState();
+
+  // Find player
+  const playerIndex = players.findIndex((p: Player) => p.id === playerId);
+
+  if (playerIndex === -1) {
+    return {
+      data: [{ success: false, message: "Player not found" }],
+      error: null,
+    };
+  }
+
+  // Apply adjustments
+  players[playerIndex].ev += evChange;
+  players[playerIndex].rep += repChange;
+  players[playerIndex].updated_at = new Date().toISOString();
+
+  // Create ledger entry
+  const newLedgerEntry = {
+    id: crypto.randomUUID(),
+    player_id: playerId,
+    player_name: players[playerIndex].name,
+    round: gameState.current_round,
+    transaction_type: "MANUAL_ADJUSTMENT" as const,
+    amount: evChange,
+    ev_change: evChange,
+    rep_change: repChange,
+    reason: reason,
+    processed: true,
+    infrastructure_id: null,
+    contract_id: null,
+    metadata: null,
+    created_at: new Date().toISOString(),
+  };
+
+  ledger.push(newLedgerEntry);
+
+  // Save updates
+  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+
+  // Notify subscribers
+  notifySubscribers("players");
+
+  return {
+    data: [
+      {
+        success: true,
+        message: "Adjustment applied successfully",
+        new_ev: players[playerIndex].ev,
+        new_rep: players[playerIndex].rep,
+      },
+    ],
+    error: null,
+  };
+}
+
 // Mock Supabase client
 export const mockSupabaseClient = {
   from: (tableName: string) => {
@@ -529,11 +594,17 @@ export const mockSupabaseClient = {
           params?.p_infrastructure_type as string,
           params?.p_location as string | null
         );
+      case "manual_adjustment":
+        return rpcManualAdjustment(
+          params?.p_player_id as string,
+          params?.p_ev_change as number,
+          params?.p_rep_change as number,
+          params?.p_reason as string
+        );
       // Stub implementations for other infrastructure/contract/ledger RPCs
       case "toggle_infrastructure_status":
       case "create_contract":
       case "end_contract":
-      case "manual_adjustment":
       case "process_round_end":
         return Promise.resolve({
           data: [{ success: true, message: `Mock ${functionName} - not yet implemented` }],
