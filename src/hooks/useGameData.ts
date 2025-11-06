@@ -15,6 +15,9 @@ export const gameKeys = {
   ledger: () => [...gameKeys.all, "ledger"] as const,
 };
 
+// Avoid repeated ensure_game calls for the same game id
+const ensuredGames = new Set<string>();
+
 /**
  * Fetches dashboard summary data
  */
@@ -41,19 +44,23 @@ export function useDashboardData() {
         throw new Error(`Failed to fetch dashboard: ${error.message}`);
       }
 
-      // If the game hasn't been initialized on the server yet, ensure it exists and retry once
+      // If the game hasn't been initialized on the server yet, ensure once and retry
       if (!data || data.game_state == null) {
-        try {
-          await supabase.rpc("ensure_game", { p_game_id: gameId as string });
-        } catch {
-          // ignore ensure_game failure and continue with fallback
+        if (gameId && !ensuredGames.has(gameId)) {
+          const { error: ensureErr } = await supabase.rpc("ensure_game", {
+            p_game_id: gameId as string,
+          });
+          // Mark attempted to prevent repeated 409s in the console
+          ensuredGames.add(gameId);
+          if (!ensureErr) {
+            const retry = await fetchSummary();
+            data =
+              (retry.data as {
+                game_state?: DashboardSummary["game_state"] | null;
+                players?: DashboardSummary["players"] | null;
+              } | null) ?? data;
+          }
         }
-        const retry = await fetchSummary();
-        data =
-          (retry.data as {
-            game_state?: DashboardSummary["game_state"] | null;
-            players?: DashboardSummary["players"] | null;
-          } | null) ?? data;
       }
 
       // Final guard: coalesce to safe defaults to avoid null access in UI
