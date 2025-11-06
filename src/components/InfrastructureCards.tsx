@@ -8,12 +8,21 @@ import {
   SimpleGrid,
   Text,
   VStack,
-} from '@chakra-ui/react';
-import { FaBolt, FaUsers, FaCoins, FaChartLine, FaHome, FaSolarPanel, FaTint, FaAtom } from 'react-icons/fa';
-import { useEditPlayer } from '../hooks/useGameData';
-import { EditPlayerModal } from './EditPlayerModal';
-import { toaster } from './ui/toaster';
-import type { DashboardPlayer, Specialization } from '../lib/database.types';
+} from "@chakra-ui/react";
+import {
+  FaAtom,
+  FaBolt,
+  FaChartLine,
+  FaCoins,
+  FaHome,
+  FaSolarPanel,
+  FaTint,
+  FaUsers,
+} from "react-icons/fa";
+import { useEditPlayer } from "../hooks/useGameData";
+import type { DashboardPlayer, Specialization } from "../lib/database.types";
+import { EditPlayerModal } from "./EditPlayerModal";
+import { toaster } from "./ui/toasterInstance";
 
 interface InfrastructureCardsProps {
   players: DashboardPlayer[];
@@ -23,17 +32,17 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   const editPlayer = useEditPlayer();
 
   const getInfrastructureIcon = (type: string) => {
-    if (type.includes('Habitat')) return <FaHome />;
-    if (type.includes('Solar')) return <FaSolarPanel />;
-    if (type.includes('H2O')) return <FaTint />;
-    if (type.includes('Helium')) return <FaAtom />;
+    if (type.includes("Habitat")) return <FaHome />;
+    if (type.includes("Solar")) return <FaSolarPanel />;
+    if (type.includes("H2O")) return <FaTint />;
+    if (type.includes("Helium")) return <FaAtom />;
     return null;
   };
 
   const getInfrastructureCounts = (player: DashboardPlayer) => {
     const counts: Record<string, number> = {};
     player.infrastructure.forEach((infra) => {
-      const baseType = infra.type.replace('Starter ', '');
+      const baseType = infra.type.replace("Starter ", "");
       counts[baseType] = (counts[baseType] || 0) + 1;
     });
     return counts;
@@ -47,17 +56,17 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
     try {
       await editPlayer.mutateAsync({ playerId, name, specialization });
       toaster.create({
-        title: 'Player Updated',
+        title: "Player Updated",
         description: `${name} updated successfully`,
-        type: 'success',
+        type: "success",
         duration: 3000,
       });
     } catch (error) {
       toaster.create({
-        title: 'Failed to Update Player',
+        title: "Failed to Update Player",
         description:
-          error instanceof Error ? error.message : 'Failed to update player',
-        type: 'error',
+          error instanceof Error ? error.message : "Failed to update player",
+        type: "error",
         duration: 5000,
       });
     }
@@ -65,7 +74,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
   return (
     <Box>
-      <Heading size="lg" mb={4} color="gray.900">
+      <Heading size="lg" mb={4} color="fg">
         Infrastructure Overview
       </Heading>
 
@@ -81,18 +90,18 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
           return (
             <Box
               key={player.id}
-              bg="white"
+              bg="bg"
               p={5}
               borderRadius="lg"
               borderWidth={1}
-              borderColor="gray.200"
+              borderColor="border"
               shadow="sm"
             >
               <VStack align="stretch" gap={4}>
                 {/* Player Header */}
                 <Flex justify="space-between" align="flex-start">
                   <Box>
-                    <Text fontWeight="bold" fontSize="lg" color="gray.900">
+                    <Text fontWeight="bold" fontSize="lg" color="fg">
                       {player.name}
                     </Text>
                     <Badge size="sm" colorPalette="gray">
@@ -110,20 +119,22 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
                 {/* Infrastructure Counts */}
                 <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.800">
+                  <Text fontSize="sm" fontWeight="semibold" mb={2} color="fg">
                     Infrastructure
                   </Text>
                   <SimpleGrid columns={2} gap={2}>
-                    {Object.entries(infrastructureCounts).map(([type, count]) => (
-                      <HStack key={type} gap={2}>
-                        <Box color="gray.600" fontSize="sm">
-                          {getInfrastructureIcon(type)}
-                        </Box>
-                        <Text fontSize="sm" color="gray.900">
-                          {type}: {count}
-                        </Text>
-                      </HStack>
-                    ))}
+                    {Object.entries(infrastructureCounts).map(
+                      ([type, count]) => (
+                        <HStack key={type} gap={2}>
+                          <Box color="fg.muted" fontSize="sm">
+                            {getInfrastructureIcon(type)}
+                          </Box>
+                          <Text fontSize="sm" color="fg">
+                            {type}: {count}
+                          </Text>
+                        </HStack>
+                      )
+                    )}
                   </SimpleGrid>
                 </Box>
 
@@ -132,109 +143,108 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   {/* Power */}
                   <Box
                     p={3}
-                    bg={powerShortage ? 'red.50' : 'blue.50'}
+                    bg="bg.muted"
                     borderRadius="md"
                     borderWidth={1}
-                    borderColor={powerShortage ? 'red.200' : 'blue.200'}
+                    borderColor="border"
                   >
                     <HStack gap={2} mb={1}>
-                      <FaBolt color={powerShortage ? '#C53030' : '#3182CE'} />
-                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
+                      <Box color={powerShortage ? "fg" : "fg.muted"}>
+                        <FaBolt />
+                      </Box>
+                      <Text fontSize="xs" fontWeight="bold" color="fg">
                         Power
                       </Text>
                     </HStack>
-                    <Text
-                      fontSize="lg"
-                      fontWeight="bold"
-                      color={powerShortage ? 'red.700' : 'gray.900'}
-                    >
+                    <Text fontSize="lg" fontWeight="bold" color="fg">
                       {totals.total_power_used}/{totals.total_power_capacity}
                     </Text>
                     {powerShortage && (
-                      <Text fontSize="xs" color="red.700" fontWeight="bold">
+                      <Badge size="sm" colorPalette="red">
                         SHORTAGE
-                      </Text>
+                      </Badge>
                     )}
                   </Box>
 
                   {/* Crew */}
                   <Box
                     p={3}
-                    bg={crewShortage ? 'red.50' : 'green.50'}
+                    bg="bg.muted"
                     borderRadius="md"
                     borderWidth={1}
-                    borderColor={crewShortage ? 'red.200' : 'green.200'}
+                    borderColor="border"
                   >
                     <HStack gap={2} mb={1}>
-                      <FaUsers color={crewShortage ? '#C53030' : '#38A169'} />
-                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
+                      <Box color={crewShortage ? "fg" : "fg.muted"}>
+                        <FaUsers />
+                      </Box>
+                      <Text fontSize="xs" fontWeight="bold" color="fg">
                         Crew
                       </Text>
                     </HStack>
-                    <Text
-                      fontSize="lg"
-                      fontWeight="bold"
-                      color={crewShortage ? 'red.700' : 'gray.900'}
-                    >
+                    <Text fontSize="lg" fontWeight="bold" color="fg">
                       {totals.total_crew_used}/{totals.total_crew_capacity}
                     </Text>
                     {crewShortage && (
-                      <Text fontSize="xs" color="red.700" fontWeight="bold">
+                      <Badge size="sm" colorPalette="red">
                         SHORTAGE
-                      </Text>
+                      </Badge>
                     )}
                   </Box>
                 </SimpleGrid>
 
                 {/* Financial Stats */}
                 <SimpleGrid columns={2} gap={3}>
-                  <Box p={3} bg="orange.50" borderRadius="md" borderWidth={1} borderColor="orange.200">
+                  <Box
+                    p={3}
+                    bg="bg.muted"
+                    borderRadius="md"
+                    borderWidth={1}
+                    borderColor="border"
+                  >
                     <HStack gap={2} mb={1}>
-                      <FaCoins color="#DD6B20" />
-                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
+                      <Box color="fg.muted">
+                        <FaCoins />
+                      </Box>
+                      <Text fontSize="xs" fontWeight="bold" color="fg">
                         Maintenance
                       </Text>
                     </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="gray.900">
+                    <Text fontSize="lg" fontWeight="bold" color="fg">
                       {totals.total_maintenance_cost} EV
                     </Text>
                   </Box>
 
-                  <Box p={3} bg="green.50" borderRadius="md" borderWidth={1} borderColor="green.200">
+                  <Box
+                    p={3}
+                    bg="bg.muted"
+                    borderRadius="md"
+                    borderWidth={1}
+                    borderColor="border"
+                  >
                     <HStack gap={2} mb={1}>
-                      <FaChartLine color="#38A169" />
-                      <Text fontSize="xs" fontWeight="bold" color="gray.900">
+                      <Box color="fg.muted">
+                        <FaChartLine />
+                      </Box>
+                      <Text fontSize="xs" fontWeight="bold" color="fg">
                         Yield
                       </Text>
                     </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="green.700">
+                    <Text fontSize="lg" fontWeight="bold" color="fg">
                       +{totals.total_yield} EV
                     </Text>
                   </Box>
                 </SimpleGrid>
 
                 {/* Net Income */}
-                <Box
-                  p={2}
-                  bg="gray.50"
-                  borderRadius="md"
-                  textAlign="center"
-                >
-                  <Text fontSize="xs" color="gray.800" mb={1} fontWeight="bold">
+                <Box p={2} bg="bg.muted" borderRadius="md" textAlign="center">
+                  <Text fontSize="xs" color="fg" mb={1} fontWeight="bold">
                     Net Per Round
                   </Text>
-                  <Text
-                    fontSize="xl"
-                    fontWeight="bold"
-                    color={
-                      totals.total_yield - totals.total_maintenance_cost > 0
-                        ? 'green.700'
-                        : 'red.700'
-                    }
-                  >
+                  <Text fontSize="xl" fontWeight="bold" color="fg">
                     {totals.total_yield - totals.total_maintenance_cost > 0
-                      ? '+'
-                      : ''}
+                      ? "+"
+                      : ""}
                     {totals.total_yield - totals.total_maintenance_cost} EV
                   </Text>
                 </Box>

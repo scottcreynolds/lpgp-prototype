@@ -1,6 +1,7 @@
 import type {
   Contract,
   GamePhase,
+  LedgerEntry,
   Player,
   Specialization,
 } from "./database.types";
@@ -713,13 +714,13 @@ async function rpcEndContract(
   initializeStorage();
   const contracts = JSON.parse(
     localStorage.getItem(STORAGE_KEYS.CONTRACTS) || "[]"
-  );
+  ) as Contract[];
   const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || "[]");
   const players = getPlayers();
   const gameState = getGameState();
 
   // Find contract
-  const contractIndex = contracts.findIndex((c: any) => c.id === contractId);
+  const contractIndex = contracts.findIndex((c) => c.id === contractId);
 
   if (contractIndex === -1) {
     return {
@@ -1112,7 +1113,7 @@ async function rpcAdvanceRound(currentVersion: number) {
 export const mockSupabaseClient = {
   from: (tableName: string) => {
     const queryBuilder = {
-      select: (_columns: string = "*") => {
+      select: () => {
         let filterColumn: string | null = null;
         let filterValue: unknown = null;
         let orFilter: string | null = null;
@@ -1155,24 +1156,32 @@ export const mockSupabaseClient = {
             } else if (tableName === "ledger_entries") {
               let ledger = JSON.parse(
                 localStorage.getItem(STORAGE_KEYS.LEDGER)!
-              );
+              ) as LedgerEntry[];
 
               // Apply filter if specified
               if (filterColumn && filterValue !== null) {
-                ledger = ledger.filter(
-                  (entry: any) => entry[filterColumn!] === filterValue
-                );
+                if (filterColumn === "player_id") {
+                  ledger = ledger.filter(
+                    (entry) => entry.player_id === filterValue
+                  );
+                } else if (filterColumn === "round") {
+                  ledger = ledger.filter(
+                    (entry) => entry.round === filterValue
+                  );
+                }
               }
 
               // Apply ordering
               if (orderColumn) {
-                ledger.sort((a: any, b: any) => {
-                  const aVal = a[orderColumn!];
-                  const bVal = b[orderColumn!];
-                  if (aVal < bVal) return orderAscending ? -1 : 1;
-                  if (aVal > bVal) return orderAscending ? 1 : -1;
-                  return 0;
-                });
+                if (orderColumn === "created_at") {
+                  ledger.sort((a, b) => {
+                    const aVal = a.created_at;
+                    const bVal = b.created_at;
+                    if (aVal < bVal) return orderAscending ? -1 : 1;
+                    if (aVal > bVal) return orderAscending ? 1 : -1;
+                    return 0;
+                  });
+                }
               }
 
               // Apply limit
@@ -1187,35 +1196,51 @@ export const mockSupabaseClient = {
             } else if (tableName === "contracts") {
               let contracts = JSON.parse(
                 localStorage.getItem(STORAGE_KEYS.CONTRACTS)!
-              );
+              ) as Contract[];
 
               // Apply .or() filter if specified (e.g., "party_a_id.eq.uuid,party_b_id.eq.uuid")
               if (orFilter) {
                 const conditions = orFilter.split(",");
-                contracts = contracts.filter((contract: any) => {
+                contracts = contracts.filter((contract) => {
                   return conditions.some((condition) => {
                     const [columnPath, value] = condition.split(".eq.");
-                    return contract[columnPath] === value;
+                    if (columnPath === "party_a_id")
+                      return contract.party_a_id === value;
+                    if (columnPath === "party_b_id")
+                      return contract.party_b_id === value;
+                    return false;
                   });
                 });
               }
 
               // Apply .eq() filter if specified
               if (filterColumn && filterValue !== null) {
-                contracts = contracts.filter(
-                  (contract: any) => contract[filterColumn!] === filterValue
-                );
+                if (filterColumn === "party_a_id") {
+                  contracts = contracts.filter(
+                    (contract) => contract.party_a_id === filterValue
+                  );
+                } else if (filterColumn === "party_b_id") {
+                  contracts = contracts.filter(
+                    (contract) => contract.party_b_id === filterValue
+                  );
+                } else if (filterColumn === "status") {
+                  contracts = contracts.filter(
+                    (contract) => contract.status === filterValue
+                  );
+                }
               }
 
               // Apply ordering
               if (orderColumn) {
-                contracts.sort((a: any, b: any) => {
-                  const aVal = a[orderColumn!];
-                  const bVal = b[orderColumn!];
-                  if (aVal < bVal) return orderAscending ? -1 : 1;
-                  if (aVal > bVal) return orderAscending ? 1 : -1;
-                  return 0;
-                });
+                if (orderColumn === "created_at") {
+                  contracts.sort((a, b) => {
+                    const aVal = a.created_at;
+                    const bVal = b.created_at;
+                    if (aVal < bVal) return orderAscending ? -1 : 1;
+                    if (aVal > bVal) return orderAscending ? 1 : -1;
+                    return 0;
+                  });
+                }
               }
 
               // Apply limit

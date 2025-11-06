@@ -319,62 +319,80 @@ Guidelines:
 
 ### Components to update (file and props)
 
-- [ ] `src/components/GameStateDisplay.tsx`
-  - [ ] Replace `bg="white"` with `bg="bg"` (container surface)
-  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
-  - [ ] Replace heading `color="gray.900"` with `color="fg"`
-  - [ ] Replace meta text `color="gray.700"` with `color="fg.muted"`
+- [x] `src/components/GameStateDisplay.tsx`
+  - [x] Replace `bg="white"` with `bg="bg"` (container surface)
+  - [x] Replace `borderColor="gray.200"` with `borderColor="border"`
+  - [x] Replace heading `color="gray.900"` with `color="fg"`
+  - [x] Replace meta text `color="gray.700"` with `color="fg.muted"`
 
-- [ ] `src/components/PhaseTimer.tsx`
-  - [ ] Replace `bg="gray.100"` with `bg="bg"` (or a `subtle` surface if defined)
-  - [ ] Replace `borderColor="gray.300"` with `borderColor="border"`
-  - [ ] Replace label `color="gray.800"` with `color="fg"`
-  - [ ] Replace `timeColor` from `'red.600' | 'gray.900'` to tokens (e.g., `color="fg"` normally and apply `colorPalette="red"` + variant or `color="fg"` with emphasis and an error badge)
+- [x] `src/components/PhaseTimer.tsx`
+  - [x] Replace `bg="gray.100"` with `bg="bg"` (or a `subtle` surface if defined)
+  - [x] Replace `borderColor="gray.300"` with `borderColor="border"`
+  - [x] Replace label `color="gray.800"` with `color="fg"`
+  - [x] Replace `timeColor` from `'red.600' | 'gray.900'` to tokens (e.g., `color="fg"` normally and apply `colorPalette="red"` + variant or `color="fg"` with emphasis and an error badge)
 
-- [ ] `src/components/PlayerRankings.tsx`
-  - [ ] Replace card `bg="white"` with `bg="bg"`
-  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
-  - [ ] Replace heading `color="gray.900"` with `color="fg"`
-  - [ ] Replace header row `bg="gray.100"` with semantic surface (e.g., `bg="bg"` and use font weight for emphasis)
-  - [ ] Replace column header `color="gray.900"` with `color="fg"`
-  - [ ] Replace winner EV `color='green.600'` with a token or `colorPalette="green"` on a badge/text
-  - [ ] Replace REP negative `color='red.700'` with token or `colorPalette="red"`
+- [x] `src/components/PlayerRankings.tsx`
+  - [x] Replace card `bg="white"` with `bg="bg"`
+  - [x] Replace `borderColor="gray.200"` with `borderColor="border"`
+  - [x] Replace heading `color="gray.900"` with `color="fg"`
+  - [x] Replace header row `bg="gray.100"` with semantic surface (e.g., `bg="bg"` and use font weight for emphasis)
+  - [x] Replace column header `color="gray.900"` with `color="fg"`
+  - [x] Replace winner EV `color='green.600'` with a token or `colorPalette="green"` on a badge/text
+  - [x] Replace REP negative `color='red.700'` with token or `colorPalette="red"`
 
-- [ ] `src/components/EditPlayerModal.tsx`
-  - [ ] Replace helper text `color="gray.700"` with `color="fg.muted"`
+- [x] `src/components/EditPlayerModal.tsx`
+  - [x] Replace helper text `color="gray.700"` with `color="fg.muted"`
 
-- [ ] `src/components/InfrastructureCards.tsx`
-  - [ ] Replace section heading `color="gray.900"` with `color="fg"`
-  - [ ] Replace card `bg="white"` with `bg="bg"`
-  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
-  - [ ] Replace title/text `color="gray.900"` with `color="fg"`
-  - [ ] Replace labels `color="gray.800"`/`gray.600` with `fg`/`fg.muted`
-  - [ ] Replace power alert backgrounds `red.50`/`blue.50`, borders `red.200`/`blue.200`, and icon hex `#C53030`/`#3182CE` with semantic or `colorPalette`-based styling
-  - [ ] Replace crew alert backgrounds `red.50`/`green.50`, borders `red.200`/`green.200`, and icon hex `#C53030`/`#38A169` similarly
-  - [ ] Replace EV/Income boxes `orange.50`/`orange.200` and `green.50`/`green.200` with semantic or `colorPalette` tokens
-  - [ ] Replace yield `color="green.700"` with token or `colorPalette="green"`
-  - [ ] Replace misc `color="gray.800"` with `fg`
+- [x] `src/components/InfrastructureCards.tsx`
+  - [x] Replace section heading `color="gray.900"` with `color="fg"`
+  - [x] Replace card `bg="white"` with `bg="bg"`
+  - [x] Replace `borderColor="gray.200"` with `borderColor="border"`
+  - [x] Replace title/text `color="gray.900"` with `color="fg"`
+  - [x] Replace labels `color="gray.800"`/`gray.600` with `fg`/`fg.muted`
+  - [x] Replace power alert backgrounds `red.50`/`blue.50`, borders `red.200`/`blue.200`, and icon hex `#C53030`/`#3182CE` with semantic or `colorPalette`-based styling
+  - [x] Replace crew alert backgrounds `red.50`/`green.50`, borders `red.200`/`green.200`, and icon hex `#C53030`/`#38A169` similarly
+  - [x] Replace EV/Income boxes `orange.50`/`orange.200` and `green.50`/`green.200` with semantic or `colorPalette` tokens
+  - [x] Replace yield `color="green.700"` with token or `colorPalette="green"`
+  - [x] Replace misc `color="gray.800"` with `fg`
 
-- [ ] `src/components/AddPlayerModal.tsx`
-  - [ ] Replace helper text `color="gray.600"` with `color="fg.muted"`
+- [x] `src/components/AddPlayerModal.tsx`
+  - [x] Replace helper text `color="gray.600"` with `color="fg.muted"`
 
-- [ ] `src/components/DashboardHeader.tsx`
-  - [ ] Replace header bar `bg="white"` with `bg="bg"`
-  - [ ] Replace `borderColor="gray.200"` with `borderColor="border"`
+- [x] `src/components/DashboardHeader.tsx`
+  - [x] Replace header bar `bg="white"` with `bg="bg"`
+  - [x] Replace `borderColor="gray.200"` with `borderColor="border"`
 
-- [ ] `src/components/Dashboard.tsx`
-  - [ ] Replace error panel `bg="red.50"`, `borderColor="red.200"`, `color="red.700"/"red.600"` with an `Alert` using `colorPalette="red"` or semantic tokens
-  - [ ] Replace page `bg="gray.50"` with `bg="bg"`
-  - [ ] Replace section heading `color="gray.900"` with `color="fg"`
+- [x] `src/components/Dashboard.tsx`
+  - [x] Replace error panel `bg="red.50"`, `borderColor="red.200"`, `color="red.700"/"red.600"` with an `Alert` using `colorPalette="red"` or semantic tokens
+  - [x] Replace page `bg="gray.50"` with `bg="bg"`
+  - [x] Replace section heading `color="gray.900"` with `color="fg"`
 
-- [ ] `src/components/GameStateDisplay.tsx` (post-Setup adjustments if any remain)
-  - [ ] Ensure any remaining hardcoded grays/whites are swapped for semantic tokens
+- [x] `src/components/GameStateDisplay.tsx` (post-Setup adjustments if any remain)
+  - [x] Ensure any remaining hardcoded grays/whites are swapped for semantic tokens
 
 Notes:
 
 - Keep contrast in dark mode (avoid overly subtle tokens for critical text).
 - Verify existing custom theme exposes `bg`, `fg`, `fg.muted`, `border` (usage is present elsewhere in repo).
 - Where component-level `colorPalette` isn’t available, apply token colors via `color`/`bg` on a wrapper Box.
+
+### Follow-ups – 2025-11-06
+
+- [ ] Theme tokens: extend Chakra system to add additional surface tokens for more nuance
+  - [ ] Define `bg.subtle` and possibly `card`/`card.muted` surfaces in a custom theme (v3 `createSystem`)
+  - [ ] Map tokens for both light and dark modes and document usage
+- [ ] Replace any remaining neutral panels with subtle surfaces
+  - [ ] Scan the codebase for neutral containers still using `bg` and evaluate swapping to `bg.muted` where appropriate (non-critical panels, summaries)
+- [ ] Audit and replace any remaining raw palette colors
+  - [ ] Search for usages of `gray.*`, `red.*`, `green.*`, etc., and replace with semantic tokens or `colorPalette` on components
+  - [ ] Ensure icon colors rely on `currentColor` from a parent with token-based `color`
+- [ ] Standardize status UI with Chakra Alert
+  - [ ] Convert any remaining custom error/info boxes to `<Alert.Root status="...">` with `variant="surface"|"subtle"` as appropriate
+- [ ] Bundle size follow-up
+  - [ ] Code-split heavy modals (`CreateContractModal`, `PlayerInventoryModal`, `BuildInfrastructureModal`) via dynamic import
+  - [ ] Consider `manualChunks` in `vite.config.ts` and recheck chunk-size warning after splitting
+- [ ] Docs
+  - [ ] Add a short design note in `doc/` describing our semantic tokens and when to use `bg` vs `bg.muted` vs Alerts
 
 ## New: Setup Phase & Round Start
 

@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import {
+  Badge,
+  Box,
   Button,
   DialogActionTrigger,
   DialogBackdrop,
@@ -12,19 +13,18 @@ import {
   DialogTitle,
   DialogTrigger,
   Field,
+  Heading,
+  HStack,
   Input,
   NativeSelect,
   Portal,
   Text,
   VStack,
-  HStack,
-  Box,
-  Heading,
-  Badge,
-} from '@chakra-ui/react';
-import { useCreateContract } from '../hooks/useGameData';
-import { toaster } from './ui/toaster';
-import type { DashboardPlayer } from '../lib/database.types';
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { useCreateContract } from "../hooks/useGameData";
+import type { DashboardPlayer } from "../lib/database.types";
+import { toaster } from "./ui/toasterInstance";
 
 interface CreateContractModalProps {
   players: DashboardPlayer[];
@@ -34,35 +34,34 @@ interface CreateContractModalProps {
 
 export function CreateContractModal({
   players,
-  currentRound: _currentRound,
   disabled,
 }: CreateContractModalProps) {
   const [open, setOpen] = useState(false);
   const createContract = useCreateContract();
 
   // Form state
-  const [partyAId, setPartyAId] = useState('');
-  const [partyBId, setPartyBId] = useState('');
-  const [evFromAToB, setEvFromAToB] = useState('0');
-  const [evFromBToA, setEvFromBToA] = useState('0');
+  const [partyAId, setPartyAId] = useState("");
+  const [partyBId, setPartyBId] = useState("");
+  const [evFromAToB, setEvFromAToB] = useState("0");
+  const [evFromBToA, setEvFromBToA] = useState("0");
   const [evIsPerRound, setEvIsPerRound] = useState(false);
-  const [powerFromAToB, setPowerFromAToB] = useState('0');
-  const [powerFromBToA, setPowerFromBToA] = useState('0');
-  const [crewFromAToB, setCrewFromAToB] = useState('0');
-  const [crewFromBToA, setCrewFromBToA] = useState('0');
-  const [durationRounds, setDurationRounds] = useState('');
+  const [powerFromAToB, setPowerFromAToB] = useState("0");
+  const [powerFromBToA, setPowerFromBToA] = useState("0");
+  const [crewFromAToB, setCrewFromAToB] = useState("0");
+  const [crewFromBToA, setCrewFromBToA] = useState("0");
+  const [durationRounds, setDurationRounds] = useState("");
 
   const resetForm = () => {
-    setPartyAId('');
-    setPartyBId('');
-    setEvFromAToB('0');
-    setEvFromBToA('0');
+    setPartyAId("");
+    setPartyBId("");
+    setEvFromAToB("0");
+    setEvFromBToA("0");
     setEvIsPerRound(false);
-    setPowerFromAToB('0');
-    setPowerFromBToA('0');
-    setCrewFromAToB('0');
-    setCrewFromBToA('0');
-    setDurationRounds('');
+    setPowerFromAToB("0");
+    setPowerFromBToA("0");
+    setCrewFromAToB("0");
+    setCrewFromBToA("0");
+    setDurationRounds("");
   };
 
   const handleOpenChange = (details: { open: boolean }) => {
@@ -75,9 +74,9 @@ export function CreateContractModal({
   const handleSubmit = async () => {
     if (!partyAId || !partyBId) {
       toaster.create({
-        title: 'Validation Error',
-        description: 'Please select both parties',
-        type: 'error',
+        title: "Validation Error",
+        description: "Please select both parties",
+        type: "error",
         duration: 3000,
       });
       return;
@@ -85,9 +84,9 @@ export function CreateContractModal({
 
     if (partyAId === partyBId) {
       toaster.create({
-        title: 'Validation Error',
-        description: 'Cannot create a contract with yourself',
-        type: 'error',
+        title: "Validation Error",
+        description: "Cannot create a contract with yourself",
+        type: "error",
         duration: 3000,
       });
       return;
@@ -103,11 +102,18 @@ export function CreateContractModal({
     const duration = durationRounds.trim() ? parseInt(durationRounds) : null;
 
     // Validate all parsed numbers are non-negative
-    if (evAToB < 0 || evBToA < 0 || powerAToB < 0 || powerBToA < 0 || crewAToB < 0 || crewBToA < 0) {
+    if (
+      evAToB < 0 ||
+      evBToA < 0 ||
+      powerAToB < 0 ||
+      powerBToA < 0 ||
+      crewAToB < 0 ||
+      crewBToA < 0
+    ) {
       toaster.create({
-        title: 'Validation Error',
-        description: 'Values cannot be negative',
-        type: 'error',
+        title: "Validation Error",
+        description: "Values cannot be negative",
+        type: "error",
         duration: 3000,
       });
       return;
@@ -115,9 +121,9 @@ export function CreateContractModal({
 
     if (duration !== null && duration < 1) {
       toaster.create({
-        title: 'Validation Error',
-        description: 'Duration must be at least 1 round',
-        type: 'error',
+        title: "Validation Error",
+        description: "Duration must be at least 1 round",
+        type: "error",
         duration: 3000,
       });
       return;
@@ -134,9 +140,9 @@ export function CreateContractModal({
 
     if (!hasExchange) {
       toaster.create({
-        title: 'Validation Error',
-        description: 'Contract must have at least one exchange',
-        type: 'error',
+        title: "Validation Error",
+        description: "Contract must have at least one exchange",
+        type: "error",
         duration: 3000,
       });
       return;
@@ -160,19 +166,19 @@ export function CreateContractModal({
       const partyB = players.find((p) => p.id === partyBId);
 
       toaster.create({
-        title: 'Contract Created',
+        title: "Contract Created",
         description: `Contract between ${partyA?.name} and ${partyB?.name} created successfully`,
-        type: 'success',
+        type: "success",
         duration: 3000,
       });
 
       setOpen(false);
     } catch (error) {
       toaster.create({
-        title: 'Failed to Create Contract',
+        title: "Failed to Create Contract",
         description:
-          error instanceof Error ? error.message : 'Failed to create contract',
-        type: 'error',
+          error instanceof Error ? error.message : "Failed to create contract",
+        type: "error",
         duration: 5000,
       });
     }
@@ -216,12 +222,12 @@ export function CreateContractModal({
         <DialogBackdrop />
         <DialogContent
           css={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            maxHeight: '90vh',
-            overflow: 'auto',
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            maxHeight: "90vh",
+            overflow: "auto",
           }}
         >
           <DialogHeader>
@@ -306,28 +312,28 @@ export function CreateContractModal({
                         />
                       </Field.Root>
                     </HStack>
-                  <Field.Root>
-                    <Field.Label>Payment Type</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        value={evIsPerRound ? 'per-round' : 'one-time'}
-                        onChange={(e) =>
-                          setEvIsPerRound(e.target.value === 'per-round')
-                        }
-                      >
-                        <option value="one-time">One-time Payment</option>
-                        <option value="per-round">Per-round Payment</option>
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    <Text fontSize="xs" color="fg.muted" mt={1}>
-                      {evIsPerRound
-                        ? 'Payment occurs each round while contract is active'
-                        : 'Payment occurs only when contract is created'}
-                    </Text>
-                  </Field.Root>
-                </VStack>
-              </Box>
+                    <Field.Root>
+                      <Field.Label>Payment Type</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          value={evIsPerRound ? "per-round" : "one-time"}
+                          onChange={(e) =>
+                            setEvIsPerRound(e.target.value === "per-round")
+                          }
+                        >
+                          <option value="one-time">One-time Payment</option>
+                          <option value="per-round">Per-round Payment</option>
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                      <Text fontSize="xs" color="fg.muted" mt={1}>
+                        {evIsPerRound
+                          ? "Payment occurs each round while contract is active"
+                          : "Payment occurs only when contract is created"}
+                      </Text>
+                    </Field.Root>
+                  </VStack>
+                </Box>
 
                 {/* Power Exchange */}
                 <Box>
@@ -419,37 +425,43 @@ export function CreateContractModal({
                     <VStack gap={1} align="stretch">
                       {(evAToB > 0 || evBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">EV:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            EV:
+                          </Text>
                           <Badge
-                            colorPalette={netEvA >= 0 ? 'green' : 'red'}
+                            colorPalette={netEvA >= 0 ? "green" : "red"}
                             size="sm"
                           >
-                            {netEvA >= 0 ? '+' : ''}
+                            {netEvA >= 0 ? "+" : ""}
                             {netEvA}
-                            {evIsPerRound ? ' /round' : ' one-time'}
+                            {evIsPerRound ? " /round" : " one-time"}
                           </Badge>
                         </HStack>
                       )}
                       {(powerAToB > 0 || powerBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">Power:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            Power:
+                          </Text>
                           <Badge
-                            colorPalette={netPowerA >= 0 ? 'green' : 'red'}
+                            colorPalette={netPowerA >= 0 ? "green" : "red"}
                             size="sm"
                           >
-                            {netPowerA >= 0 ? '+' : ''}
+                            {netPowerA >= 0 ? "+" : ""}
                             {netPowerA}
                           </Badge>
                         </HStack>
                       )}
                       {(crewAToB > 0 || crewBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">Crew:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            Crew:
+                          </Text>
                           <Badge
-                            colorPalette={netCrewA >= 0 ? 'green' : 'red'}
+                            colorPalette={netCrewA >= 0 ? "green" : "red"}
                             size="sm"
                           >
-                            {netCrewA >= 0 ? '+' : ''}
+                            {netCrewA >= 0 ? "+" : ""}
                             {netCrewA}
                           </Badge>
                         </HStack>
@@ -471,37 +483,43 @@ export function CreateContractModal({
                     <VStack gap={1} align="stretch">
                       {(evAToB > 0 || evBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">EV:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            EV:
+                          </Text>
                           <Badge
-                            colorPalette={netEvB >= 0 ? 'green' : 'red'}
+                            colorPalette={netEvB >= 0 ? "green" : "red"}
                             size="sm"
                           >
-                            {netEvB >= 0 ? '+' : ''}
+                            {netEvB >= 0 ? "+" : ""}
                             {netEvB}
-                            {evIsPerRound ? ' /round' : ' one-time'}
+                            {evIsPerRound ? " /round" : " one-time"}
                           </Badge>
                         </HStack>
                       )}
                       {(powerAToB > 0 || powerBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">Power:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            Power:
+                          </Text>
                           <Badge
-                            colorPalette={netPowerB >= 0 ? 'green' : 'red'}
+                            colorPalette={netPowerB >= 0 ? "green" : "red"}
                             size="sm"
                           >
-                            {netPowerB >= 0 ? '+' : ''}
+                            {netPowerB >= 0 ? "+" : ""}
                             {netPowerB}
                           </Badge>
                         </HStack>
                       )}
                       {(crewAToB > 0 || crewBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">Crew:</Text>
+                          <Text fontSize="sm" color="fg.muted">
+                            Crew:
+                          </Text>
                           <Badge
-                            colorPalette={netCrewB >= 0 ? 'green' : 'red'}
+                            colorPalette={netCrewB >= 0 ? "green" : "red"}
                             size="sm"
                           >
-                            {netCrewB >= 0 ? '+' : ''}
+                            {netCrewB >= 0 ? "+" : ""}
                             {netCrewB}
                           </Badge>
                         </HStack>

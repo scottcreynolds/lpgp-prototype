@@ -1,4 +1,5 @@
 import type {
+  Contract,
   DashboardSummary,
   GameState,
   InfrastructureDefinition,
@@ -179,7 +180,7 @@ export function buildDashboardSummary(
   players: Player[],
   playerInfra: PlayerInfrastructure[],
   infraDefs: InfrastructureDefinition[],
-  contracts?: any[]
+  contracts?: Contract[]
 ): DashboardSummary {
   // Get active contracts if provided
   const activeContracts = contracts?.filter((c) => c.status === "active") || [];
@@ -217,7 +218,10 @@ export function buildDashboardSummary(
       // Calculate base totals from infrastructure
       const total_power_capacity = infrastructure.reduce(
         (sum, i) =>
-          sum + (i.capacity && i.type.includes("Solar") && i.is_active ? i.capacity : 0),
+          sum +
+          (i.capacity && i.type.includes("Solar") && i.is_active
+            ? i.capacity
+            : 0),
         0
       );
 
@@ -229,7 +233,10 @@ export function buildDashboardSummary(
 
       const total_crew_capacity = infrastructure.reduce(
         (sum, i) =>
-          sum + (i.capacity && i.type.includes("Habitat") && i.is_active ? i.capacity : 0),
+          sum +
+          (i.capacity && i.type.includes("Habitat") && i.is_active
+            ? i.capacity
+            : 0),
         0
       );
 
@@ -246,12 +253,16 @@ export function buildDashboardSummary(
       activeContracts.forEach((contract) => {
         if (contract.party_a_id === player.id) {
           // Player is Party A: receives B->A, gives A->B
-          contractPowerAdjustment += contract.power_from_b_to_a - contract.power_from_a_to_b;
-          contractCrewAdjustment += contract.crew_from_b_to_a - contract.crew_from_a_to_b;
+          contractPowerAdjustment +=
+            contract.power_from_b_to_a - contract.power_from_a_to_b;
+          contractCrewAdjustment +=
+            contract.crew_from_b_to_a - contract.crew_from_a_to_b;
         } else if (contract.party_b_id === player.id) {
           // Player is Party B: receives A->B, gives B->A
-          contractPowerAdjustment += contract.power_from_a_to_b - contract.power_from_b_to_a;
-          contractCrewAdjustment += contract.crew_from_a_to_b - contract.crew_from_b_to_a;
+          contractPowerAdjustment +=
+            contract.power_from_a_to_b - contract.power_from_b_to_a;
+          contractCrewAdjustment +=
+            contract.crew_from_a_to_b - contract.crew_from_b_to_a;
         }
       });
 
@@ -261,17 +272,19 @@ export function buildDashboardSummary(
         total_crew_capacity,
         total_crew_used,
         total_maintenance_cost: infrastructure.reduce(
-          (sum, i) => sum + (i.is_starter || !i.is_active ? 0 : i.maintenance_cost),
+          (sum, i) =>
+            sum + (i.is_starter || !i.is_active ? 0 : i.maintenance_cost),
           0
         ),
         total_yield: infrastructure.reduce(
-          (sum, i) =>
-            sum + (i.is_active && i.yield ? i.yield : 0),
+          (sum, i) => sum + (i.is_active && i.yield ? i.yield : 0),
           0
         ),
         infrastructure_count: infrastructure.length,
-        available_power: total_power_capacity - total_power_used + contractPowerAdjustment,
-        available_crew: total_crew_capacity - total_crew_used + contractCrewAdjustment,
+        available_power:
+          total_power_capacity - total_power_used + contractPowerAdjustment,
+        available_crew:
+          total_crew_capacity - total_crew_used + contractCrewAdjustment,
       };
 
       return {

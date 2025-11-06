@@ -8,31 +8,28 @@ import {
   Table,
   Text,
   VStack,
-} from '@chakra-ui/react';
-import { useState } from 'react';
-import { useContracts, useEndContract } from '../hooks/useGameData';
-import type { DashboardPlayer } from '../lib/database.types';
-import { toaster } from './ui/toaster';
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { useContracts, useEndContract } from "../hooks/useGameData";
+import type { Contract, DashboardPlayer } from "../lib/database.types";
+import { toaster } from "./ui/toasterInstance";
 
 interface ContractsListViewProps {
   players: DashboardPlayer[];
   currentRound: number;
 }
 
-export function ContractsListView({
-  players,
-  currentRound: _currentRound,
-}: ContractsListViewProps) {
-  const [filterPlayerId, setFilterPlayerId] = useState<string>('all');
+export function ContractsListView({ players }: ContractsListViewProps) {
+  const [filterPlayerId, setFilterPlayerId] = useState<string>("all");
   const { data: contracts, isLoading } = useContracts(
-    filterPlayerId === 'all' ? undefined : filterPlayerId
+    filterPlayerId === "all" ? undefined : filterPlayerId
   );
   const endContract = useEndContract();
 
   const handleEndContract = async (contractId: string, isBroken: boolean) => {
     const reason = isBroken
-      ? 'Contract broken by mutual agreement'
-      : 'Contract ended naturally';
+      ? "Contract broken by mutual agreement"
+      : "Contract ended naturally";
 
     try {
       await endContract.mutateAsync({
@@ -42,36 +39,36 @@ export function ContractsListView({
       });
 
       toaster.create({
-        title: isBroken ? 'Contract Broken' : 'Contract Ended',
-        description: `Contract ${isBroken ? 'broken' : 'ended'} successfully`,
-        type: 'info',
+        title: isBroken ? "Contract Broken" : "Contract Ended",
+        description: `Contract ${isBroken ? "broken" : "ended"} successfully`,
+        type: "info",
         duration: 3000,
       });
     } catch (error) {
       toaster.create({
-        title: 'Failed to End Contract',
+        title: "Failed to End Contract",
         description:
-          error instanceof Error ? error.message : 'Failed to end contract',
-        type: 'error',
+          error instanceof Error ? error.message : "Failed to end contract",
+        type: "error",
         duration: 5000,
       });
     }
   };
 
   const getPlayerName = (playerId: string) => {
-    return players.find((p) => p.id === playerId)?.name || 'Unknown';
+    return players.find((p) => p.id === playerId)?.name || "Unknown";
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'green';
-      case 'ended':
-        return 'gray';
-      case 'broken':
-        return 'red';
+      case "active":
+        return "green";
+      case "ended":
+        return "gray";
+      case "broken":
+        return "red";
       default:
-        return 'gray';
+        return "gray";
     }
   };
 
@@ -90,8 +87,14 @@ export function ContractsListView({
     );
   }
 
-  const activeContracts = contracts?.filter((c: { status: string }) => c.status === 'active') || [];
-  const inactiveContracts = contracts?.filter((c: { status: string }) => c.status !== 'active') || [];
+  const activeContracts =
+    (contracts as Contract[] | undefined)?.filter(
+      (c) => c.status === "active"
+    ) || [];
+  const inactiveContracts =
+    (contracts as Contract[] | undefined)?.filter(
+      (c) => c.status !== "active"
+    ) || [];
 
   return (
     <Box
@@ -129,9 +132,9 @@ export function ContractsListView({
             No contracts found
           </Text>
           <Text color="fg.muted" fontSize="sm" mt={2}>
-            {filterPlayerId === 'all'
-              ? 'Create a contract during the Governance phase'
-              : 'This player has no contracts'}
+            {filterPlayerId === "all"
+              ? "Create a contract during the Governance phase"
+              : "This player has no contracts"}
           </Text>
         </Box>
       ) : (
@@ -170,7 +173,7 @@ export function ContractsListView({
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {activeContracts.map((contract: any) => {
+                    {activeContracts.map((contract: Contract) => {
                       const partyAName = getPlayerName(contract.party_a_id);
                       const partyBName = getPlayerName(contract.party_b_id);
 
@@ -193,16 +196,18 @@ export function ContractsListView({
                             <VStack gap={1} align="start">
                               {contract.ev_from_a_to_b > 0 && (
                                 <Text fontSize="sm">
-                                  {partyAName.substring(0, 10)} → {partyBName.substring(0, 10)}:{' '}
+                                  {partyAName.substring(0, 10)} →{" "}
+                                  {partyBName.substring(0, 10)}:{" "}
                                   {contract.ev_from_a_to_b}
-                                  {contract.ev_is_per_round ? '/r' : ''}
+                                  {contract.ev_is_per_round ? "/r" : ""}
                                 </Text>
                               )}
                               {contract.ev_from_b_to_a > 0 && (
                                 <Text fontSize="sm">
-                                  {partyBName.substring(0, 10)} → {partyAName.substring(0, 10)}:{' '}
+                                  {partyBName.substring(0, 10)} →{" "}
+                                  {partyAName.substring(0, 10)}:{" "}
                                   {contract.ev_from_b_to_a}
-                                  {contract.ev_is_per_round ? '/r' : ''}
+                                  {contract.ev_is_per_round ? "/r" : ""}
                                 </Text>
                               )}
                               {contract.ev_from_a_to_b === 0 &&
@@ -283,7 +288,9 @@ export function ContractsListView({
                                 size="xs"
                                 variant="outline"
                                 colorPalette="gray"
-                                onClick={() => handleEndContract(contract.id, false)}
+                                onClick={() =>
+                                  handleEndContract(contract.id, false)
+                                }
                                 loading={endContract.isPending}
                               >
                                 End
@@ -292,7 +299,9 @@ export function ContractsListView({
                                 size="xs"
                                 variant="outline"
                                 colorPalette="red"
-                                onClick={() => handleEndContract(contract.id, true)}
+                                onClick={() =>
+                                  handleEndContract(contract.id, true)
+                                }
                                 loading={endContract.isPending}
                               >
                                 Break
@@ -336,7 +345,7 @@ export function ContractsListView({
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {inactiveContracts.map((contract: any) => {
+                    {inactiveContracts.map((contract: Contract) => {
                       const partyAName = getPlayerName(contract.party_a_id);
                       const partyBName = getPlayerName(contract.party_b_id);
 
@@ -348,11 +357,13 @@ export function ContractsListView({
                             </Text>
                           </Table.Cell>
                           <Table.Cell>
-                            <Text fontSize="sm">Round {contract.created_in_round}</Text>
+                            <Text fontSize="sm">
+                              Round {contract.created_in_round}
+                            </Text>
                           </Table.Cell>
                           <Table.Cell>
                             <Text fontSize="sm">
-                              Round {contract.ended_in_round || '?'}
+                              Round {contract.ended_in_round || "?"}
                             </Text>
                           </Table.Cell>
                           <Table.Cell>
@@ -365,7 +376,7 @@ export function ContractsListView({
                           </Table.Cell>
                           <Table.Cell>
                             <Text fontSize="xs" color="fg.muted">
-                              {contract.reason_for_ending || 'N/A'}
+                              {contract.reason_for_ending || "N/A"}
                             </Text>
                           </Table.Cell>
                         </Table.Row>

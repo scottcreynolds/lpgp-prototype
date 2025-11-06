@@ -14,7 +14,7 @@ import type { DashboardPlayer, GamePhase } from "../lib/database.types";
 import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { SetupTips } from "./SetupTips.tsx";
-import { toaster } from "./ui/toaster";
+import { toaster } from "./ui/toasterInstance";
 
 interface GameStateDisplayProps {
   round: number;
@@ -79,16 +79,16 @@ export function GameStateDisplay({
 
   return (
     <Box
-      bg="white"
+      bg="bg"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="gray.200"
+      borderColor="border"
       shadow="sm"
     >
       <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
         <Box flex="1" minW="300px">
-          <Heading size="xl" mb={1} color="gray.900">
+          <Heading size="xl" mb={1} color="fg">
             {phase === "Setup" ? (
               <>Setup Phase</>
             ) : (
@@ -99,7 +99,7 @@ export function GameStateDisplay({
           </Heading>
           {/* Highest Rep label */}
           {players && players.length > 0 && phase !== "Setup" && (
-            <Text color="gray.700" fontSize="sm" fontWeight="medium" mb={1}>
+            <Text color="fg.muted" fontSize="sm" fontWeight="medium" mb={1}>
               {(() => {
                 const maxRep = Math.max(...players.map((p) => p.rep));
                 const leaders = players.filter((p) => p.rep === maxRep);
@@ -110,7 +110,7 @@ export function GameStateDisplay({
               })()}
             </Text>
           )}
-          <Text color="gray.700" fontSize="sm" fontWeight="medium">
+          <Text color="fg.muted" fontSize="sm" fontWeight="medium">
             Version: {version}
           </Text>
         </Box>

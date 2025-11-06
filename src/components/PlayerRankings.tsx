@@ -2,20 +2,19 @@ import {
   Badge,
   Box,
   Heading,
+  HStack,
   Table,
   Text,
-  HStack,
   VStack,
-} from '@chakra-ui/react';
-import { useEditPlayer } from '../hooks/useGameData';
-import { EditPlayerModal } from './EditPlayerModal';
-import { BuildInfrastructureModal } from './BuildInfrastructureModal';
-import { PlayerInventoryModal } from './PlayerInventoryModal';
-import { ManualAdjustmentModal } from './ManualAdjustmentModal';
-import { toaster } from './ui/toaster';
-import { useGameStore } from '../store/gameStore';
-import type { DashboardPlayer } from '../lib/database.types';
-import type { Specialization } from '../lib/database.types';
+} from "@chakra-ui/react";
+import { useEditPlayer } from "../hooks/useGameData";
+import type { DashboardPlayer, Specialization } from "../lib/database.types";
+import { useGameStore } from "../store/gameStore";
+import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
+import { EditPlayerModal } from "./EditPlayerModal";
+import { ManualAdjustmentModal } from "./ManualAdjustmentModal";
+import { PlayerInventoryModal } from "./PlayerInventoryModal";
+import { toaster } from "./ui/toasterInstance";
 
 interface PlayerRankingsProps {
   players: DashboardPlayer[];
@@ -27,11 +26,11 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
 
   const getSpecializationBadge = (specialization: string) => {
     const colorMap: Record<string, string> = {
-      'Resource Extractor': 'orange',
-      'Infrastructure Provider': 'blue',
-      'Operations Manager': 'green',
+      "Resource Extractor": "orange",
+      "Infrastructure Provider": "blue",
+      "Operations Manager": "green",
     };
-    return colorMap[specialization] || 'gray';
+    return colorMap[specialization] || "gray";
   };
 
   const isCloseToWinning = (ev: number) => ev >= 400 && ev < 500;
@@ -45,17 +44,17 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
     try {
       await editPlayer.mutateAsync({ playerId, name, specialization });
       toaster.create({
-        title: 'Player Updated',
+        title: "Player Updated",
         description: `${name} updated successfully`,
-        type: 'success',
+        type: "success",
         duration: 3000,
       });
     } catch (error) {
       toaster.create({
-        title: 'Failed to Update Player',
+        title: "Failed to Update Player",
         description:
-          error instanceof Error ? error.message : 'Failed to update player',
-        type: 'error',
+          error instanceof Error ? error.message : "Failed to update player",
+        type: "error",
         duration: 5000,
       });
     }
@@ -80,11 +79,21 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
             <Table.Row>
               <Table.ColumnHeader fontWeight="bold">Rank</Table.ColumnHeader>
               <Table.ColumnHeader fontWeight="bold">Player</Table.ColumnHeader>
-              <Table.ColumnHeader fontWeight="bold">Specialization</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="right" fontWeight="bold">EV</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="right" fontWeight="bold">REP</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="center" fontWeight="bold">Power</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="center" fontWeight="bold">Crew</Table.ColumnHeader>
+              <Table.ColumnHeader fontWeight="bold">
+                Specialization
+              </Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="right" fontWeight="bold">
+                EV
+              </Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="right" fontWeight="bold">
+                REP
+              </Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="center" fontWeight="bold">
+                Power
+              </Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="center" fontWeight="bold">
+                Crew
+              </Table.ColumnHeader>
               <Table.ColumnHeader fontWeight="bold">Actions</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
@@ -101,7 +110,9 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                 </Table.Cell>
                 <Table.Cell>
                   <HStack gap={2}>
-                    <Text fontWeight="semibold" color="fg">{player.name}</Text>
+                    <Text fontWeight="semibold" color="fg">
+                      {player.name}
+                    </Text>
                     {isWinner(player.ev) && (
                       <Badge colorPalette="green" size="sm">
                         WINNER
@@ -115,16 +126,14 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                   </HStack>
                 </Table.Cell>
                 <Table.Cell>
-                  <Badge colorPalette={getSpecializationBadge(player.specialization)}>
+                  <Badge
+                    colorPalette={getSpecializationBadge(player.specialization)}
+                  >
                     {player.specialization}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell textAlign="right">
-                  <Text
-                    fontWeight="bold"
-                    fontSize="lg"
-                    color="fg"
-                  >
+                  <Text fontWeight="bold" fontSize="lg" color="fg">
                     {player.ev}
                   </Text>
                 </Table.Cell>
@@ -139,7 +148,10 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       {player.totals.available_power}
                     </Text>
                     <Text fontSize="xs" color="fg.muted">
-                      ({player.totals.total_power_capacity - player.totals.total_power_used} / {player.totals.total_power_capacity})
+                      (
+                      {player.totals.total_power_capacity -
+                        player.totals.total_power_used}{" "}
+                      / {player.totals.total_power_capacity})
                     </Text>
                   </VStack>
                 </Table.Cell>
@@ -149,7 +161,10 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       {player.totals.available_crew}
                     </Text>
                     <Text fontSize="xs" color="fg.muted">
-                      ({player.totals.total_crew_capacity - player.totals.total_crew_used} / {player.totals.total_crew_capacity})
+                      (
+                      {player.totals.total_crew_capacity -
+                        player.totals.total_crew_used}{" "}
+                      / {player.totals.total_crew_capacity})
                     </Text>
                   </VStack>
                 </Table.Cell>
@@ -167,7 +182,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       builderName={player.name}
                       builderEv={player.ev}
                       players={players}
-                      disabled={currentPhase !== 'Operations'}
+                      disabled={currentPhase !== "Operations"}
                     />
                     <PlayerInventoryModal
                       playerId={player.id}

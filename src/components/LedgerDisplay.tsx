@@ -7,10 +7,10 @@ import {
   Table,
   Text,
   VStack,
-} from '@chakra-ui/react';
-import { useState } from 'react';
-import { useLedger } from '../hooks/useGameData';
-import type { DashboardPlayer } from '../lib/database.types';
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { useLedger } from "../hooks/useGameData";
+import type { DashboardPlayer, LedgerEntry } from "../lib/database.types";
 
 interface LedgerDisplayProps {
   players: DashboardPlayer[];
@@ -18,65 +18,65 @@ interface LedgerDisplayProps {
 }
 
 const transactionTypeLabels: Record<string, string> = {
-  GAME_START: 'Game Start',
-  INFRASTRUCTURE_BUILT: 'Infrastructure Built',
-  INFRASTRUCTURE_MAINTENANCE: 'Maintenance',
-  INFRASTRUCTURE_YIELD: 'Yield',
-  CONTRACT_CREATED: 'Contract Created',
-  CONTRACT_PAYMENT: 'Contract Payment',
-  CONTRACT_ENDED: 'Contract Ended',
-  CONTRACT_BROKEN: 'Contract Broken',
-  INFRASTRUCTURE_ACTIVATED: 'Infrastructure Activated',
-  INFRASTRUCTURE_DEACTIVATED: 'Infrastructure Deactivated',
-  MANUAL_ADJUSTMENT: 'Manual Adjustment',
+  GAME_START: "Game Start",
+  INFRASTRUCTURE_BUILT: "Infrastructure Built",
+  INFRASTRUCTURE_MAINTENANCE: "Maintenance",
+  INFRASTRUCTURE_YIELD: "Yield",
+  CONTRACT_CREATED: "Contract Created",
+  CONTRACT_PAYMENT: "Contract Payment",
+  CONTRACT_ENDED: "Contract Ended",
+  CONTRACT_BROKEN: "Contract Broken",
+  INFRASTRUCTURE_ACTIVATED: "Infrastructure Activated",
+  INFRASTRUCTURE_DEACTIVATED: "Infrastructure Deactivated",
+  MANUAL_ADJUSTMENT: "Manual Adjustment",
 };
 
 const transactionTypeColors: Record<string, string> = {
-  GAME_START: 'blue',
-  INFRASTRUCTURE_BUILT: 'purple',
-  INFRASTRUCTURE_MAINTENANCE: 'orange',
-  INFRASTRUCTURE_YIELD: 'green',
-  CONTRACT_CREATED: 'cyan',
-  CONTRACT_PAYMENT: 'teal',
-  CONTRACT_ENDED: 'gray',
-  CONTRACT_BROKEN: 'red',
-  INFRASTRUCTURE_ACTIVATED: 'green',
-  INFRASTRUCTURE_DEACTIVATED: 'gray',
-  MANUAL_ADJUSTMENT: 'yellow',
+  GAME_START: "blue",
+  INFRASTRUCTURE_BUILT: "purple",
+  INFRASTRUCTURE_MAINTENANCE: "orange",
+  INFRASTRUCTURE_YIELD: "green",
+  CONTRACT_CREATED: "cyan",
+  CONTRACT_PAYMENT: "teal",
+  CONTRACT_ENDED: "gray",
+  CONTRACT_BROKEN: "red",
+  INFRASTRUCTURE_ACTIVATED: "green",
+  INFRASTRUCTURE_DEACTIVATED: "gray",
+  MANUAL_ADJUSTMENT: "yellow",
 };
 
 export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
-  const [filterPlayerId, setFilterPlayerId] = useState<string>('all');
-  const [filterRound, setFilterRound] = useState<string>('all');
+  const [filterPlayerId, setFilterPlayerId] = useState<string>("all");
+  const [filterRound, setFilterRound] = useState<string>("all");
 
   const { data: ledgerEntries, isLoading } = useLedger(
-    filterPlayerId === 'all' ? undefined : filterPlayerId,
-    filterRound === 'all' ? undefined : parseInt(filterRound)
+    filterPlayerId === "all" ? undefined : filterPlayerId,
+    filterRound === "all" ? undefined : parseInt(filterRound)
   );
 
   const getPlayerName = (playerId: string | null) => {
-    if (!playerId) return 'System';
-    return players.find((p) => p.id === playerId)?.name || 'Unknown';
+    if (!playerId) return "System";
+    return players.find((p) => p.id === playerId)?.name || "Unknown";
   };
 
   const formatChange = (value: number) => {
-    if (value === 0) return '0';
+    if (value === 0) return "0";
     return value > 0 ? `+${value}` : `${value}`;
   };
 
   const getChangeColor = (value: number) => {
-    if (value === 0) return 'gray.700';
-    return value > 0 ? 'green.600' : 'red.600';
+    if (value === 0) return "gray.700";
+    return value > 0 ? "green.600" : "red.600";
   };
 
   if (isLoading) {
     return (
       <Box
-        bg="white"
+        bg="bg"
         p={6}
         borderRadius="lg"
         borderWidth={1}
-        borderColor="gray.200"
+        borderColor="border"
         shadow="sm"
       >
         <Text>Loading ledger...</Text>
@@ -85,28 +85,25 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
   }
 
   // Generate round options
-  const roundOptions = Array.from(
-    { length: currentRound + 1 },
-    (_, i) => i
-  );
+  const roundOptions = Array.from({ length: currentRound + 1 }, (_, i) => i);
 
   return (
     <Box
-      bg="white"
+      bg="bg"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="gray.200"
+      borderColor="border"
       shadow="sm"
     >
-      <Heading size="lg" mb={4} color="gray.900">
+      <Heading size="lg" mb={4} color="fg">
         Transaction Ledger
       </Heading>
 
       {/* Filters */}
       <HStack gap={4} mb={4}>
         <Box flex={1}>
-          <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.900">
+          <Text fontSize="sm" fontWeight="semibold" mb={2} color="fg">
             Filter by Player
           </Text>
           <NativeSelect.Root>
@@ -126,7 +123,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
         </Box>
 
         <Box flex={1}>
-          <Text fontSize="sm" fontWeight="semibold" mb={2} color="gray.900">
+          <Text fontSize="sm" fontWeight="semibold" mb={2} color="fg">
             Filter by Round
           </Text>
           <NativeSelect.Root>
@@ -151,17 +148,17 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
         <Box
           p={3}
           mb={4}
-          bg="gray.50"
+          bg="bg.muted"
           borderRadius="md"
           borderWidth={1}
-          borderColor="gray.300"
+          borderColor="border"
         >
           <HStack justify="space-around">
             <VStack gap={0}>
               <Text fontSize="xs" color="fg.muted">
                 Total Entries
               </Text>
-              <Text fontSize="xl" fontWeight="bold" color="gray.900">
+              <Text fontSize="xl" fontWeight="bold" color="fg">
                 {ledgerEntries.length}
               </Text>
             </VStack>
@@ -173,11 +170,17 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                 fontSize="xl"
                 fontWeight="bold"
                 color={getChangeColor(
-                  ledgerEntries.reduce((sum: number, e: any) => sum + e.ev_change, 0)
+                  ledgerEntries.reduce(
+                    (sum: number, e: LedgerEntry) => sum + e.ev_change,
+                    0
+                  )
                 )}
               >
                 {formatChange(
-                  ledgerEntries.reduce((sum: number, e: any) => sum + e.ev_change, 0)
+                  ledgerEntries.reduce(
+                    (sum: number, e: LedgerEntry) => sum + e.ev_change,
+                    0
+                  )
                 )}
               </Text>
             </VStack>
@@ -189,11 +192,17 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                 fontSize="xl"
                 fontWeight="bold"
                 color={getChangeColor(
-                  ledgerEntries.reduce((sum: number, e: any) => sum + e.rep_change, 0)
+                  ledgerEntries.reduce(
+                    (sum: number, e: LedgerEntry) => sum + e.rep_change,
+                    0
+                  )
                 )}
               >
                 {formatChange(
-                  ledgerEntries.reduce((sum: number, e: any) => sum + e.rep_change, 0)
+                  ledgerEntries.reduce(
+                    (sum: number, e: LedgerEntry) => sum + e.rep_change,
+                    0
+                  )
                 )}
               </Text>
             </VStack>
@@ -208,44 +217,52 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
             No transactions found
           </Text>
           <Text color="fg.muted" fontSize="sm" mt={2}>
-            {filterPlayerId !== 'all' || filterRound !== 'all'
-              ? 'Try adjusting your filters'
-              : 'Transactions will appear here as the game progresses'}
+            {filterPlayerId !== "all" || filterRound !== "all"
+              ? "Try adjusting your filters"
+              : "Transactions will appear here as the game progresses"}
           </Text>
         </Box>
       ) : (
         <Table.Root size="sm" variant="outline">
           <Table.ScrollArea maxH="500px">
             <Table.Header>
-              <Table.Row bg="gray.100">
-                <Table.ColumnHeader fontWeight="bold" color="gray.900">
+              <Table.Row bg="bg.muted">
+                <Table.ColumnHeader fontWeight="bold" color="fg">
                   Round
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                <Table.ColumnHeader fontWeight="bold" color="fg">
                   Player
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                <Table.ColumnHeader fontWeight="bold" color="fg">
                   Type
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900" textAlign="right">
+                <Table.ColumnHeader
+                  fontWeight="bold"
+                  color="fg"
+                  textAlign="right"
+                >
                   EV Δ
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900" textAlign="right">
+                <Table.ColumnHeader
+                  fontWeight="bold"
+                  color="fg"
+                  textAlign="right"
+                >
                   REP Δ
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                <Table.ColumnHeader fontWeight="bold" color="fg">
                   Reason
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                <Table.ColumnHeader fontWeight="bold" color="fg">
                   Status
                 </Table.ColumnHeader>
-                <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                <Table.ColumnHeader fontWeight="bold" color="fg">
                   Timestamp
                 </Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {ledgerEntries.map((entry: any) => (
+              {ledgerEntries.map((entry: LedgerEntry) => (
                 <Table.Row key={entry.id}>
                   <Table.Cell>
                     <Badge colorPalette="blue" size="sm">
@@ -260,7 +277,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                   <Table.Cell>
                     <Badge
                       colorPalette={
-                        transactionTypeColors[entry.transaction_type] || 'gray'
+                        transactionTypeColors[entry.transaction_type] || "gray"
                       }
                       size="sm"
                     >
@@ -293,10 +310,10 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                   </Table.Cell>
                   <Table.Cell>
                     <Badge
-                      colorPalette={entry.processed ? 'green' : 'gray'}
+                      colorPalette={entry.processed ? "green" : "gray"}
                       size="sm"
                     >
-                      {entry.processed ? 'Processed' : 'Pending'}
+                      {entry.processed ? "Processed" : "Pending"}
                     </Badge>
                   </Table.Cell>
                   <Table.Cell>

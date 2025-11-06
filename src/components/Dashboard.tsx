@@ -1,11 +1,19 @@
-import { Box, Container, Heading, Spinner, Text, VStack } from '@chakra-ui/react';
-import { useDashboardData } from '../hooks/useGameData';
-import { DashboardHeader } from './DashboardHeader';
-import { GameStateDisplay } from './GameStateDisplay';
-import { PlayerRankings } from './PlayerRankings';
-import { InfrastructureCards } from './InfrastructureCards';
-import { ContractsListView } from './ContractsListView';
-import { LedgerDisplay } from './LedgerDisplay';
+import {
+  Alert,
+  Box,
+  Container,
+  Heading,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { useDashboardData } from "../hooks/useGameData";
+import { ContractsListView } from "./ContractsListView";
+import { DashboardHeader } from "./DashboardHeader";
+import { GameStateDisplay } from "./GameStateDisplay";
+import { InfrastructureCards } from "./InfrastructureCards";
+import { LedgerDisplay } from "./LedgerDisplay";
+import { PlayerRankings } from "./PlayerRankings";
 
 export function Dashboard() {
   const { data, isLoading, error } = useDashboardData();
@@ -24,24 +32,15 @@ export function Dashboard() {
   if (error) {
     return (
       <Container maxW="container.xl" py={8}>
-        <Box
-          p={6}
-          borderRadius="md"
-          bg="red.50"
-          borderWidth={1}
-          borderColor="red.200"
-        >
-          <Text color="red.700" fontWeight="semibold">
-            Error loading dashboard
-          </Text>
-          <Text color="red.600" fontSize="sm" mt={2}>
-            {error instanceof Error ? error.message : 'Unknown error'}
-          </Text>
-          <Text fontSize="sm" mt={4} color="red.600">
-            Make sure you have set up your Supabase environment variables in
-            .env.local
-          </Text>
-        </Box>
+        <Alert.Root status="error" variant="surface">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Error loading dashboard</Alert.Title>
+            <Alert.Description>
+              {error instanceof Error ? error.message : "Unknown error"}
+            </Alert.Description>
+          </Alert.Content>
+        </Alert.Root>
       </Container>
     );
   }
@@ -55,14 +54,14 @@ export function Dashboard() {
   }
 
   return (
-    <Box minH="100vh" bg="gray.50">
+    <Box minH="100vh" bg="bg">
       <DashboardHeader />
 
       <Container maxW="container.xl" py={8}>
         <VStack gap={8} align="stretch">
           {/* Game Status Section */}
           <Box>
-            <Heading size="md" mb={3} color="gray.900">
+            <Heading size="md" mb={3} color="fg">
               Game Status
             </Heading>
             <GameStateDisplay

@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   DialogBackdrop,
@@ -105,28 +106,32 @@ export function PhaseTimer({ round, phase }: PhaseTimerProps) {
 
   const handleCloseDialog = () => setOpen(false);
 
-  const timeColor = isExpired ? "red.600" : "gray.900";
+  // Use semantic text color; show a red badge for expiry instead of hardcoded red text
+  const timeColor = "fg";
 
   return (
     <Box
       px={4}
       py={3}
-      bg="gray.100"
+      bg="bg.muted"
       borderRadius="md"
       borderWidth={1}
-      borderColor="gray.300"
+      borderColor="border"
     >
-      <Text fontSize="sm" color="gray.800" mb={1} fontWeight="semibold">
+      <Text fontSize="sm" color="fg" mb={1} fontWeight="semibold">
         Timer
       </Text>
-      <Text
-        fontSize="2xl"
-        fontWeight="bold"
-        fontFamily="mono"
-        color={timeColor}
-      >
-        {formatMMSS(remaining)}
-      </Text>
+      <HStack gap={2} align="center">
+        <Text
+          fontSize="2xl"
+          fontWeight="bold"
+          fontFamily="mono"
+          color={timeColor}
+        >
+          {formatMMSS(remaining)}
+        </Text>
+        {isExpired && <Badge colorPalette="red">Expired</Badge>}
+      </HStack>
       <HStack gap={2} mt={2}>
         <Input
           type="number"
@@ -162,26 +167,26 @@ export function PhaseTimer({ round, phase }: PhaseTimerProps) {
           <DialogBackdrop />
           <DialogContent
             css={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
             }}
           >
-          <DialogHeader>
-            <DialogTitle>Phase time is up</DialogTitle>
-          </DialogHeader>
-          <DialogBody>
-            <Text>
-              The timer for Round {round} - {phase} has expired.
-            </Text>
-          </DialogBody>
-          <DialogFooter>
-            <Button onClick={handleCloseDialog} colorPalette="red">
-              OK
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+            <DialogHeader>
+              <DialogTitle>Phase time is up</DialogTitle>
+            </DialogHeader>
+            <DialogBody>
+              <Text>
+                The timer for Round {round} - {phase} has expired.
+              </Text>
+            </DialogBody>
+            <DialogFooter>
+              <Button onClick={handleCloseDialog} colorPalette="red">
+                OK
+              </Button>
+            </DialogFooter>
+          </DialogContent>
         </Portal>
       </DialogRoot>
     </Box>
