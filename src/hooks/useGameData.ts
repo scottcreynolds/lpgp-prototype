@@ -455,6 +455,7 @@ export function useCreateContract() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: gameKeys.contracts() });
       queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
     },
   });
 }
@@ -500,6 +501,7 @@ export function useEndContract() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: gameKeys.contracts() });
       queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
     },
   });
 }

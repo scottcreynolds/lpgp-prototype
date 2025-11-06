@@ -78,11 +78,11 @@ export function ContractsListView({
   if (isLoading) {
     return (
       <Box
-        bg="white"
+        bg="bg"
         p={6}
         borderRadius="lg"
         borderWidth={1}
-        borderColor="gray.200"
+        borderColor="border"
         shadow="sm"
       >
         <Text>Loading contracts...</Text>
@@ -95,15 +95,15 @@ export function ContractsListView({
 
   return (
     <Box
-      bg="white"
+      bg="bg"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="gray.200"
+      borderColor="border"
       shadow="sm"
     >
       <HStack justify="space-between" mb={4}>
-        <Heading size="lg" color="gray.900">
+        <Heading size="lg" color="fg.emphasized">
           Contracts
         </Heading>
 
@@ -139,32 +139,32 @@ export function ContractsListView({
           {/* Active Contracts */}
           {activeContracts.length > 0 && (
             <Box>
-              <Heading size="md" mb={3} color="gray.900">
+              <Heading size="md" mb={3} color="fg.emphasized">
                 Active Contracts ({activeContracts.length})
               </Heading>
               <Table.Root size="md" variant="outline">
                 <Table.ScrollArea maxH="400px">
                   <Table.Header>
-                    <Table.Row bg="gray.100">
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                    <Table.Row>
+                      <Table.ColumnHeader fontWeight="bold">
                         Parties
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                      <Table.ColumnHeader fontWeight="bold">
                         EV Exchange
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                      <Table.ColumnHeader fontWeight="bold">
                         Power
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                      <Table.ColumnHeader fontWeight="bold">
                         Crew
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                      <Table.ColumnHeader fontWeight="bold">
                         Duration
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                      <Table.ColumnHeader fontWeight="bold">
                         Status
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.900">
+                      <Table.ColumnHeader fontWeight="bold">
                         Actions
                       </Table.ColumnHeader>
                     </Table.Row>
@@ -311,26 +311,26 @@ export function ContractsListView({
           {/* Inactive Contracts */}
           {inactiveContracts.length > 0 && (
             <Box>
-              <Heading size="md" mb={3} color="gray.900">
+              <Heading size="md" mb={3} color="fg.emphasized">
                 Past Contracts ({inactiveContracts.length})
               </Heading>
               <Table.Root size="sm" variant="outline">
                 <Table.ScrollArea maxH="300px">
                   <Table.Header>
-                    <Table.Row bg="gray.50">
-                      <Table.ColumnHeader fontWeight="bold" color="gray.700">
+                    <Table.Row>
+                      <Table.ColumnHeader fontWeight="bold">
                         Parties
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.700">
+                      <Table.ColumnHeader fontWeight="bold">
                         Created
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.700">
+                      <Table.ColumnHeader fontWeight="bold">
                         Ended
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.700">
+                      <Table.ColumnHeader fontWeight="bold">
                         Status
                       </Table.ColumnHeader>
-                      <Table.ColumnHeader fontWeight="bold" color="gray.700">
+                      <Table.ColumnHeader fontWeight="bold">
                         Reason
                       </Table.ColumnHeader>
                     </Table.Row>

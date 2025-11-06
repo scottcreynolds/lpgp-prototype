@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   PLAYERS: "lpgp_players",
   PLAYER_INFRASTRUCTURE: "lpgp_player_infrastructure",
   LEDGER: "lpgp_ledger",
+  CONTRACTS: "lpgp_contracts",
 } as const;
 
 // Initialize localStorage with seed data if empty
@@ -28,6 +29,7 @@ function initializeStorage() {
       JSON.stringify(initialPlayerInfrastructure)
     );
     localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(initialLedger));
+    localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify([]));
   }
 }
 
@@ -82,15 +84,18 @@ function notifySubscribers(table: string) {
 
 // Mock RPC functions
 async function rpcGetDashboardSummary() {
+  initializeStorage();
   const gameState = getGameState();
   const players = getPlayers();
   const playerInfra = getPlayerInfrastructure();
+  const contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS) || '[]');
 
   const summary = buildDashboardSummary(
     gameState,
     players,
     playerInfra,
-    infrastructureDefinitions
+    infrastructureDefinitions,
+    contracts
   );
 
   return {
@@ -489,6 +494,321 @@ async function rpcManualAdjustment(
   };
 }
 
+async function rpcCreateContract(
+  partyAId: string,
+  partyBId: string,
+  evFromAToB: number,
+  evFromBToA: number,
+  evIsPerRound: boolean,
+  powerFromAToB: number,
+  powerFromBToA: number,
+  crewFromAToB: number,
+  crewFromBToA: number,
+  durationRounds: number | null
+) {
+  initializeStorage();
+  const players = getPlayers();
+  const contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS) || '[]');
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || '[]');
+  const gameState = getGameState();
+
+  // Validate players
+  const partyA = players.find((p: Player) => p.id === partyAId);
+  const partyB = players.find((p: Player) => p.id === partyBId);
+
+  if (!partyA || !partyB) {
+    return {
+      data: [{ success: false, message: "One or both parties not found" }],
+      error: null,
+    };
+  }
+
+  // For one-time EV payments, deduct immediately from payer and add to receiver
+  if (!evIsPerRound) {
+    if (evFromAToB > 0) {
+      if (partyA.ev < evFromAToB) {
+        return {
+          data: [{ success: false, message: `${partyA.name} has insufficient EV` }],
+          error: null,
+        };
+      }
+      partyA.ev -= evFromAToB;
+      partyB.ev += evFromAToB;
+    }
+    if (evFromBToA > 0) {
+      if (partyB.ev < evFromBToA) {
+        return {
+          data: [{ success: false, message: `${partyB.name} has insufficient EV` }],
+          error: null,
+        };
+      }
+      partyB.ev -= evFromBToA;
+      partyA.ev += evFromBToA;
+    }
+    partyA.updated_at = new Date().toISOString();
+    partyB.updated_at = new Date().toISOString();
+  }
+
+  // Create contract
+  const newContract = {
+    id: crypto.randomUUID(),
+    party_a_id: partyAId,
+    party_b_id: partyBId,
+    ev_from_a_to_b: evFromAToB,
+    ev_from_b_to_a: evFromBToA,
+    ev_is_per_round: evIsPerRound,
+    power_from_a_to_b: powerFromAToB,
+    power_from_b_to_a: powerFromBToA,
+    crew_from_a_to_b: crewFromAToB,
+    crew_from_b_to_a: crewFromBToA,
+    duration_rounds: durationRounds,
+    rounds_remaining: durationRounds,
+    status: "active",
+    created_in_round: gameState.current_round,
+    ended_in_round: null,
+    reason_for_ending: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  contracts.push(newContract);
+
+  // Create ledger entries for one-time EV payments
+  if (!evIsPerRound) {
+    if (evFromAToB > 0) {
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyAId,
+        player_name: partyA.name,
+        round: gameState.current_round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: evFromAToB,
+        ev_change: -evFromAToB,
+        rep_change: 0,
+        reason: `One-time payment to ${partyB.name} via contract`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: newContract.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyBId,
+        player_name: partyB.name,
+        round: gameState.current_round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: evFromAToB,
+        ev_change: evFromAToB,
+        rep_change: 0,
+        reason: `One-time payment from ${partyA.name} via contract`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: newContract.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+    if (evFromBToA > 0) {
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyBId,
+        player_name: partyB.name,
+        round: gameState.current_round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: evFromBToA,
+        ev_change: -evFromBToA,
+        rep_change: 0,
+        reason: `One-time payment to ${partyA.name} via contract`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: newContract.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyAId,
+        player_name: partyA.name,
+        round: gameState.current_round,
+        transaction_type: "CONTRACT_PAYMENT",
+        amount: evFromBToA,
+        ev_change: evFromBToA,
+        rep_change: 0,
+        reason: `One-time payment from ${partyB.name} via contract`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: newContract.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  // Create ledger entry for contract creation
+  ledger.push({
+    id: crypto.randomUUID(),
+    player_id: null,
+    player_name: null,
+    round: gameState.current_round,
+    transaction_type: "CONTRACT_CREATED",
+    amount: 0,
+    ev_change: 0,
+    rep_change: 0,
+    reason: `Contract created between ${partyA.name} and ${partyB.name}`,
+    processed: true,
+    infrastructure_id: null,
+    contract_id: newContract.id,
+    metadata: null,
+    created_at: new Date().toISOString(),
+  });
+
+  // Save all updates
+  localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
+  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+
+  // Notify subscribers
+  notifySubscribers("contracts");
+  notifySubscribers("players");
+  notifySubscribers("ledger_entries");
+
+  return {
+    data: [
+      {
+        success: true,
+        message: "Contract created successfully",
+        contract_id: newContract.id,
+      },
+    ],
+    error: null,
+  };
+}
+
+async function rpcEndContract(
+  contractId: string,
+  isBroken: boolean,
+  reason: string | null
+) {
+  initializeStorage();
+  const contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS) || '[]');
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER) || '[]');
+  const players = getPlayers();
+  const gameState = getGameState();
+
+  // Find contract
+  const contractIndex = contracts.findIndex((c: any) => c.id === contractId);
+
+  if (contractIndex === -1) {
+    return {
+      data: [{ success: false, message: "Contract not found" }],
+      error: null,
+    };
+  }
+
+  const contract = contracts[contractIndex];
+
+  if (contract.status !== "active") {
+    return {
+      data: [{ success: false, message: "Contract is not active" }],
+      error: null,
+    };
+  }
+
+  // Update contract status
+  contract.status = isBroken ? "broken" : "ended";
+  contract.ended_in_round = gameState.current_round;
+  contract.reason_for_ending = reason;
+  contract.updated_at = new Date().toISOString();
+
+  // Find player names
+  const partyA = players.find((p: Player) => p.id === contract.party_a_id);
+  const partyB = players.find((p: Player) => p.id === contract.party_b_id);
+
+  // Apply reputation penalty if broken
+  if (isBroken && partyA && partyB) {
+    const repPenalty = 5; // Fixed penalty for breaking contract
+    partyA.rep -= repPenalty;
+    partyB.rep -= repPenalty;
+    partyA.updated_at = new Date().toISOString();
+    partyB.updated_at = new Date().toISOString();
+
+    // Create ledger entries for reputation penalty
+    ledger.push({
+      id: crypto.randomUUID(),
+      player_id: partyA.id,
+      player_name: partyA.name,
+      round: gameState.current_round,
+      transaction_type: "CONTRACT_BROKEN",
+      amount: 0,
+      ev_change: 0,
+      rep_change: -repPenalty,
+      reason: `Reputation penalty for breaking contract with ${partyB.name}`,
+      processed: true,
+      infrastructure_id: null,
+      contract_id: contractId,
+      metadata: null,
+      created_at: new Date().toISOString(),
+    });
+    ledger.push({
+      id: crypto.randomUUID(),
+      player_id: partyB.id,
+      player_name: partyB.name,
+      round: gameState.current_round,
+      transaction_type: "CONTRACT_BROKEN",
+      amount: 0,
+      ev_change: 0,
+      rep_change: -repPenalty,
+      reason: `Reputation penalty for breaking contract with ${partyA.name}`,
+      processed: true,
+      infrastructure_id: null,
+      contract_id: contractId,
+      metadata: null,
+      created_at: new Date().toISOString(),
+    });
+
+    localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  }
+
+  // Create ledger entry for contract ending
+  ledger.push({
+    id: crypto.randomUUID(),
+    player_id: null,
+    player_name: null,
+    round: gameState.current_round,
+    transaction_type: isBroken ? "CONTRACT_BROKEN" : "CONTRACT_ENDED",
+    amount: 0,
+    ev_change: 0,
+    rep_change: 0,
+    reason: reason || `Contract ${isBroken ? 'broken' : 'ended'} between ${partyA?.name || 'Unknown'} and ${partyB?.name || 'Unknown'}`,
+    processed: true,
+    infrastructure_id: null,
+    contract_id: contractId,
+    metadata: null,
+    created_at: new Date().toISOString(),
+  });
+
+  // Save updates
+  localStorage.setItem(STORAGE_KEYS.CONTRACTS, JSON.stringify(contracts));
+  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+
+  // Notify subscribers
+  notifySubscribers("contracts");
+  if (isBroken) {
+    notifySubscribers("players");
+  }
+
+  return {
+    data: [
+      {
+        success: true,
+        message: `Contract ${isBroken ? 'broken' : 'ended'} successfully`,
+      },
+    ],
+    error: null,
+  };
+}
+
 // Mock Supabase client
 export const mockSupabaseClient = {
   from: (tableName: string) => {
@@ -496,6 +816,7 @@ export const mockSupabaseClient = {
       select: (_columns: string = "*") => {
         let filterColumn: string | null = null;
         let filterValue: unknown = null;
+        let orFilter: string | null = null;
         let orderColumn: string | null = null;
         let orderAscending = true;
         let limitValue: number | null = null;
@@ -504,6 +825,10 @@ export const mockSupabaseClient = {
           eq: (column: string, value: unknown) => {
             filterColumn = column;
             filterValue = value;
+            return selectBuilder;
+          },
+          or: (filter: string) => {
+            orFilter = filter;
             return selectBuilder;
           },
           order: (column: string, options?: { ascending?: boolean }) => {
@@ -554,6 +879,45 @@ export const mockSupabaseClient = {
                 data: ledger,
                 error: null,
               });
+            } else if (tableName === "contracts") {
+              let contracts = JSON.parse(localStorage.getItem(STORAGE_KEYS.CONTRACTS)!);
+
+              // Apply .or() filter if specified (e.g., "party_a_id.eq.uuid,party_b_id.eq.uuid")
+              if (orFilter) {
+                const conditions = orFilter.split(',');
+                contracts = contracts.filter((contract: any) => {
+                  return conditions.some((condition) => {
+                    const [columnPath, value] = condition.split('.eq.');
+                    return contract[columnPath] === value;
+                  });
+                });
+              }
+
+              // Apply .eq() filter if specified
+              if (filterColumn && filterValue !== null) {
+                contracts = contracts.filter((contract: any) => contract[filterColumn!] === filterValue);
+              }
+
+              // Apply ordering
+              if (orderColumn) {
+                contracts.sort((a: any, b: any) => {
+                  const aVal = a[orderColumn!];
+                  const bVal = b[orderColumn!];
+                  if (aVal < bVal) return orderAscending ? -1 : 1;
+                  if (aVal > bVal) return orderAscending ? 1 : -1;
+                  return 0;
+                });
+              }
+
+              // Apply limit
+              if (limitValue) {
+                contracts = contracts.slice(0, limitValue);
+              }
+
+              resolve({
+                data: contracts,
+                error: null,
+              });
             } else {
               resolve({
                 data: [],
@@ -601,10 +965,27 @@ export const mockSupabaseClient = {
           params?.p_rep_change as number,
           params?.p_reason as string
         );
+      case "create_contract":
+        return rpcCreateContract(
+          params?.p_party_a_id as string,
+          params?.p_party_b_id as string,
+          params?.p_ev_from_a_to_b as number,
+          params?.p_ev_from_b_to_a as number,
+          params?.p_ev_is_per_round as boolean,
+          params?.p_power_from_a_to_b as number,
+          params?.p_power_from_b_to_a as number,
+          params?.p_crew_from_a_to_b as number,
+          params?.p_crew_from_b_to_a as number,
+          params?.p_duration_rounds as number | null
+        );
+      case "end_contract":
+        return rpcEndContract(
+          params?.p_contract_id as string,
+          params?.p_is_broken as boolean,
+          params?.p_reason as string | null
+        );
       // Stub implementations for other infrastructure/contract/ledger RPCs
       case "toggle_infrastructure_status":
-      case "create_contract":
-      case "end_contract":
       case "process_round_end":
         return Promise.resolve({
           data: [{ success: true, message: `Mock ${functionName} - not yet implemented` }],

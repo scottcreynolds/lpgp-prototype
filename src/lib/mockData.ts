@@ -178,8 +178,12 @@ export function buildDashboardSummary(
   gameState: GameState,
   players: Player[],
   playerInfra: PlayerInfrastructure[],
-  infraDefs: InfrastructureDefinition[]
+  infraDefs: InfrastructureDefinition[],
+  contracts?: any[]
 ): DashboardSummary {
+  // Get active contracts if provided
+  const activeContracts = contracts?.filter((c) => c.status === "active") || [];
+
   return {
     game_state: {
       round: gameState.current_round,
@@ -210,7 +214,7 @@ export function buildDashboardSummary(
         };
       });
 
-      // Calculate totals
+      // Calculate base totals from infrastructure
       const total_power_capacity = infrastructure.reduce(
         (sum, i) =>
           sum + (i.capacity && i.type.includes("Solar") && i.is_active ? i.capacity : 0),
@@ -235,6 +239,22 @@ export function buildDashboardSummary(
         0
       );
 
+      // Calculate contract adjustments for this player
+      let contractPowerAdjustment = 0;
+      let contractCrewAdjustment = 0;
+
+      activeContracts.forEach((contract) => {
+        if (contract.party_a_id === player.id) {
+          // Player is Party A: receives B->A, gives A->B
+          contractPowerAdjustment += contract.power_from_b_to_a - contract.power_from_a_to_b;
+          contractCrewAdjustment += contract.crew_from_b_to_a - contract.crew_from_a_to_b;
+        } else if (contract.party_b_id === player.id) {
+          // Player is Party B: receives A->B, gives B->A
+          contractPowerAdjustment += contract.power_from_a_to_b - contract.power_from_b_to_a;
+          contractCrewAdjustment += contract.crew_from_a_to_b - contract.crew_from_b_to_a;
+        }
+      });
+
       const totals = {
         total_power_capacity,
         total_power_used,
@@ -250,8 +270,8 @@ export function buildDashboardSummary(
           0
         ),
         infrastructure_count: infrastructure.length,
-        available_power: total_power_capacity - total_power_used,
-        available_crew: total_crew_capacity - total_crew_used,
+        available_power: total_power_capacity - total_power_used + contractPowerAdjustment,
+        available_crew: total_crew_capacity - total_crew_used + contractCrewAdjustment,
       };
 
       return {

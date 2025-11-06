@@ -43,26 +43,26 @@ export function CreateContractModal({
   // Form state
   const [partyAId, setPartyAId] = useState('');
   const [partyBId, setPartyBId] = useState('');
-  const [evFromAToB, setEvFromAToB] = useState(0);
-  const [evFromBToA, setEvFromBToA] = useState(0);
+  const [evFromAToB, setEvFromAToB] = useState('0');
+  const [evFromBToA, setEvFromBToA] = useState('0');
   const [evIsPerRound, setEvIsPerRound] = useState(false);
-  const [powerFromAToB, setPowerFromAToB] = useState(0);
-  const [powerFromBToA, setPowerFromBToA] = useState(0);
-  const [crewFromAToB, setCrewFromAToB] = useState(0);
-  const [crewFromBToA, setCrewFromBToA] = useState(0);
-  const [durationRounds, setDurationRounds] = useState<number | null>(null);
+  const [powerFromAToB, setPowerFromAToB] = useState('0');
+  const [powerFromBToA, setPowerFromBToA] = useState('0');
+  const [crewFromAToB, setCrewFromAToB] = useState('0');
+  const [crewFromBToA, setCrewFromBToA] = useState('0');
+  const [durationRounds, setDurationRounds] = useState('');
 
   const resetForm = () => {
     setPartyAId('');
     setPartyBId('');
-    setEvFromAToB(0);
-    setEvFromBToA(0);
+    setEvFromAToB('0');
+    setEvFromBToA('0');
     setEvIsPerRound(false);
-    setPowerFromAToB(0);
-    setPowerFromBToA(0);
-    setCrewFromAToB(0);
-    setCrewFromBToA(0);
-    setDurationRounds(null);
+    setPowerFromAToB('0');
+    setPowerFromBToA('0');
+    setCrewFromAToB('0');
+    setCrewFromBToA('0');
+    setDurationRounds('');
   };
 
   const handleOpenChange = (details: { open: boolean }) => {
@@ -93,14 +93,44 @@ export function CreateContractModal({
       return;
     }
 
+    // Parse and validate numbers
+    const evAToB = parseInt(evFromAToB) || 0;
+    const evBToA = parseInt(evFromBToA) || 0;
+    const powerAToB = parseInt(powerFromAToB) || 0;
+    const powerBToA = parseInt(powerFromBToA) || 0;
+    const crewAToB = parseInt(crewFromAToB) || 0;
+    const crewBToA = parseInt(crewFromBToA) || 0;
+    const duration = durationRounds.trim() ? parseInt(durationRounds) : null;
+
+    // Validate all parsed numbers are non-negative
+    if (evAToB < 0 || evBToA < 0 || powerAToB < 0 || powerBToA < 0 || crewAToB < 0 || crewBToA < 0) {
+      toaster.create({
+        title: 'Validation Error',
+        description: 'Values cannot be negative',
+        type: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (duration !== null && duration < 1) {
+      toaster.create({
+        title: 'Validation Error',
+        description: 'Duration must be at least 1 round',
+        type: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
     // Check if there's any actual exchange
     const hasExchange =
-      evFromAToB > 0 ||
-      evFromBToA > 0 ||
-      powerFromAToB > 0 ||
-      powerFromBToA > 0 ||
-      crewFromAToB > 0 ||
-      crewFromBToA > 0;
+      evAToB > 0 ||
+      evBToA > 0 ||
+      powerAToB > 0 ||
+      powerBToA > 0 ||
+      crewAToB > 0 ||
+      crewBToA > 0;
 
     if (!hasExchange) {
       toaster.create({
@@ -116,14 +146,14 @@ export function CreateContractModal({
       await createContract.mutateAsync({
         partyAId,
         partyBId,
-        evFromAToB,
-        evFromBToA,
+        evFromAToB: evAToB,
+        evFromBToA: evBToA,
         evIsPerRound,
-        powerFromAToB,
-        powerFromBToA,
-        crewFromAToB,
-        crewFromBToA,
-        durationRounds,
+        powerFromAToB: powerAToB,
+        powerFromBToA: powerBToA,
+        crewFromAToB: crewAToB,
+        crewFromBToA: crewBToA,
+        durationRounds: duration,
       });
 
       const partyA = players.find((p) => p.id === partyAId);
@@ -151,9 +181,23 @@ export function CreateContractModal({
   const partyA = players.find((p) => p.id === partyAId);
   const partyB = players.find((p) => p.id === partyBId);
 
-  const netEv = evFromBToA - evFromAToB;
-  const netPower = powerFromBToA - powerFromAToB;
-  const netCrew = crewFromBToA - crewFromAToB;
+  // Parse values for preview
+  const evAToB = parseInt(evFromAToB) || 0;
+  const evBToA = parseInt(evFromBToA) || 0;
+  const powerAToB = parseInt(powerFromAToB) || 0;
+  const powerBToA = parseInt(powerFromBToA) || 0;
+  const crewAToB = parseInt(crewFromAToB) || 0;
+  const crewBToA = parseInt(crewFromBToA) || 0;
+
+  // Net flows to Party A (positive = A receives, negative = A gives)
+  const netEvA = evBToA - evAToB;
+  const netPowerA = powerBToA - powerAToB;
+  const netCrewA = crewBToA - crewAToB;
+
+  // Net flows to Party B (opposite of Party A)
+  const netEvB = evAToB - evBToA;
+  const netPowerB = powerAToB - powerBToA;
+  const netCrewB = crewAToB - crewBToA;
 
   return (
     <DialogRoot open={open} onOpenChange={handleOpenChange} size="xl">
@@ -185,87 +229,83 @@ export function CreateContractModal({
           </DialogHeader>
 
           <DialogBody>
-            <VStack gap={4} align="stretch">
-              {/* Party Selection */}
-              <Box>
-                <Heading size="sm" mb={2} color="fg.emphasized">
-                  Parties
-                </Heading>
-                <VStack gap={2} align="stretch">
-                  <Field.Root>
-                    <Field.Label>Party A</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        value={partyAId}
-                        onChange={(e) => setPartyAId(e.target.value)}
-                        placeholder="Select Party A"
-                      >
-                        <option value="">Select Party A</option>
-                        {players.map((player) => (
-                          <option key={player.id} value={player.id}>
-                            {player.name} (EV: {player.ev})
-                          </option>
-                        ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                  </Field.Root>
-
-                  <Field.Root>
-                    <Field.Label>Party B</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        value={partyBId}
-                        onChange={(e) => setPartyBId(e.target.value)}
-                        placeholder="Select Party B"
-                      >
-                        <option value="">Select Party B</option>
-                        {players.map((player) => (
-                          <option
-                            key={player.id}
-                            value={player.id}
-                            disabled={player.id === partyAId}
-                          >
-                            {player.name} (EV: {player.ev})
-                          </option>
-                        ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                  </Field.Root>
-                </VStack>
-              </Box>
-
-              {/* EV Exchange */}
-              <Box>
-                <Heading size="sm" mb={2} color="gray.900">
-                  EV Exchange
-                </Heading>
-                <VStack gap={2} align="stretch">
-                  <HStack gap={2}>
-                    <Field.Root flex={1}>
-                      <Field.Label>From A to B</Field.Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={evFromAToB}
-                        onChange={(e) =>
-                          setEvFromAToB(parseInt(e.target.value) || 0)
-                        }
-                      />
+            <HStack gap={4} align="start">
+              {/* Left side: Form */}
+              <VStack gap={4} align="stretch" flex={1}>
+                {/* Party Selection */}
+                <Box>
+                  <Heading size="sm" mb={2} color="fg.emphasized">
+                    Parties
+                  </Heading>
+                  <VStack gap={2} align="stretch">
+                    <Field.Root>
+                      <Field.Label>Party A</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          value={partyAId}
+                          onChange={(e) => setPartyAId(e.target.value)}
+                        >
+                          <option value="">Select Party A</option>
+                          {players.map((player) => (
+                            <option key={player.id} value={player.id}>
+                              {player.name} (EV: {player.ev})
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
                     </Field.Root>
-                    <Field.Root flex={1}>
-                      <Field.Label>From B to A</Field.Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={evFromBToA}
-                        onChange={(e) =>
-                          setEvFromBToA(parseInt(e.target.value) || 0)
-                        }
-                      />
+
+                    <Field.Root>
+                      <Field.Label>Party B</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          value={partyBId}
+                          onChange={(e) => setPartyBId(e.target.value)}
+                        >
+                          <option value="">Select Party B</option>
+                          {players.map((player) => (
+                            <option
+                              key={player.id}
+                              value={player.id}
+                              disabled={player.id === partyAId}
+                            >
+                              {player.name} (EV: {player.ev})
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
                     </Field.Root>
-                  </HStack>
+                  </VStack>
+                </Box>
+
+                {/* EV Exchange */}
+                <Box>
+                  <Heading size="sm" mb={2} color="fg.emphasized">
+                    EV Exchange
+                  </Heading>
+                  <VStack gap={2} align="stretch">
+                    <HStack gap={2}>
+                      <Field.Root flex={1}>
+                        <Field.Label>From A to B</Field.Label>
+                        <Input
+                          type="text"
+                          value={evFromAToB}
+                          onChange={(e) => setEvFromAToB(e.target.value)}
+                          placeholder="0"
+                        />
+                      </Field.Root>
+                      <Field.Root flex={1}>
+                        <Field.Label>From B to A</Field.Label>
+                        <Input
+                          type="text"
+                          value={evFromBToA}
+                          onChange={(e) => setEvFromBToA(e.target.value)}
+                          placeholder="0"
+                        />
+                      </Field.Root>
+                    </HStack>
                   <Field.Root>
                     <Field.Label>Payment Type</Field.Label>
                     <NativeSelect.Root>
@@ -289,141 +329,188 @@ export function CreateContractModal({
                 </VStack>
               </Box>
 
-              {/* Power Exchange */}
-              <Box>
-                <Heading size="sm" mb={2} color="gray.900">
-                  Power Capacity Sharing
-                </Heading>
-                <HStack gap={2}>
-                  <Field.Root flex={1}>
-                    <Field.Label>From A to B</Field.Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={powerFromAToB}
-                      onChange={(e) =>
-                        setPowerFromAToB(parseInt(e.target.value) || 0)
-                      }
-                    />
-                  </Field.Root>
-                  <Field.Root flex={1}>
-                    <Field.Label>From B to A</Field.Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={powerFromBToA}
-                      onChange={(e) =>
-                        setPowerFromBToA(parseInt(e.target.value) || 0)
-                      }
-                    />
-                  </Field.Root>
-                </HStack>
-              </Box>
-
-              {/* Crew Exchange */}
-              <Box>
-                <Heading size="sm" mb={2} color="gray.900">
-                  Crew Capacity Sharing
-                </Heading>
-                <HStack gap={2}>
-                  <Field.Root flex={1}>
-                    <Field.Label>From A to B</Field.Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={crewFromAToB}
-                      onChange={(e) =>
-                        setCrewFromAToB(parseInt(e.target.value) || 0)
-                      }
-                    />
-                  </Field.Root>
-                  <Field.Root flex={1}>
-                    <Field.Label>From B to A</Field.Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={crewFromBToA}
-                      onChange={(e) =>
-                        setCrewFromBToA(parseInt(e.target.value) || 0)
-                      }
-                    />
-                  </Field.Root>
-                </HStack>
-              </Box>
-
-              {/* Duration */}
-              <Field.Root>
-                <Field.Label>Duration (Rounds)</Field.Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={durationRounds ?? ''}
-                  onChange={(e) =>
-                    setDurationRounds(
-                      e.target.value ? parseInt(e.target.value) : null
-                    )
-                  }
-                  placeholder="Leave empty for permanent"
-                />
-                <Text fontSize="xs" color="fg.muted" mt={1}>
-                  Leave empty for a permanent contract
-                </Text>
-              </Field.Root>
-
-              {/* Preview */}
-              {partyA && partyB && (
-                <Box
-                  p={3}
-                  bg="gray.50"
-                  borderRadius="md"
-                  borderWidth={1}
-                  borderColor="gray.300"
-                >
-                  <Heading size="xs" mb={2} color="gray.900">
-                    Net Flows to Party A ({partyA.name})
+                {/* Power Exchange */}
+                <Box>
+                  <Heading size="sm" mb={2} color="fg.emphasized">
+                    Power Capacity Sharing
                   </Heading>
-                  <VStack gap={1} align="stretch">
-                    {(evFromAToB > 0 || evFromBToA > 0) && (
-                      <HStack justify="space-between">
-                        <Text fontSize="sm">EV:</Text>
-                        <Badge
-                          colorPalette={netEv >= 0 ? 'green' : 'red'}
-                          size="sm"
-                        >
-                          {netEv >= 0 ? '+' : ''}
-                          {netEv}
-                          {evIsPerRound ? ' /round' : ' one-time'}
-                        </Badge>
-                      </HStack>
-                    )}
-                    {(powerFromAToB > 0 || powerFromBToA > 0) && (
-                      <HStack justify="space-between">
-                        <Text fontSize="sm">Power:</Text>
-                        <Badge
-                          colorPalette={netPower >= 0 ? 'green' : 'red'}
-                          size="sm"
-                        >
-                          {netPower >= 0 ? '+' : ''}
-                          {netPower}
-                        </Badge>
-                      </HStack>
-                    )}
-                    {(crewFromAToB > 0 || crewFromBToA > 0) && (
-                      <HStack justify="space-between">
-                        <Text fontSize="sm">Crew:</Text>
-                        <Badge
-                          colorPalette={netCrew >= 0 ? 'green' : 'red'}
-                          size="sm"
-                        >
-                          {netCrew >= 0 ? '+' : ''}
-                          {netCrew}
-                        </Badge>
-                      </HStack>
-                    )}
-                  </VStack>
+                  <HStack gap={2}>
+                    <Field.Root flex={1}>
+                      <Field.Label>From A to B</Field.Label>
+                      <Input
+                        type="text"
+                        value={powerFromAToB}
+                        onChange={(e) => setPowerFromAToB(e.target.value)}
+                        placeholder="0"
+                      />
+                    </Field.Root>
+                    <Field.Root flex={1}>
+                      <Field.Label>From B to A</Field.Label>
+                      <Input
+                        type="text"
+                        value={powerFromBToA}
+                        onChange={(e) => setPowerFromBToA(e.target.value)}
+                        placeholder="0"
+                      />
+                    </Field.Root>
+                  </HStack>
                 </Box>
+
+                {/* Crew Exchange */}
+                <Box>
+                  <Heading size="sm" mb={2} color="fg.emphasized">
+                    Crew Capacity Sharing
+                  </Heading>
+                  <HStack gap={2}>
+                    <Field.Root flex={1}>
+                      <Field.Label>From A to B</Field.Label>
+                      <Input
+                        type="text"
+                        value={crewFromAToB}
+                        onChange={(e) => setCrewFromAToB(e.target.value)}
+                        placeholder="0"
+                      />
+                    </Field.Root>
+                    <Field.Root flex={1}>
+                      <Field.Label>From B to A</Field.Label>
+                      <Input
+                        type="text"
+                        value={crewFromBToA}
+                        onChange={(e) => setCrewFromBToA(e.target.value)}
+                        placeholder="0"
+                      />
+                    </Field.Root>
+                  </HStack>
+                </Box>
+
+                {/* Duration */}
+                <Field.Root>
+                  <Field.Label>Duration (Rounds)</Field.Label>
+                  <Input
+                    type="text"
+                    value={durationRounds}
+                    onChange={(e) => setDurationRounds(e.target.value)}
+                    placeholder="Leave empty for permanent"
+                  />
+                  <Text fontSize="xs" color="fg.muted" mt={1}>
+                    Leave empty for a permanent contract
+                  </Text>
+                </Field.Root>
+              </VStack>
+
+              {/* Right side: Preview */}
+              {partyA && partyB && (
+                <VStack gap={3} align="stretch" width="300px">
+                  <Heading size="sm" color="fg.emphasized">
+                    Preview
+                  </Heading>
+
+                  {/* Party A Net Flows */}
+                  <Box
+                    p={3}
+                    bg="bg.muted"
+                    borderRadius="md"
+                    borderWidth={1}
+                    borderColor="border"
+                  >
+                    <Heading size="xs" mb={2} color="fg.emphasized">
+                      {partyA.name} receives:
+                    </Heading>
+                    <VStack gap={1} align="stretch">
+                      {(evAToB > 0 || evBToA > 0) && (
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" color="fg.muted">EV:</Text>
+                          <Badge
+                            colorPalette={netEvA >= 0 ? 'green' : 'red'}
+                            size="sm"
+                          >
+                            {netEvA >= 0 ? '+' : ''}
+                            {netEvA}
+                            {evIsPerRound ? ' /round' : ' one-time'}
+                          </Badge>
+                        </HStack>
+                      )}
+                      {(powerAToB > 0 || powerBToA > 0) && (
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" color="fg.muted">Power:</Text>
+                          <Badge
+                            colorPalette={netPowerA >= 0 ? 'green' : 'red'}
+                            size="sm"
+                          >
+                            {netPowerA >= 0 ? '+' : ''}
+                            {netPowerA}
+                          </Badge>
+                        </HStack>
+                      )}
+                      {(crewAToB > 0 || crewBToA > 0) && (
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" color="fg.muted">Crew:</Text>
+                          <Badge
+                            colorPalette={netCrewA >= 0 ? 'green' : 'red'}
+                            size="sm"
+                          >
+                            {netCrewA >= 0 ? '+' : ''}
+                            {netCrewA}
+                          </Badge>
+                        </HStack>
+                      )}
+                    </VStack>
+                  </Box>
+
+                  {/* Party B Net Flows */}
+                  <Box
+                    p={3}
+                    bg="bg.muted"
+                    borderRadius="md"
+                    borderWidth={1}
+                    borderColor="border"
+                  >
+                    <Heading size="xs" mb={2} color="fg.emphasized">
+                      {partyB.name} receives:
+                    </Heading>
+                    <VStack gap={1} align="stretch">
+                      {(evAToB > 0 || evBToA > 0) && (
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" color="fg.muted">EV:</Text>
+                          <Badge
+                            colorPalette={netEvB >= 0 ? 'green' : 'red'}
+                            size="sm"
+                          >
+                            {netEvB >= 0 ? '+' : ''}
+                            {netEvB}
+                            {evIsPerRound ? ' /round' : ' one-time'}
+                          </Badge>
+                        </HStack>
+                      )}
+                      {(powerAToB > 0 || powerBToA > 0) && (
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" color="fg.muted">Power:</Text>
+                          <Badge
+                            colorPalette={netPowerB >= 0 ? 'green' : 'red'}
+                            size="sm"
+                          >
+                            {netPowerB >= 0 ? '+' : ''}
+                            {netPowerB}
+                          </Badge>
+                        </HStack>
+                      )}
+                      {(crewAToB > 0 || crewBToA > 0) && (
+                        <HStack justify="space-between">
+                          <Text fontSize="sm" color="fg.muted">Crew:</Text>
+                          <Badge
+                            colorPalette={netCrewB >= 0 ? 'green' : 'red'}
+                            size="sm"
+                          >
+                            {netCrewB >= 0 ? '+' : ''}
+                            {netCrewB}
+                          </Badge>
+                        </HStack>
+                      )}
+                    </VStack>
+                  </Box>
+                </VStack>
               )}
-            </VStack>
+            </HStack>
           </DialogBody>
 
           <DialogFooter>
