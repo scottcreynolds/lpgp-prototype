@@ -58,11 +58,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 
   setDashboardData: (data) =>
-    set({
-      dashboardData: data,
-      currentRound: data.game_state.round,
-      currentPhase: data.game_state.phase,
-      version: data.game_state.version,
+    set(() => {
+      const safe = {
+        game_state: data.game_state ?? {
+          round: 0,
+          phase: "Setup" as GamePhase,
+          version: 0,
+        },
+        players: data.players ?? [],
+      };
+      return {
+        dashboardData: safe,
+        currentRound: safe.game_state.round,
+        currentPhase: safe.game_state.phase,
+        version: safe.game_state.version,
+      };
     }),
 
   reset: () => set(initialState),

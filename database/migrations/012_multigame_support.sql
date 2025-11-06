@@ -87,12 +87,11 @@ BEGIN
                 'is_starter', pi.is_starter,
                 'location', pi.location,
                 'is_active', pi.is_active
-              )
+              ) ORDER BY id_def.type
             )
             FROM player_infrastructure pi
             JOIN infrastructure_definitions id_def ON pi.infrastructure_id = id_def.id
             WHERE pi.player_id = p.id AND pi.game_id = p_game_id
-            ORDER BY id_def.type
           ),
           'totals', (
             SELECT json_build_object(
@@ -110,8 +109,7 @@ BEGIN
             JOIN infrastructure_definitions id_def ON pi.infrastructure_id = id_def.id
             WHERE pi.player_id = p.id AND pi.game_id = p_game_id
           )
-        )
-        ORDER BY p.ev DESC, p.rep DESC
+        ) ORDER BY p.ev DESC, p.rep DESC
       )
       FROM players p
       WHERE p.game_id = p_game_id
@@ -122,7 +120,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION get_dashboard_summary IS 'Returns complete dashboard data for a game including game state, player summaries, and calculated capacities';
+COMMENT ON FUNCTION get_dashboard_summary(uuid) IS 'Returns complete dashboard data for a game including game state, player summaries, and calculated capacities';
 
 -- Reset game for a specific game_id
 CREATE OR REPLACE FUNCTION reset_game(p_game_id UUID)
@@ -407,8 +405,8 @@ DECLARE v_current_round INTEGER; v_total_maintenance INTEGER := 0; v_total_yield
       UPDATE players SET ev = ev + v_rec.ev_from_a_to_b WHERE id = v_rec.party_b_id AND game_id = p_game_id;
       INSERT INTO ledger_entries (player_id, player_name, round, transaction_type, amount, ev_change, rep_change, reason, processed, contract_id, game_id)
       VALUES (v_rec.party_a_id, v_rec.party_a_name, v_current_round, 'CONTRACT_PAYMENT', v_rec.ev_from_a_to_b, -v_rec.ev_from_a_to_b, 0, format('Round %s contract payment: %s → %s', v_current_round, v_rec.party_a_name, v_rec.party_b_name), true, v_rec.contract_id, p_game_id);
-      INSERT INTO ledger_entries (...)
-      SELECT v_rec.party_b_id, v_rec.party_b_name, v_current_round, 'CONTRACT_PAYMENT', v_rec.ev_from_a_to_b, v_rec.ev_from_a_to_b, 0, format('Round %s contract payment: %s → %s', v_current_round, v_rec.party_a_name, v_rec.party_b_name), true, v_rec.contract_id, p_game_id;
+  INSERT INTO ledger_entries (player_id, player_name, round, transaction_type, amount, ev_change, rep_change, reason, processed, contract_id, game_id)
+  VALUES (v_rec.party_b_id, v_rec.party_b_name, v_current_round, 'CONTRACT_PAYMENT', v_rec.ev_from_a_to_b, v_rec.ev_from_a_to_b, 0, format('Round %s contract payment: %s → %s', v_current_round, v_rec.party_a_name, v_rec.party_b_name), true, v_rec.contract_id, p_game_id);
       v_total_contract_payments := v_total_contract_payments + v_rec.ev_from_a_to_b;
     END IF;
     IF v_rec.ev_from_b_to_a > 0 THEN
@@ -416,8 +414,8 @@ DECLARE v_current_round INTEGER; v_total_maintenance INTEGER := 0; v_total_yield
       UPDATE players SET ev = ev + v_rec.ev_from_b_to_a WHERE id = v_rec.party_a_id AND game_id = p_game_id;
       INSERT INTO ledger_entries (player_id, player_name, round, transaction_type, amount, ev_change, rep_change, reason, processed, contract_id, game_id)
       VALUES (v_rec.party_b_id, v_rec.party_b_name, v_current_round, 'CONTRACT_PAYMENT', v_rec.ev_from_b_to_a, -v_rec.ev_from_b_to_a, 0, format('Round %s contract payment: %s → %s', v_current_round, v_rec.party_b_name, v_rec.party_a_name), true, v_rec.contract_id, p_game_id);
-      INSERT INTO ledger_entries (...)
-      SELECT v_rec.party_a_id, v_rec.party_a_name, v_current_round, 'CONTRACT_PAYMENT', v_rec.ev_from_b_to_a, v_rec.ev_from_b_to_a, 0, format('Round %s contract payment: %s → %s', v_current_round, v_rec.party_b_name, v_rec.party_a_name), true, v_rec.contract_id, p_game_id;
+  INSERT INTO ledger_entries (player_id, player_name, round, transaction_type, amount, ev_change, rep_change, reason, processed, contract_id, game_id)
+  VALUES (v_rec.party_a_id, v_rec.party_a_name, v_current_round, 'CONTRACT_PAYMENT', v_rec.ev_from_b_to_a, v_rec.ev_from_b_to_a, 0, format('Round %s contract payment: %s → %s', v_current_round, v_rec.party_b_name, v_rec.party_a_name), true, v_rec.contract_id, p_game_id);
       v_total_contract_payments := v_total_contract_payments + v_rec.ev_from_b_to_a;
     END IF;
   END LOOP;

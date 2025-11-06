@@ -25,19 +25,45 @@ export function useDashboardData() {
   const query = useQuery({
     queryKey: gameKeys.dashboard(),
     queryFn: async (): Promise<DashboardSummary> => {
-      const { data, error } = await supabase.rpc("get_dashboard_summary", {
-        p_game_id: getCurrentGameId(),
-      });
+      const gameId = getCurrentGameId();
+      const fetchSummary = async () =>
+        await supabase.rpc("get_dashboard_summary", { p_game_id: gameId });
+
+      // First attempt
+      const first = await fetchSummary();
+      let data = first.data as {
+        game_state?: DashboardSummary["game_state"] | null;
+        players?: DashboardSummary["players"] | null;
+      } | null;
+      const error = first.error;
 
       if (error) {
         throw new Error(`Failed to fetch dashboard: ${error.message}`);
       }
 
-      if (!data) {
-        throw new Error("No dashboard data returned");
+      // If the game hasn't been initialized on the server yet, ensure it exists and retry once
+      if (!data || data.game_state == null) {
+        try {
+          await supabase.rpc("ensure_game", { p_game_id: gameId as string });
+        } catch {
+          // ignore ensure_game failure and continue with fallback
+        }
+        const retry = await fetchSummary();
+        data =
+          (retry.data as {
+            game_state?: DashboardSummary["game_state"] | null;
+            players?: DashboardSummary["players"] | null;
+          } | null) ?? data;
       }
 
-      return data as DashboardSummary;
+      // Final guard: coalesce to safe defaults to avoid null access in UI
+      const raw = data || {};
+      const safe: DashboardSummary = {
+        game_state: raw.game_state ?? { round: 0, phase: "Setup", version: 0 },
+        players: (raw.players as DashboardSummary["players"] | undefined) ?? [],
+      };
+
+      return safe;
     },
     refetchInterval: 5000, // Refetch every 5 seconds as fallback
   });
