@@ -147,6 +147,8 @@ export const initialPlayerInfrastructure: PlayerInfrastructure[] = [
     is_powered: true,
     is_crewed: true,
     is_starter: true,
+    location: null,
+    is_active: true,
     created_at: new Date().toISOString(),
   },
 ];
@@ -156,10 +158,16 @@ export const initialLedger: LedgerEntry[] = [
   {
     id: "ledger-1",
     player_id: playerIds[0],
+    player_name: "Luna Corp",
     round: 1,
     transaction_type: "GAME_START",
     amount: 50,
+    ev_change: 50,
+    rep_change: 0,
     reason: "Initial EV",
+    processed: true,
+    infrastructure_id: null,
+    contract_id: null,
     metadata: null,
     created_at: new Date().toISOString(),
   },
@@ -186,6 +194,7 @@ export function buildDashboardSummary(
       const infrastructure = playerInfrastructure.map((pi) => {
         const def = infraDefs.find((d) => d.id === pi.infrastructure_id)!;
         return {
+          id: pi.id,
           type: def.type,
           cost: def.cost,
           maintenance_cost: def.maintenance_cost,
@@ -196,48 +205,53 @@ export function buildDashboardSummary(
           is_powered: pi.is_powered,
           is_crewed: pi.is_crewed,
           is_starter: pi.is_starter,
+          location: pi.location,
+          is_active: pi.is_active,
         };
       });
 
       // Calculate totals
+      const total_power_capacity = infrastructure.reduce(
+        (sum, i) =>
+          sum + (i.capacity && i.type.includes("Solar") && i.is_active ? i.capacity : 0),
+        0
+      );
+
+      const total_power_used = infrastructure.reduce(
+        (sum, i) =>
+          sum + (i.is_active && i.power_requirement ? i.power_requirement : 0),
+        0
+      );
+
+      const total_crew_capacity = infrastructure.reduce(
+        (sum, i) =>
+          sum + (i.capacity && i.type.includes("Habitat") && i.is_active ? i.capacity : 0),
+        0
+      );
+
+      const total_crew_used = infrastructure.reduce(
+        (sum, i) =>
+          sum + (i.is_active && i.crew_requirement ? i.crew_requirement : 0),
+        0
+      );
+
       const totals = {
-        total_power_capacity: infrastructure.reduce(
-          (sum, i) =>
-            sum + (i.capacity && i.type.includes("Solar") ? i.capacity : 0),
-          0
-        ),
-        total_power_used: infrastructure.reduce(
-          (sum, i) =>
-            sum +
-            (i.is_powered === false && i.power_requirement
-              ? 0
-              : i.power_requirement || 0),
-          0
-        ),
-        total_crew_capacity: infrastructure.reduce(
-          (sum, i) =>
-            sum + (i.capacity && i.type.includes("Habitat") ? i.capacity : 0),
-          0
-        ),
-        total_crew_used: infrastructure.reduce(
-          (sum, i) =>
-            sum +
-            (i.is_crewed === false && i.crew_requirement
-              ? 0
-              : i.crew_requirement || 0),
-          0
-        ),
+        total_power_capacity,
+        total_power_used,
+        total_crew_capacity,
+        total_crew_used,
         total_maintenance_cost: infrastructure.reduce(
-          (sum, i) => sum + (i.is_starter ? 0 : i.maintenance_cost),
+          (sum, i) => sum + (i.is_starter || !i.is_active ? 0 : i.maintenance_cost),
           0
         ),
         total_yield: infrastructure.reduce(
           (sum, i) =>
-            sum +
-            (i.is_powered && i.is_crewed && i.yield ? i.yield : i.yield || 0),
+            sum + (i.is_active && i.yield ? i.yield : 0),
           0
         ),
         infrastructure_count: infrastructure.length,
+        available_power: total_power_capacity - total_power_used,
+        available_crew: total_crew_capacity - total_crew_used,
       };
 
       return {

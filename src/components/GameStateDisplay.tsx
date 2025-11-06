@@ -10,21 +10,24 @@ import {
 import { useState } from "react";
 import { FiInfo } from "react-icons/fi";
 import { useAdvancePhase } from "../hooks/useGameData";
-import type { GamePhase } from "../lib/database.types";
+import type { GamePhase, DashboardPlayer } from "../lib/database.types";
 import { PhaseTimer } from "./PhaseTimer";
 import { SetupTips } from "./SetupTips.tsx";
+import { CreateContractModal } from "./CreateContractModal";
 import { toaster } from "./ui/toaster";
 
 interface GameStateDisplayProps {
   round: number;
   phase: GamePhase;
   version: number;
+  players?: DashboardPlayer[];
 }
 
 export function GameStateDisplay({
   round,
   phase,
   version,
+  players,
 }: GameStateDisplayProps) {
   const advancePhase = useAdvancePhase();
   const [tipsOpen, setTipsOpen] = useState(true);
@@ -87,6 +90,14 @@ export function GameStateDisplay({
             >
               <FiInfo />
             </IconButton>
+          )}
+
+          {phase === "Governance" && players && (
+            <CreateContractModal
+              players={players}
+              currentRound={round}
+              disabled={false}
+            />
           )}
 
           <Button

@@ -5,10 +5,15 @@ import {
   Table,
   Text,
   HStack,
+  VStack,
 } from '@chakra-ui/react';
 import { useEditPlayer } from '../hooks/useGameData';
 import { EditPlayerModal } from './EditPlayerModal';
+import { BuildInfrastructureModal } from './BuildInfrastructureModal';
+import { PlayerInventoryModal } from './PlayerInventoryModal';
+import { ManualAdjustmentModal } from './ManualAdjustmentModal';
 import { toaster } from './ui/toaster';
+import { useGameStore } from '../store/gameStore';
 import type { DashboardPlayer } from '../lib/database.types';
 import type { Specialization } from '../lib/database.types';
 
@@ -18,6 +23,7 @@ interface PlayerRankingsProps {
 
 export function PlayerRankings({ players }: PlayerRankingsProps) {
   const editPlayer = useEditPlayer();
+  const currentPhase = useGameStore((state) => state.currentPhase);
 
   const getSpecializationBadge = (specialization: string) => {
     const colorMap: Record<string, string> = {
@@ -57,44 +63,37 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
 
   return (
     <Box
-      bg="white"
+      bg="bg"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="gray.200"
+      borderColor="border"
       shadow="sm"
     >
-      <Heading size="lg" mb={4} color="gray.900">
+      <Heading size="lg" mb={4} color="fg.emphasized">
         Player Rankings
       </Heading>
 
       <Table.Root size="lg" variant="outline" striped>
         <Table.ScrollArea maxH="600px">
           <Table.Header>
-            <Table.Row bg="gray.100">
-              <Table.ColumnHeader fontWeight="bold" color="gray.900">Rank</Table.ColumnHeader>
-              <Table.ColumnHeader fontWeight="bold" color="gray.900">Player</Table.ColumnHeader>
-              <Table.ColumnHeader fontWeight="bold" color="gray.900">Specialization</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="right" fontWeight="bold" color="gray.900">EV</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="right" fontWeight="bold" color="gray.900">REP</Table.ColumnHeader>
-              <Table.ColumnHeader fontWeight="bold" color="gray.900">Actions</Table.ColumnHeader>
+            <Table.Row>
+              <Table.ColumnHeader fontWeight="bold">Rank</Table.ColumnHeader>
+              <Table.ColumnHeader fontWeight="bold">Player</Table.ColumnHeader>
+              <Table.ColumnHeader fontWeight="bold">Specialization</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="right" fontWeight="bold">EV</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="right" fontWeight="bold">REP</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="center" fontWeight="bold">Power</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="center" fontWeight="bold">Crew</Table.ColumnHeader>
+              <Table.ColumnHeader fontWeight="bold">Actions</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {players.map((player, index) => (
-              <Table.Row
-                key={player.id}
-                bg={
-                  isWinner(player.ev)
-                    ? 'green.50'
-                    : isCloseToWinning(player.ev)
-                      ? 'yellow.50'
-                      : undefined
-                }
-              >
+              <Table.Row key={player.id}>
                 <Table.Cell>
                   <HStack gap={2}>
-                    <Text fontWeight="bold" fontSize="lg">
+                    <Text fontWeight="bold" fontSize="lg" color="fg">
                       {index + 1}
                     </Text>
                     {index === 0 && <Text fontSize="xl">👑</Text>}
@@ -102,7 +101,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                 </Table.Cell>
                 <Table.Cell>
                   <HStack gap={2}>
-                    <Text fontWeight="semibold" color="gray.900">{player.name}</Text>
+                    <Text fontWeight="semibold" color="fg">{player.name}</Text>
                     {isWinner(player.ev) && (
                       <Badge colorPalette="green" size="sm">
                         WINNER
@@ -124,24 +123,64 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                   <Text
                     fontWeight="bold"
                     fontSize="lg"
-                    color={isWinner(player.ev) ? 'green.600' : 'inherit'}
+                    color="fg"
                   >
                     {player.ev}
                   </Text>
                 </Table.Cell>
                 <Table.Cell textAlign="right">
-                  <Text fontWeight="semibold" color={player.rep < 0 ? 'red.700' : 'gray.900'}>
+                  <Text fontWeight="semibold" color="fg">
                     {player.rep}
                   </Text>
                 </Table.Cell>
+                <Table.Cell textAlign="center">
+                  <VStack gap={0}>
+                    <Text fontSize="sm" fontWeight="semibold" color="fg">
+                      {player.totals.available_power}
+                    </Text>
+                    <Text fontSize="xs" color="fg.muted">
+                      ({player.totals.total_power_capacity - player.totals.total_power_used} / {player.totals.total_power_capacity})
+                    </Text>
+                  </VStack>
+                </Table.Cell>
+                <Table.Cell textAlign="center">
+                  <VStack gap={0}>
+                    <Text fontSize="sm" fontWeight="semibold" color="fg">
+                      {player.totals.available_crew}
+                    </Text>
+                    <Text fontSize="xs" color="fg.muted">
+                      ({player.totals.total_crew_capacity - player.totals.total_crew_used} / {player.totals.total_crew_capacity})
+                    </Text>
+                  </VStack>
+                </Table.Cell>
                 <Table.Cell>
-                  <EditPlayerModal
-                    playerId={player.id}
-                    currentName={player.name}
-                    currentSpecialization={player.specialization}
-                    onEditPlayer={handleEditPlayer}
-                    isPending={editPlayer.isPending}
-                  />
+                  <HStack gap={2}>
+                    <EditPlayerModal
+                      playerId={player.id}
+                      currentName={player.name}
+                      currentSpecialization={player.specialization}
+                      onEditPlayer={handleEditPlayer}
+                      isPending={editPlayer.isPending}
+                    />
+                    <BuildInfrastructureModal
+                      builderId={player.id}
+                      builderName={player.name}
+                      builderEv={player.ev}
+                      players={players}
+                      disabled={currentPhase !== 'Operations'}
+                    />
+                    <PlayerInventoryModal
+                      playerId={player.id}
+                      playerName={player.name}
+                      infrastructure={player.infrastructure}
+                    />
+                    <ManualAdjustmentModal
+                      playerId={player.id}
+                      playerName={player.name}
+                      currentEv={player.ev}
+                      currentRep={player.rep}
+                    />
+                  </HStack>
                 </Table.Cell>
               </Table.Row>
             ))}

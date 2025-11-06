@@ -4,6 +4,8 @@ import { DashboardHeader } from './DashboardHeader';
 import { GameStateDisplay } from './GameStateDisplay';
 import { PlayerRankings } from './PlayerRankings';
 import { InfrastructureCards } from './InfrastructureCards';
+import { ContractsListView } from './ContractsListView';
+import { LedgerDisplay } from './LedgerDisplay';
 
 export function Dashboard() {
   const { data, isLoading, error } = useDashboardData();
@@ -67,6 +69,7 @@ export function Dashboard() {
               round={data.game_state.round}
               phase={data.game_state.phase}
               version={data.game_state.version}
+              players={data.players}
             />
           </Box>
 
@@ -75,9 +78,25 @@ export function Dashboard() {
             <PlayerRankings players={data.players} />
           </Box>
 
+          {/* Contracts Section */}
+          <Box>
+            <ContractsListView
+              players={data.players}
+              currentRound={data.game_state.round}
+            />
+          </Box>
+
           {/* Infrastructure Section */}
           <Box>
             <InfrastructureCards players={data.players} />
+          </Box>
+
+          {/* Ledger Section */}
+          <Box>
+            <LedgerDisplay
+              players={data.players}
+              currentRound={data.game_state.round}
+            />
           </Box>
         </VStack>
       </Container>

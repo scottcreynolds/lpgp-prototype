@@ -23,7 +23,15 @@ export type TransactionType =
   | "YIELD"
   | "MANUAL_ADJUSTMENT"
   | "GAME_START"
-  | "COMMONS_MAINTENANCE";
+  | "COMMONS_MAINTENANCE"
+  | "CONTRACT_CREATED"
+  | "CONTRACT_PAYMENT"
+  | "CONTRACT_ENDED"
+  | "CONTRACT_BROKEN"
+  | "INFRASTRUCTURE_ACTIVATED"
+  | "INFRASTRUCTURE_DEACTIVATED";
+
+export type ContractStatus = "active" | "ended" | "broken";
 
 export interface Database {
   public: {
@@ -132,6 +140,8 @@ export interface Database {
           is_powered: boolean;
           is_crewed: boolean;
           is_starter: boolean;
+          location: string | null;
+          is_active: boolean;
           created_at: string;
         };
         Insert: {
@@ -141,6 +151,8 @@ export interface Database {
           is_powered?: boolean;
           is_crewed?: boolean;
           is_starter?: boolean;
+          location?: string | null;
+          is_active?: boolean;
           created_at?: string;
         };
         Update: {
@@ -150,6 +162,8 @@ export interface Database {
           is_powered?: boolean;
           is_crewed?: boolean;
           is_starter?: boolean;
+          location?: string | null;
+          is_active?: boolean;
           created_at?: string;
         };
       };
@@ -157,32 +171,112 @@ export interface Database {
         Row: {
           id: string;
           player_id: string | null;
+          player_name: string | null;
           round: number;
           transaction_type: TransactionType;
           amount: number;
+          ev_change: number;
+          rep_change: number;
           reason: string;
+          processed: boolean;
+          infrastructure_id: string | null;
+          contract_id: string | null;
           metadata: Json | null;
           created_at: string;
         };
         Insert: {
           id?: string;
           player_id?: string | null;
+          player_name?: string | null;
           round: number;
           transaction_type: TransactionType;
           amount: number;
+          ev_change?: number;
+          rep_change?: number;
           reason: string;
+          processed?: boolean;
+          infrastructure_id?: string | null;
+          contract_id?: string | null;
           metadata?: Json | null;
           created_at?: string;
         };
         Update: {
           id?: string;
           player_id?: string | null;
+          player_name?: string | null;
           round?: number;
           transaction_type?: TransactionType;
           amount?: number;
+          ev_change?: number;
+          rep_change?: number;
           reason?: string;
+          processed?: boolean;
+          infrastructure_id?: string | null;
+          contract_id?: string | null;
           metadata?: Json | null;
           created_at?: string;
+        };
+      };
+      contracts: {
+        Row: {
+          id: string;
+          party_a_id: string;
+          party_b_id: string;
+          ev_from_a_to_b: number;
+          ev_from_b_to_a: number;
+          ev_is_per_round: boolean;
+          power_from_a_to_b: number;
+          power_from_b_to_a: number;
+          crew_from_a_to_b: number;
+          crew_from_b_to_a: number;
+          duration_rounds: number | null;
+          rounds_remaining: number | null;
+          status: ContractStatus;
+          created_in_round: number;
+          ended_in_round: number | null;
+          reason_for_ending: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          party_a_id: string;
+          party_b_id: string;
+          ev_from_a_to_b?: number;
+          ev_from_b_to_a?: number;
+          ev_is_per_round?: boolean;
+          power_from_a_to_b?: number;
+          power_from_b_to_a?: number;
+          crew_from_a_to_b?: number;
+          crew_from_b_to_a?: number;
+          duration_rounds?: number | null;
+          rounds_remaining?: number | null;
+          status?: ContractStatus;
+          created_in_round: number;
+          ended_in_round?: number | null;
+          reason_for_ending?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          party_a_id?: string;
+          party_b_id?: string;
+          ev_from_a_to_b?: number;
+          ev_from_b_to_a?: number;
+          ev_is_per_round?: boolean;
+          power_from_a_to_b?: number;
+          power_from_b_to_a?: number;
+          crew_from_a_to_b?: number;
+          crew_from_b_to_a?: number;
+          duration_rounds?: number | null;
+          rounds_remaining?: number | null;
+          status?: ContractStatus;
+          created_in_round?: number;
+          ended_in_round?: number | null;
+          reason_for_ending?: string | null;
+          created_at?: string;
+          updated_at?: string;
         };
       };
     };
@@ -209,6 +303,91 @@ export interface Database {
         Args: Record<string, never>;
         Returns: Json;
       };
+      build_infrastructure: {
+        Args: {
+          p_builder_id: string;
+          p_owner_id: string;
+          p_infrastructure_type: string;
+          p_location: string;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+          infrastructure_id: string | null;
+          new_ev: number | null;
+        }[];
+      };
+      toggle_infrastructure_status: {
+        Args: {
+          p_infrastructure_id: string;
+          p_target_status: boolean;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+          is_active: boolean;
+        }[];
+      };
+      get_available_power: {
+        Args: { p_player_id: string };
+        Returns: number;
+      };
+      get_available_crew: {
+        Args: { p_player_id: string };
+        Returns: number;
+      };
+      create_contract: {
+        Args: {
+          p_party_a_id: string;
+          p_party_b_id: string;
+          p_ev_from_a_to_b?: number;
+          p_ev_from_b_to_a?: number;
+          p_ev_is_per_round?: boolean;
+          p_power_from_a_to_b?: number;
+          p_power_from_b_to_a?: number;
+          p_crew_from_a_to_b?: number;
+          p_crew_from_b_to_a?: number;
+          p_duration_rounds?: number | null;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+          contract_id: string | null;
+        }[];
+      };
+      end_contract: {
+        Args: {
+          p_contract_id: string;
+          p_is_broken?: boolean;
+          p_reason?: string | null;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+        }[];
+      };
+      manual_adjustment: {
+        Args: {
+          p_player_id: string;
+          p_ev_change?: number;
+          p_rep_change?: number;
+          p_reason?: string;
+        };
+        Returns: {
+          success: boolean;
+          message: string;
+          new_ev: number | null;
+          new_rep: number | null;
+        }[];
+      };
+      process_round_end: {
+        Args: Record<string, never>;
+        Returns: {
+          success: boolean;
+          message: string;
+          summary: Json;
+        }[];
+      };
     };
   };
 }
@@ -221,9 +400,11 @@ export type InfrastructureDefinition =
 export type PlayerInfrastructure =
   Database["public"]["Tables"]["player_infrastructure"]["Row"];
 export type LedgerEntry = Database["public"]["Tables"]["ledger_entries"]["Row"];
+export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
 
 // Dashboard summary types
 export interface PlayerInfrastructureItem {
+  id: string;
   type: string;
   cost: number;
   maintenance_cost: number;
@@ -234,6 +415,8 @@ export interface PlayerInfrastructureItem {
   is_powered: boolean;
   is_crewed: boolean;
   is_starter: boolean;
+  location: string | null;
+  is_active: boolean;
 }
 
 export interface PlayerTotals {
@@ -244,6 +427,8 @@ export interface PlayerTotals {
   total_maintenance_cost: number;
   total_yield: number;
   infrastructure_count: number;
+  available_power: number;
+  available_crew: number;
 }
 
 export interface DashboardPlayer extends Player {

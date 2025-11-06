@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Button,
   DialogActionTrigger,
+  DialogBackdrop,
   DialogBody,
   DialogCloseTrigger,
   DialogContent,
@@ -14,6 +15,7 @@ import {
   IconButton,
   Input,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -87,7 +89,16 @@ export function EditPlayerModal({
         </IconButton>
       </DialogTrigger>
 
-      <DialogContent>
+      <Portal>
+        <DialogBackdrop />
+        <DialogContent
+          css={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
         <DialogHeader>
           <DialogTitle>Edit Player</DialogTitle>
         </DialogHeader>
@@ -144,6 +155,7 @@ export function EditPlayerModal({
 
         <DialogCloseTrigger />
       </DialogContent>
+      </Portal>
     </DialogRoot>
   );
 }

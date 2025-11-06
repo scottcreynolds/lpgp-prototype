@@ -1,12 +1,14 @@
 import {
   Box,
   Button,
+  DialogBackdrop,
   DialogBody,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogRoot,
   DialogTitle,
+  Portal,
   Text,
 } from "@chakra-ui/react";
 
@@ -18,7 +20,16 @@ interface SetupTipsProps {
 export function SetupTips({ open, onClose }: SetupTipsProps) {
   return (
     <DialogRoot open={open} onOpenChange={(e) => !e.open && onClose()}>
-      <DialogContent>
+      <Portal>
+        <DialogBackdrop />
+        <DialogContent
+          css={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
         <DialogHeader>
           <DialogTitle>Welcome to Setup</DialogTitle>
         </DialogHeader>
@@ -45,6 +56,7 @@ export function SetupTips({ open, onClose }: SetupTipsProps) {
           </Button>
         </DialogFooter>
       </DialogContent>
+      </Portal>
     </DialogRoot>
   );
 }

@@ -319,8 +319,190 @@ async function rpcEditPlayer(
   };
 }
 
+async function rpcBuildInfrastructure(
+  builderId: string,
+  ownerId: string,
+  infrastructureType: string,
+  location: string | null
+) {
+  const players = getPlayers();
+  const playerInfra = getPlayerInfrastructure();
+  const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+  const gameState = getGameState();
+
+  // Find builder and infrastructure definition
+  const builderIndex = players.findIndex((p: Player) => p.id === builderId);
+  const owner = players.find((p: Player) => p.id === ownerId);
+  const infraDef = infrastructureDefinitions.find((d) => d.type === infrastructureType);
+
+  if (builderIndex === -1) {
+    return {
+      data: [{ success: false, message: "Builder not found" }],
+      error: null,
+    };
+  }
+
+  if (!owner) {
+    return {
+      data: [{ success: false, message: "Owner not found" }],
+      error: null,
+    };
+  }
+
+  if (!infraDef) {
+    return {
+      data: [{ success: false, message: "Infrastructure type not found" }],
+      error: null,
+    };
+  }
+
+  // Check if builder can afford it
+  if (players[builderIndex].ev < infraDef.cost) {
+    return {
+      data: [{ success: false, message: "Insufficient EV" }],
+      error: null,
+    };
+  }
+
+  // Deduct cost from builder
+  players[builderIndex].ev -= infraDef.cost;
+  players[builderIndex].updated_at = new Date().toISOString();
+
+  // Create new infrastructure entry
+  const newInfra = {
+    id: crypto.randomUUID(),
+    player_id: ownerId,
+    infrastructure_id: infraDef.id,
+    is_powered: true,
+    is_crewed: true,
+    is_starter: false,
+    location: location,
+    is_active: true,
+    created_at: new Date().toISOString(),
+  };
+
+  playerInfra.push(newInfra);
+
+  // Create ledger entry
+  const newLedgerEntry = {
+    id: crypto.randomUUID(),
+    player_id: builderId,
+    player_name: players[builderIndex].name,
+    round: gameState.current_round,
+    transaction_type: "INFRASTRUCTURE_BUILT" as const,
+    amount: infraDef.cost,
+    ev_change: -infraDef.cost,
+    rep_change: 0,
+    reason: `Built ${infrastructureType}${location ? ` at ${location}` : ''} for ${owner.name}`,
+    processed: true,
+    infrastructure_id: newInfra.id,
+    contract_id: null,
+    metadata: null,
+    created_at: new Date().toISOString(),
+  };
+
+  ledger.push(newLedgerEntry);
+
+  // Save all updates
+  localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
+  localStorage.setItem(STORAGE_KEYS.PLAYER_INFRASTRUCTURE, JSON.stringify(playerInfra));
+  localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+
+  // Notify subscribers
+  notifySubscribers("players");
+  notifySubscribers("player_infrastructure");
+
+  return {
+    data: [
+      {
+        success: true,
+        message: "Infrastructure built successfully",
+        infrastructure_id: newInfra.id,
+      },
+    ],
+    error: null,
+  };
+}
+
 // Mock Supabase client
 export const mockSupabaseClient = {
+  from: (tableName: string) => {
+    const queryBuilder = {
+      select: (_columns: string = "*") => {
+        let filterColumn: string | null = null;
+        let filterValue: unknown = null;
+        let orderColumn: string | null = null;
+        let orderAscending = true;
+        let limitValue: number | null = null;
+
+        const selectBuilder = {
+          eq: (column: string, value: unknown) => {
+            filterColumn = column;
+            filterValue = value;
+            return selectBuilder;
+          },
+          order: (column: string, options?: { ascending?: boolean }) => {
+            orderColumn = column;
+            orderAscending = options?.ascending ?? true;
+            return selectBuilder;
+          },
+          limit: (n: number) => {
+            limitValue = n;
+            return selectBuilder;
+          },
+          then: (resolve: (value: { data: unknown; error: unknown | null }) => void) => {
+            // Execute the query
+            if (tableName === "infrastructure_definitions") {
+              // Filter to only non-starter infrastructure
+              const nonStarterInfra = infrastructureDefinitions.filter(
+                (infra) => !infra.is_starter
+              );
+              resolve({
+                data: nonStarterInfra,
+                error: null,
+              });
+            } else if (tableName === "ledger_entries") {
+              let ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+
+              // Apply filter if specified
+              if (filterColumn && filterValue !== null) {
+                ledger = ledger.filter((entry: any) => entry[filterColumn!] === filterValue);
+              }
+
+              // Apply ordering
+              if (orderColumn) {
+                ledger.sort((a: any, b: any) => {
+                  const aVal = a[orderColumn!];
+                  const bVal = b[orderColumn!];
+                  if (aVal < bVal) return orderAscending ? -1 : 1;
+                  if (aVal > bVal) return orderAscending ? 1 : -1;
+                  return 0;
+                });
+              }
+
+              // Apply limit
+              if (limitValue) {
+                ledger = ledger.slice(0, limitValue);
+              }
+
+              resolve({
+                data: ledger,
+                error: null,
+              });
+            } else {
+              resolve({
+                data: [],
+                error: { message: `Table ${tableName} not implemented in mock` },
+              });
+            }
+          },
+        };
+        return selectBuilder;
+      },
+    };
+    return queryBuilder;
+  },
+
   rpc: (functionName: string, params?: Record<string, unknown>) => {
     switch (functionName) {
       case "get_dashboard_summary":
@@ -340,6 +522,23 @@ export const mockSupabaseClient = {
           params?.p_player_name as string,
           params?.p_player_specialization as Specialization
         );
+      case "build_infrastructure":
+        return rpcBuildInfrastructure(
+          params?.p_builder_id as string,
+          params?.p_owner_id as string,
+          params?.p_infrastructure_type as string,
+          params?.p_location as string | null
+        );
+      // Stub implementations for other infrastructure/contract/ledger RPCs
+      case "toggle_infrastructure_status":
+      case "create_contract":
+      case "end_contract":
+      case "manual_adjustment":
+      case "process_round_end":
+        return Promise.resolve({
+          data: [{ success: true, message: `Mock ${functionName} - not yet implemented` }],
+          error: null,
+        });
       default:
         return Promise.resolve({
           data: null,

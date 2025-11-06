@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Button,
   DialogActionTrigger,
+  DialogBackdrop,
   DialogBody,
   DialogCloseTrigger,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   Field,
   Input,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -61,7 +63,16 @@ export function AddPlayerModal({ onAddPlayer, isPending }: AddPlayerModalProps) 
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <Portal>
+        <DialogBackdrop />
+        <DialogContent
+          css={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
         <DialogHeader>
           <DialogTitle>Add New Player</DialogTitle>
         </DialogHeader>
@@ -116,6 +127,7 @@ export function AddPlayerModal({ onAddPlayer, isPending }: AddPlayerModalProps) 
 
         <DialogCloseTrigger />
       </DialogContent>
+      </Portal>
     </DialogRoot>
   );
 }

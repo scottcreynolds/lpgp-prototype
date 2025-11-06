@@ -9,6 +9,9 @@ export const gameKeys = {
   all: ['game'] as const,
   dashboard: () => [...gameKeys.all, 'dashboard'] as const,
   state: () => [...gameKeys.all, 'state'] as const,
+  infrastructure: () => [...gameKeys.all, 'infrastructure'] as const,
+  contracts: () => [...gameKeys.all, 'contracts'] as const,
+  ledger: () => [...gameKeys.all, 'ledger'] as const,
 };
 
 /**
@@ -248,6 +251,367 @@ export function useEditPlayer() {
     onSuccess: () => {
       // Refetch dashboard to show updated player
       queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+    },
+  });
+}
+
+/**
+ * Fetches infrastructure definitions
+ */
+export function useInfrastructureDefinitions() {
+  return useQuery({
+    queryKey: gameKeys.infrastructure(),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('infrastructure_definitions')
+        .select('*')
+        .eq('is_starter', false)
+        .order('type');
+
+      if (error) {
+        throw new Error(`Failed to fetch infrastructure: ${error.message}`);
+      }
+
+      return data;
+    },
+  });
+}
+
+/**
+ * Builds infrastructure for a player
+ */
+export function useBuildInfrastructure() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      builderId,
+      ownerId,
+      infrastructureType,
+      location,
+    }: {
+      builderId: string;
+      ownerId: string;
+      infrastructureType: string;
+      location: string | null;
+    }) => {
+      const { data, error } = await supabase.rpc('build_infrastructure', {
+        p_builder_id: builderId,
+        p_owner_id: ownerId,
+        p_infrastructure_type: infrastructureType,
+        p_location: location,
+      });
+
+      if (error) {
+        throw new Error(`Failed to build infrastructure: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from build_infrastructure');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to build infrastructure');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
+    },
+  });
+}
+
+/**
+ * Toggles infrastructure active/dormant status
+ */
+export function useToggleInfrastructureStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      infrastructureId,
+      targetStatus,
+    }: {
+      infrastructureId: string;
+      targetStatus: boolean;
+    }) => {
+      const { data, error } = await supabase.rpc('toggle_infrastructure_status', {
+        p_infrastructure_id: infrastructureId,
+        p_target_status: targetStatus,
+      });
+
+      if (error) {
+        throw new Error(`Failed to toggle infrastructure: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from toggle_infrastructure_status');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to toggle infrastructure');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+    },
+  });
+}
+
+/**
+ * Fetches contracts with optional filtering
+ */
+export function useContracts(playerId?: string) {
+  return useQuery({
+    queryKey: [...gameKeys.contracts(), playerId],
+    queryFn: async () => {
+      let query = supabase
+        .from('contracts')
+        .select('*, party_a:players!party_a_id(name), party_b:players!party_b_id(name)')
+        .order('created_at', { ascending: false });
+
+      if (playerId) {
+        query = query.or(`party_a_id.eq.${playerId},party_b_id.eq.${playerId}`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Failed to fetch contracts: ${error.message}`);
+      }
+
+      return data;
+    },
+  });
+}
+
+/**
+ * Creates a contract between two players
+ */
+export function useCreateContract() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      partyAId,
+      partyBId,
+      evFromAToB = 0,
+      evFromBToA = 0,
+      evIsPerRound = false,
+      powerFromAToB = 0,
+      powerFromBToA = 0,
+      crewFromAToB = 0,
+      crewFromBToA = 0,
+      durationRounds = null,
+    }: {
+      partyAId: string;
+      partyBId: string;
+      evFromAToB?: number;
+      evFromBToA?: number;
+      evIsPerRound?: boolean;
+      powerFromAToB?: number;
+      powerFromBToA?: number;
+      crewFromAToB?: number;
+      crewFromBToA?: number;
+      durationRounds?: number | null;
+    }) => {
+      const { data, error } = await supabase.rpc('create_contract', {
+        p_party_a_id: partyAId,
+        p_party_b_id: partyBId,
+        p_ev_from_a_to_b: evFromAToB,
+        p_ev_from_b_to_a: evFromBToA,
+        p_ev_is_per_round: evIsPerRound,
+        p_power_from_a_to_b: powerFromAToB,
+        p_power_from_b_to_a: powerFromBToA,
+        p_crew_from_a_to_b: crewFromAToB,
+        p_crew_from_b_to_a: crewFromBToA,
+        p_duration_rounds: durationRounds,
+      });
+
+      if (error) {
+        throw new Error(`Failed to create contract: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from create_contract');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to create contract');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.contracts() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+    },
+  });
+}
+
+/**
+ * Ends a contract
+ */
+export function useEndContract() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      contractId,
+      isBroken = false,
+      reason = null,
+    }: {
+      contractId: string;
+      isBroken?: boolean;
+      reason?: string | null;
+    }) => {
+      const { data, error } = await supabase.rpc('end_contract', {
+        p_contract_id: contractId,
+        p_is_broken: isBroken,
+        p_reason: reason,
+      });
+
+      if (error) {
+        throw new Error(`Failed to end contract: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from end_contract');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to end contract');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.contracts() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+    },
+  });
+}
+
+/**
+ * Manually adjusts player EV and/or REP
+ */
+export function useManualAdjustment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      playerId,
+      evChange = 0,
+      repChange = 0,
+      reason = 'Manual adjustment',
+    }: {
+      playerId: string;
+      evChange?: number;
+      repChange?: number;
+      reason?: string;
+    }) => {
+      const { data, error } = await supabase.rpc('manual_adjustment', {
+        p_player_id: playerId,
+        p_ev_change: evChange,
+        p_rep_change: repChange,
+        p_reason: reason,
+      });
+
+      if (error) {
+        throw new Error(`Failed to make adjustment: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from manual_adjustment');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to make adjustment');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
+    },
+  });
+}
+
+/**
+ * Fetches ledger entries with optional filtering
+ */
+export function useLedger(playerId?: string, round?: number) {
+  return useQuery({
+    queryKey: [...gameKeys.ledger(), playerId, round],
+    queryFn: async () => {
+      let query = supabase
+        .from('ledger_entries')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (playerId) {
+        query = query.eq('player_id', playerId);
+      }
+
+      if (round !== undefined) {
+        query = query.eq('round', round);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Failed to fetch ledger: ${error.message}`);
+      }
+
+      return data;
+    },
+  });
+}
+
+/**
+ * Processes round end calculations
+ */
+export function useProcessRoundEnd() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc('process_round_end');
+
+      if (error) {
+        throw new Error(`Failed to process round end: ${error.message}`);
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('No response from process_round_end');
+      }
+
+      const result = data[0];
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to process round end');
+      }
+
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.all });
     },
   });
 }

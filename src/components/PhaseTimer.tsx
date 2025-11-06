@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  DialogBackdrop,
   DialogBody,
   DialogContent,
   DialogFooter,
@@ -9,6 +10,7 @@ import {
   DialogTitle,
   HStack,
   Input,
+  Portal,
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -156,7 +158,16 @@ export function PhaseTimer({ round, phase }: PhaseTimerProps) {
       <Box display="none">{tick}</Box>
 
       <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)}>
-        <DialogContent>
+        <Portal>
+          <DialogBackdrop />
+          <DialogContent
+            css={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
           <DialogHeader>
             <DialogTitle>Phase time is up</DialogTitle>
           </DialogHeader>
@@ -171,6 +182,7 @@ export function PhaseTimer({ round, phase }: PhaseTimerProps) {
             </Button>
           </DialogFooter>
         </DialogContent>
+        </Portal>
       </DialogRoot>
     </Box>
   );
