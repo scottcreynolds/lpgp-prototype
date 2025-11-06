@@ -143,7 +143,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   {/* Power */}
                   <Box
                     p={3}
-                    bg="bg.muted"
+                    bg={powerShortage ? "bg.error.subtle" : "bg.muted"}
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
@@ -169,7 +169,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   {/* Crew */}
                   <Box
                     p={3}
-                    bg="bg.muted"
+                    bg={crewShortage ? "bg.error.subtle" : "bg.muted"}
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
@@ -217,7 +217,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
                   <Box
                     p={3}
-                    bg="bg.muted"
+                    bg={totals.total_yield > 0 ? "bg.success.subtle" : "bg.muted"}
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
@@ -237,7 +237,18 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                 </SimpleGrid>
 
                 {/* Net Income */}
-                <Box p={2} bg="bg.muted" borderRadius="md" textAlign="center">
+                <Box
+                  p={2}
+                  bg={
+                    totals.total_yield - totals.total_maintenance_cost > 0
+                      ? "bg.success.subtle"
+                      : totals.total_yield - totals.total_maintenance_cost < 0
+                      ? "bg.error.subtle"
+                      : "bg.muted"
+                  }
+                  borderRadius="md"
+                  textAlign="center"
+                >
                   <Text fontSize="xs" color="fg" mb={1} fontWeight="bold">
                     Net Per Round
                   </Text>

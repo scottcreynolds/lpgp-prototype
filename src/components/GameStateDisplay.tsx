@@ -3,14 +3,15 @@ import {
   Button,
   Flex,
   Heading,
-  HStack,
   IconButton,
+  Stack,
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { FiInfo } from "react-icons/fi";
-import { useAdvancePhase, useAdvanceRound } from "../hooks/useGameData";
-import type { DashboardPlayer, GamePhase } from "../lib/database.types";
+import { useAdvancePhase, useAdvanceRound, useAddPlayer } from "../hooks/useGameData";
+import type { DashboardPlayer, GamePhase, Specialization } from "../lib/database.types";
+import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { SetupTips } from "./SetupTips.tsx";
@@ -31,6 +32,7 @@ export function GameStateDisplay({
 }: GameStateDisplayProps) {
   const advancePhase = useAdvancePhase();
   const advanceRound = useAdvanceRound();
+  const addPlayer = useAddPlayer();
   const [tipsOpen, setTipsOpen] = useState(true);
 
   const handleAdvancePhase = async () => {
@@ -77,6 +79,29 @@ export function GameStateDisplay({
     }
   };
 
+  const handleAddPlayer = async (
+    name: string,
+    specialization: Specialization
+  ) => {
+    try {
+      await addPlayer.mutateAsync({ name, specialization });
+      toaster.create({
+        title: "Player Added",
+        description: `${name} joined as ${specialization}`,
+        type: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toaster.create({
+        title: "Failed to Add Player",
+        description:
+          error instanceof Error ? error.message : "Failed to add player",
+        type: "error",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <Box
       bg="bg"
@@ -85,9 +110,19 @@ export function GameStateDisplay({
       borderWidth={1}
       borderColor="border"
       shadow="sm"
+      maxW={{ base: "full", lg: "4xl" }}
+      mx="auto"
     >
-      <Flex justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
-        <Box flex="1" minW="300px">
+      {/* Top Row: Two columns */}
+      <Flex
+        justify="space-between"
+        align="flex-start"
+        flexWrap={{ base: "wrap", md: "nowrap" }}
+        gap={4}
+        mb={4}
+      >
+        {/* Left Column: Round/Status Info */}
+        <Box flex="1" minW={{ base: "full", md: "300px" }}>
           <Heading size="xl" mb={1} color="fg">
             {phase === "Setup" ? (
               <>Setup Phase</>
@@ -115,48 +150,70 @@ export function GameStateDisplay({
           </Text>
         </Box>
 
-        <HStack gap={4} flexShrink={0}>
+        {/* Right Column: Timer */}
+        <Box flexShrink={0}>
           {phase !== "Setup" && <PhaseTimer round={round} phase={phase} />}
-
-          {phase === "Setup" && (
-            <IconButton
-              aria-label="Setup tips"
-              onClick={() => setTipsOpen(true)}
-              variant="subtle"
-            >
-              <FiInfo />
-            </IconButton>
-          )}
-
-          {phase === "Governance" && players && (
-            <CreateContractModal
-              players={players}
-              currentRound={round}
-              disabled={false}
-            />
-          )}
-
-          {phase === "Operations" ? (
-            <Button
-              onClick={handleAdvanceRound}
-              loading={advanceRound.isPending}
-              colorPalette="blue"
-              size="lg"
-            >
-              Advance Round
-            </Button>
-          ) : (
-            <Button
-              onClick={handleAdvancePhase}
-              loading={advancePhase.isPending}
-              colorPalette="blue"
-              size="lg"
-            >
-              {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
-            </Button>
-          )}
-        </HStack>
+        </Box>
       </Flex>
+
+      {/* Action Row */}
+      <Stack
+        direction={{ base: "column", md: "row" }}
+        justify="flex-start"
+        align={{ base: "stretch", md: "center" }}
+        gap={3}
+      >
+        {phase === "Setup" && (
+          <IconButton
+            aria-label="Setup tips"
+            onClick={() => setTipsOpen(true)}
+            variant="subtle"
+            width={{ base: "full", md: "auto" }}
+          >
+            <FiInfo />
+          </IconButton>
+        )}
+
+        {phase === "Governance" && players && (
+          <CreateContractModal
+            players={players}
+            currentRound={round}
+            disabled={false}
+          />
+        )}
+
+        {/* Add Player Button */}
+        <AddPlayerModal
+          onAddPlayer={handleAddPlayer}
+          isPending={addPlayer.isPending}
+        />
+
+        {/* Spacer to push next button to the right on desktop */}
+        <Box flex={{ base: "0", md: "1" }} />
+
+        {/* Next Phase / Advance Round - always rightmost */}
+        {phase === "Operations" ? (
+          <Button
+            onClick={handleAdvanceRound}
+            loading={advanceRound.isPending}
+            colorPalette="blue"
+            size="lg"
+            width={{ base: "full", md: "auto" }}
+          >
+            Advance Round
+          </Button>
+        ) : (
+          <Button
+            onClick={handleAdvancePhase}
+            loading={advancePhase.isPending}
+            colorPalette="blue"
+            size="lg"
+            width={{ base: "full", md: "auto" }}
+          >
+            {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
+          </Button>
+        )}
+      </Stack>
 
       {phase === "Setup" && (
         <SetupTips open={tipsOpen} onClose={() => setTipsOpen(false)} />

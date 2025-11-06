@@ -1269,6 +1269,121 @@ export const mockSupabaseClient = {
   },
 
   rpc: (functionName: string, params?: Record<string, unknown>) => {
+    // Define toggle_infrastructure_status function
+    async function rpcToggleInfrastructureStatus(
+      infrastructureId: string,
+      targetStatus: boolean
+    ) {
+      const playerInfra = getPlayerInfrastructure();
+      const ledger = JSON.parse(localStorage.getItem(STORAGE_KEYS.LEDGER)!);
+      const gameState = getGameState();
+      const players = getPlayers();
+
+      // Find the infrastructure
+      const infraIndex = playerInfra.findIndex(
+        (pi: PlayerInfrastructure) => pi.id === infrastructureId
+      );
+
+      if (infraIndex === -1) {
+        return {
+          data: [
+            {
+              success: false,
+              message: "Infrastructure not found",
+              is_active: false,
+            },
+          ],
+          error: null,
+        };
+      }
+
+      const infra = playerInfra[infraIndex];
+
+      // Prevent deactivating starter infrastructure
+      if (infra.is_starter && targetStatus === false) {
+        return {
+          data: [
+            {
+              success: false,
+              message: "Starter infrastructure cannot be deactivated",
+              is_active: infra.is_active,
+            },
+          ],
+          error: null,
+        };
+      }
+
+      // If already in target status
+      if (infra.is_active === targetStatus) {
+        return {
+          data: [
+            {
+              success: true,
+              message: "Already in target status",
+              is_active: infra.is_active,
+            },
+          ],
+          error: null,
+        };
+      }
+
+      // Toggle the status
+      playerInfra[infraIndex].is_active = targetStatus;
+      playerInfra[infraIndex].is_powered = targetStatus;
+      playerInfra[infraIndex].is_crewed = targetStatus;
+
+      // Save changes
+      localStorage.setItem(
+        STORAGE_KEYS.PLAYER_INFRASTRUCTURE,
+        JSON.stringify(playerInfra)
+      );
+
+      // Find player and infrastructure definition for ledger
+      const player = players.find((p: Player) => p.id === infra.player_id);
+      const infraDef = infrastructureDefinitions.find(
+        (d) => d.id === infra.infrastructure_id
+      );
+
+      // Add ledger entry
+      const ledgerEntry = {
+        id: crypto.randomUUID(),
+        player_id: infra.player_id,
+        player_name: player?.name || "Unknown",
+        round: gameState.current_round,
+        transaction_type: targetStatus
+          ? "INFRASTRUCTURE_ACTIVATED"
+          : "INFRASTRUCTURE_DEACTIVATED",
+        amount: 0,
+        ev_change: 0,
+        rep_change: 0,
+        reason: `${targetStatus ? "Activated" : "Deactivated"} ${infraDef?.type || "infrastructure"}`,
+        processed: true,
+        infrastructure_id: infrastructureId,
+        contract_id: null,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      };
+
+      ledger.push(ledgerEntry);
+      localStorage.setItem(STORAGE_KEYS.LEDGER, JSON.stringify(ledger));
+
+      notifySubscribers("player_infrastructure");
+      notifySubscribers("ledger_entries");
+
+      return {
+        data: [
+          {
+            success: true,
+            message: targetStatus
+              ? "Infrastructure activated"
+              : "Infrastructure deactivated",
+            is_active: targetStatus,
+          },
+        ],
+        error: null,
+      };
+    }
+
     switch (functionName) {
       case "get_dashboard_summary":
         return rpcGetDashboardSummary();
@@ -1322,8 +1437,12 @@ export const mockSupabaseClient = {
           params?.p_is_broken as boolean,
           params?.p_reason as string | null
         );
-      // Stub implementations for other infrastructure/contract/ledger RPCs
       case "toggle_infrastructure_status":
+        return rpcToggleInfrastructureStatus(
+          params?.p_infrastructure_id as string,
+          params?.p_target_status as boolean
+        );
+      // Stub implementations for other RPCs
       case "process_round_end":
         return Promise.resolve({
           data: [

@@ -615,7 +615,7 @@ export function useLedger(playerId?: string, round?: number) {
     queryFn: async () => {
       let query = supabase
         .from("ledger_entries")
-        .select("*")
+        .select("*, players(name)")
         .order("created_at", { ascending: false })
         .limit(100);
 

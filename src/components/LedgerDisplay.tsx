@@ -6,7 +6,6 @@ import {
   NativeSelect,
   Table,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useLedger } from "../hooks/useGameData";
@@ -143,72 +142,6 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
         </Box>
       </HStack>
 
-      {/* Summary Stats */}
-      {ledgerEntries && ledgerEntries.length > 0 && (
-        <Box
-          p={3}
-          mb={4}
-          bg="bg.muted"
-          borderRadius="md"
-          borderWidth={1}
-          borderColor="border"
-        >
-          <HStack justify="space-around">
-            <VStack gap={0}>
-              <Text fontSize="xs" color="fg.muted">
-                Total Entries
-              </Text>
-              <Text fontSize="xl" fontWeight="bold" color="fg">
-                {ledgerEntries.length}
-              </Text>
-            </VStack>
-            <VStack gap={0}>
-              <Text fontSize="xs" color="fg.muted">
-                Total EV Change
-              </Text>
-              <Text
-                fontSize="xl"
-                fontWeight="bold"
-                color={getChangeColor(
-                  ledgerEntries.reduce(
-                    (sum: number, e: LedgerEntry) => sum + e.ev_change,
-                    0
-                  )
-                )}
-              >
-                {formatChange(
-                  ledgerEntries.reduce(
-                    (sum: number, e: LedgerEntry) => sum + e.ev_change,
-                    0
-                  )
-                )}
-              </Text>
-            </VStack>
-            <VStack gap={0}>
-              <Text fontSize="xs" color="fg.muted">
-                Total REP Change
-              </Text>
-              <Text
-                fontSize="xl"
-                fontWeight="bold"
-                color={getChangeColor(
-                  ledgerEntries.reduce(
-                    (sum: number, e: LedgerEntry) => sum + e.rep_change,
-                    0
-                  )
-                )}
-              >
-                {formatChange(
-                  ledgerEntries.reduce(
-                    (sum: number, e: LedgerEntry) => sum + e.rep_change,
-                    0
-                  )
-                )}
-              </Text>
-            </VStack>
-          </HStack>
-        </Box>
-      )}
 
       {/* Ledger Table */}
       {!ledgerEntries || ledgerEntries.length === 0 ? (
@@ -271,7 +204,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                   </Table.Cell>
                   <Table.Cell>
                     <Text fontSize="sm" fontWeight="medium">
-                      {entry.player_name || getPlayerName(entry.player_id)}
+                      {entry.players?.name || getPlayerName(entry.player_id)}
                     </Text>
                   </Table.Cell>
                   <Table.Cell>

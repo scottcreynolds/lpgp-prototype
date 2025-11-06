@@ -409,7 +409,9 @@ export type InfrastructureDefinition =
   Database["public"]["Tables"]["infrastructure_definitions"]["Row"];
 export type PlayerInfrastructure =
   Database["public"]["Tables"]["player_infrastructure"]["Row"];
-export type LedgerEntry = Database["public"]["Tables"]["ledger_entries"]["Row"];
+export type LedgerEntry = Database["public"]["Tables"]["ledger_entries"]["Row"] & {
+  players?: { name: string } | null;
+};
 export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
 
 // Dashboard summary types

@@ -191,7 +191,13 @@ export function buildDashboardSummary(
       phase: gameState.current_phase,
       version: gameState.version,
     },
-    players: players.map((player) => {
+    players: players
+      .sort((a, b) => {
+        // Sort by EV descending, then REP descending
+        if (b.ev !== a.ev) return b.ev - a.ev;
+        return b.rep - a.rep;
+      })
+      .map((player) => {
       const playerInfrastructure = playerInfra.filter(
         (pi) => pi.player_id === player.id
       );

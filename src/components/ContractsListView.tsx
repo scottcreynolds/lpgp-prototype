@@ -104,6 +104,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
       borderWidth={1}
       borderColor="border"
       shadow="sm"
+      width="full"
     >
       <HStack justify="space-between" mb={4}>
         <Heading size="lg" color="fg.emphasized">
@@ -141,11 +142,11 @@ export function ContractsListView({ players }: ContractsListViewProps) {
         <VStack gap={6} align="stretch">
           {/* Active Contracts */}
           {activeContracts.length > 0 && (
-            <Box>
+            <Box width="full">
               <Heading size="md" mb={3} color="fg.emphasized">
                 Active Contracts ({activeContracts.length})
               </Heading>
-              <Table.Root size="md" variant="outline">
+              <Table.Root size="md" variant="outline" width="full">
                 <Table.ScrollArea maxH="400px">
                   <Table.Header>
                     <Table.Row>
@@ -319,11 +320,11 @@ export function ContractsListView({ players }: ContractsListViewProps) {
 
           {/* Inactive Contracts */}
           {inactiveContracts.length > 0 && (
-            <Box>
+            <Box width="full">
               <Heading size="md" mb={3} color="fg.emphasized">
                 Past Contracts ({inactiveContracts.length})
               </Heading>
-              <Table.Root size="sm" variant="outline">
+              <Table.Root size="sm" variant="outline" width="full">
                 <Table.ScrollArea maxH="300px">
                   <Table.Header>
                     <Table.Row>
