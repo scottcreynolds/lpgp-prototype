@@ -63,8 +63,17 @@ TBD — pick next item from High Priority (e.g., turn order in each phase, multi
 - values editor
 - limit who can build what based on spec
 - player turns
-- assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces)
+- assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces) (may not need)
 
-### Bugs
+## Bugs
 
-- player leaderboard indicator not working
+- player leaderboard indicator not working correctly. The player with highest current EV should be at the top and players ranked by EV underneath
+- player names are not showing in the ledger in the player column
+- "starter" inventory is being marked as dormant when it should be always active
+-total EV change and total REP change labels not working in the ledger header but we also don't need those at all.
+- panels in "infrastructure overview" should be colored in a subtle way when there is an overage/shortage. Yield panel surface should be a subtle green when positive. Net per round should be subtle red or green depending on negative/positive. use approriate chakra-ui semantic coloring to preserve contrast and light/dark mode capability
+- contracts table should be full-width of its container and responsive
+- reorder "Game Status" panel to a two column top row and then a "action row":
+  - have round label and any associated status or prompt text on the left top column and timer on the right top
+  - have all actions like create contract, next phase, and add player in the action bar bottom slot, with next phase/advance round always being right-most
+  - leave "start new game" in header
