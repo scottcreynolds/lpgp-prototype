@@ -284,7 +284,10 @@ async function rpcAddPlayer(
     is_powered: true,
     is_crewed: true,
     is_starter: true,
+    location: null,
+    is_active: true,
     created_at: new Date().toISOString(),
+    game_id: gid!,
   };
 
   // Add ledger entry
