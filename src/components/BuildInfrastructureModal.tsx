@@ -248,7 +248,6 @@ export function BuildInfrastructureModal({
                           {players.map((player) => (
                             <option key={player.id} value={player.id}>
                               {player.name}
-                              {player.id === builderId ? " (You)" : ""}
                             </option>
                           ))}
                         </NativeSelect.Field>

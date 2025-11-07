@@ -1,3 +1,4 @@
+import { getSpecializationColor } from "@/lib/specialization";
 import {
   Badge,
   Box,
@@ -24,6 +25,7 @@ import { useEditPlayer } from "../hooks/useGameData";
 import type { DashboardPlayer, Specialization } from "../lib/database.types";
 import { EditPlayerModal } from "./EditPlayerModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
+import SpecializationIcon from "./SpecializationIcon";
 import { toaster } from "./ui/toasterInstance";
 
 interface InfrastructureCardsProps {
@@ -95,21 +97,46 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
               bg="bg"
               p={5}
               borderRadius="lg"
-              borderWidth={1}
-              borderColor="border"
-              shadow="sm"
+              borderWidth={2}
+              borderColor={`${getSpecializationColor(
+                player.specialization
+              )}.400`}
+              shadow="md"
+              position="relative"
+              transition="box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease"
+              _hover={{
+                boxShadow: "lg",
+                transform: "translateY(-2px)",
+                borderColor: `${getSpecializationColor(
+                  player.specialization
+                )}.500`,
+              }}
             >
               <VStack align="stretch" gap={4}>
                 {/* Player Header */}
-                <Flex justify="space-between" align="flex-start">
+                <Flex
+                  justify="space-between"
+                  align="flex-start"
+                  position="relative"
+                >
                   <Box>
                     <Text fontWeight="bold" fontSize="lg" color="fg">
                       {player.name}
                     </Text>
                     <HStack gap={2} align="center">
-                      <Badge size="sm" colorPalette="gray">
-                        {player.specialization}
-                      </Badge>
+                      <HStack gap={1} align="center">
+                        <SpecializationIcon
+                          specialization={player.specialization}
+                        />
+                        <Badge
+                          size="sm"
+                          colorPalette={getSpecializationColor(
+                            player.specialization
+                          )}
+                        >
+                          {player.specialization}
+                        </Badge>
+                      </HStack>
                       {(() => {
                         const inactiveCount = player.infrastructure.filter(
                           (i) => !i.is_active

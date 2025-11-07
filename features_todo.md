@@ -52,6 +52,7 @@
   - Added `ensure_game(p_game_id)`
   - Frontend hooks now pass `p_game_id` and scope table queries/subscriptions by `game_id`
   - Migration file: `database/migrations/012_multigame_support.sql`
+\n+- ✅ **Player specialization card selection** - Add Player modal now presents three specialization image cards (scaled ~75%) instead of a dropdown; responsive horizontal layout stacks vertically on narrow screens for improved clarity.
 
 ## Up Next
 

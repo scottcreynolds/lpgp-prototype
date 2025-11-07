@@ -9,12 +9,12 @@ import {
 } from "@chakra-ui/react";
 import { useEditPlayer } from "../hooks/useGameData";
 import type { DashboardPlayer, Specialization } from "../lib/database.types";
-import { getSession } from "../lib/gameSession";
 import { useGameStore } from "../store/gameStore";
 import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
 import { EditPlayerModal } from "./EditPlayerModal";
 import { ManualAdjustmentModal } from "./ManualAdjustmentModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
+import SpecializationIcon from "./SpecializationIcon";
 import { toaster } from "./ui/toasterInstance";
 
 interface PlayerRankingsProps {
@@ -24,8 +24,7 @@ interface PlayerRankingsProps {
 export function PlayerRankings({ players }: PlayerRankingsProps) {
   const editPlayer = useEditPlayer();
   const currentPhase = useGameStore((state) => state.currentPhase);
-  const mySession = getSession();
-  const myPlayerId = mySession?.playerId;
+  // Removed self-labeling of player ("You") per updated requirement.
 
   const getSpecializationBadge = (specialization: string) => {
     const colorMap: Record<string, string> = {
@@ -114,7 +113,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                 <Table.Cell>
                   <HStack gap={2}>
                     <Text fontWeight="semibold" color="fg">
-                      {player.name} {myPlayerId === player.id ? "(You)" : ""}
+                      {player.name}
                     </Text>
                     {isWinner(player.ev) && (
                       <Badge colorPalette="green" size="sm">
@@ -129,11 +128,18 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                   </HStack>
                 </Table.Cell>
                 <Table.Cell>
-                  <Badge
-                    colorPalette={getSpecializationBadge(player.specialization)}
-                  >
-                    {player.specialization}
-                  </Badge>
+                  <HStack gap={2} align="center">
+                    <SpecializationIcon
+                      specialization={player.specialization}
+                    />
+                    <Badge
+                      colorPalette={getSpecializationBadge(
+                        player.specialization
+                      )}
+                    >
+                      {player.specialization}
+                    </Badge>
+                  </HStack>
                 </Table.Cell>
                 <Table.Cell textAlign="right">
                   <Text fontWeight="bold" fontSize="lg" color="fg">
