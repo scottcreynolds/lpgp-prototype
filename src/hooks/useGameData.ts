@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import type { DashboardSummary, Specialization } from "../lib/database.types";
 import { getCurrentGameId } from "../lib/gameSession";
-import { supabase } from "../lib/supabase";
+import { isMockSupabase, supabase } from "../lib/supabase";
 import { useGameStore } from "../store/gameStore";
 
 // Query key factory
@@ -273,8 +273,19 @@ export function useAddPlayer() {
       name: string;
       specialization: Specialization;
     }) => {
+      // Defensive: ensure a game_state row exists on the server to avoid NULL round
+      // No-op in mock mode where storage is initialized locally
+      const gameId = getCurrentGameId();
+      if (!isMockSupabase && gameId) {
+        try {
+          await supabase.rpc("ensure_game", { p_game_id: gameId });
+        } catch {
+          // Ignore; add_player below will still handle sensible defaults
+        }
+      }
+
       const { data, error } = await supabase.rpc("add_player", {
-        p_game_id: getCurrentGameId(),
+        p_game_id: gameId,
         player_name: name,
         player_specialization: specialization,
       });
