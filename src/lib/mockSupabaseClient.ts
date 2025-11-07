@@ -1328,6 +1328,70 @@ async function rpcAdvanceRound(currentVersion: number) {
   };
 }
 
+// List all games present in localStorage (by scanning lpgp:*:game_state keys)
+async function rpcListGames() {
+  const games: {
+    game_id: string;
+    round: number;
+    phase: string;
+    updated_at: string;
+    player_names: string[];
+    player_count: number;
+  }[] = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)!;
+    const match = key.match(/^lpgp:([a-f0-9-]+):game_state$/);
+    if (!match) continue;
+    const gid = match[1];
+    try {
+      const KEYS = getKeys(gid);
+      const gsRaw = localStorage.getItem(KEYS.GAME_STATE);
+      if (!gsRaw) continue;
+      const gs = JSON.parse(gsRaw);
+      const playersRaw = localStorage.getItem(KEYS.PLAYERS);
+      const players: Player[] = playersRaw ? JSON.parse(playersRaw) : [];
+      games.push({
+        game_id: gid,
+        round: gs.current_round ?? 0,
+        phase: gs.current_phase ?? "Setup",
+        updated_at: gs.updated_at ?? new Date().toISOString(),
+        player_names: players.map((p) => p.name),
+        player_count: players.length,
+      });
+    } catch {
+      // ignore malformed entries
+    }
+  }
+
+  games.sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1));
+
+  return { data: games, error: null };
+}
+
+// Delete a game by removing its localStorage keys
+async function rpcDeleteGame(gameId: string) {
+  const KEYS = getKeys(gameId);
+  localStorage.removeItem(KEYS.GAME_STATE);
+  localStorage.removeItem(KEYS.PLAYERS);
+  localStorage.removeItem(KEYS.PLAYER_INFRASTRUCTURE);
+  localStorage.removeItem(KEYS.LEDGER);
+  localStorage.removeItem(KEYS.CONTRACTS);
+
+  // Also remove session entry if present
+  localStorage.removeItem(`lpgp_session:${gameId}`);
+
+  return {
+    data: [
+      {
+        success: true,
+        message: "Game deleted",
+      },
+    ],
+    error: null,
+  };
+}
+
 // Mock Supabase client
 export const mockSupabaseClient = {
   from: (tableName: string) => {
@@ -1669,6 +1733,10 @@ export const mockSupabaseClient = {
           params?.p_infrastructure_id as string,
           params?.p_target_status as boolean
         );
+      case "list_games":
+        return rpcListGames();
+      case "delete_game":
+        return rpcDeleteGame(params?.p_game_id as string);
       // Stub implementations for other RPCs
       case "process_round_end":
         return Promise.resolve({

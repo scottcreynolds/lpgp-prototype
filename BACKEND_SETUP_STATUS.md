@@ -6,7 +6,7 @@ This document tracks the backend enablement (Supabase + Netlify) for LPGP and ho
 
 ## Summary
 
-- Supabase schema and RPCs are applied through migration 012 (multi‑game support).
+- Supabase schema and RPCs are applied through migration 021 (build permissions, auto‑activation on build, and generic pre‑round auto‑deactivation).
 - Realtime publication configured for: game_state, players, player_infrastructure, ledger_entries, contracts.
 - Netlify environment variables are set so the app uses the real backend:
   - VITE_SUPABASE_URL
@@ -26,6 +26,12 @@ This document tracks the backend enablement (Supabase + Netlify) for LPGP and ho
   - create_contract(p_game_id, ...), end_contract(p_game_id, ...)
   - manual_adjustment(p_game_id, ...), process_round_end(p_game_id)
 - Realtime updates for game_state, players, and player_infrastructure invalidate React Query keys as designed.
+
+### Recent backend changes (019–021)
+
+- Auto-activate Solar Arrays and Habitats on build; add activation ledger entry.
+- Before round-end financials, auto-deactivate any active, non-starter infrastructure that lacks required crew/power (newest-first); write a ledger entry prefixed with "Auto-deactivated …".
+- Enforce build permissions: add `player_buildable` flag to `infrastructure_definitions`; commons and starters are not player-buildable; builder specialization must be allowed by `can_be_operated_by`.
 
 ## How to operate
 

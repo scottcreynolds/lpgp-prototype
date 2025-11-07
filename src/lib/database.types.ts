@@ -425,6 +425,24 @@ export interface Database {
         Args: { p_game_id: string };
         Returns: void;
       };
+      list_games: {
+        Args: Record<string, never>;
+        Returns: {
+          game_id: string;
+          round: number;
+          phase: string;
+          updated_at: string;
+          player_names: string[];
+          player_count: number;
+        }[];
+      };
+      delete_game: {
+        Args: { p_game_id: string };
+        Returns: {
+          success: boolean;
+          message: string;
+        }[];
+      };
     };
   };
 }
@@ -441,6 +459,16 @@ export type LedgerEntry =
     players?: { name: string } | null;
   };
 export type Contract = Database["public"]["Tables"]["contracts"]["Row"];
+
+// Admin listing types
+export interface GameListItem {
+  game_id: string;
+  round: number;
+  phase: string;
+  updated_at: string;
+  player_names: string[];
+  player_count: number;
+}
 
 // Dashboard summary types
 export interface PlayerInfrastructureItem {
