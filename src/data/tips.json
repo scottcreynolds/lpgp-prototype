@@ -1,0 +1,38 @@
+[
+  {
+    "id": "setup-welcome",
+    "phase": "Setup",
+    "icon": "info",
+    "text": "Choose a clear player name and specialization; discuss with others to balance roles."
+  },
+  {
+    "id": "setup-plan",
+    "phase": "Setup",
+    "icon": "time",
+    "text": "Use Setup time to skim starter infrastructure and imagine your first 2 rounds of builds."
+  },
+  {
+    "id": "gov-rep",
+    "phase": "Governance",
+    "icon": "info",
+    "text": "Highest reputation breaks ties and gets the first issue; coordinate proposals early."
+  },
+  {
+    "id": "gov-contracts",
+    "phase": "Governance",
+    "icon": "contract",
+    "text": "Draft or adjust contracts now; per-round EV transfers occur after Operations each round."
+  },
+  {
+    "id": "ops-build",
+    "phase": "Operations",
+    "icon": "build",
+    "text": "Build infrastructure that synergizes with existing capacity; watch power and crew requirements."
+  },
+  {
+    "id": "ops-maintenance",
+    "phase": "Operations",
+    "icon": "alert",
+    "text": "Active infrastructure costs maintenance at round end; dormancy can pause costs but also yields."
+  }
+]

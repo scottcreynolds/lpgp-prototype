@@ -1,14 +1,5 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  IconButton,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { FiInfo } from "react-icons/fi";
 import {
   useAddPlayer,
   useAdvancePhase,
@@ -22,26 +13,25 @@ import type {
 import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
-import { SetupTips } from "./SetupTips.tsx";
 import { toaster } from "./ui/toasterInstance";
 
 interface GameStateDisplayProps {
   round: number;
   phase: GamePhase;
-  version: number;
+  version: number; // retained for optimistic operations elsewhere
   players?: DashboardPlayer[];
 }
 
 export function GameStateDisplay({
   round,
   phase,
-  version,
   players,
 }: GameStateDisplayProps) {
   const advancePhase = useAdvancePhase();
   const advanceRound = useAdvanceRound();
   const addPlayer = useAddPlayer();
-  const [tipsOpen, setTipsOpen] = useState(true);
+  // Reserved for future inline message severity state; blank for now
+  const [panelMessages] = useState<string[]>([]);
 
   const handleAdvancePhase = async () => {
     try {
@@ -153,9 +143,24 @@ export function GameStateDisplay({
               })()}
             </Text>
           )}
-          <Text color="fg.muted" fontSize="sm" fontWeight="medium">
-            Version: {version}
-          </Text>
+          {phase === "Setup" && (
+            <Box mt={3} color="fg.muted" fontSize="sm" lineHeight={1.4}>
+              <Text mb={1} fontWeight="medium">
+                During Setup:
+              </Text>
+              <Box as="ol" pl={5} style={{ listStyle: "decimal" }}>
+                <Box as="li">Choose your player name.</Box>
+                <Box as="li">Select your specialization.</Box>
+                <Box as="li">
+                  Review starter infrastructure and plan your first two rounds.
+                </Box>
+              </Box>
+              <Text mt={2}>
+                When everyone is ready, click “Begin Round 1” to enter the
+                Governance phase.
+              </Text>
+            </Box>
+          )}
         </Box>
 
         {/* Right Column: Timer */}
@@ -171,17 +176,6 @@ export function GameStateDisplay({
         align={{ base: "stretch", md: "center" }}
         gap={3}
       >
-        {phase === "Setup" && (
-          <IconButton
-            aria-label="Setup tips"
-            onClick={() => setTipsOpen(true)}
-            variant="subtle"
-            width={{ base: "full", md: "auto" }}
-          >
-            <FiInfo />
-          </IconButton>
-        )}
-
         {phase === "Governance" && players && (
           <CreateContractModal
             players={players}
@@ -225,9 +219,26 @@ export function GameStateDisplay({
         )}
       </Stack>
 
-      {phase === "Setup" && (
-        <SetupTips open={tipsOpen} onClose={() => setTipsOpen(false)} />
-      )}
+      {/* Footer message area (errors / warnings / future dynamic content) */}
+      <Box
+        mt={6}
+        pt={4}
+        borderTopWidth={1}
+        borderColor="border"
+        minH="64px"
+        data-phase-messages
+        aria-live="polite"
+        color="fg"
+        fontSize="sm"
+      >
+        {panelMessages.length > 0 ? (
+          <Stack gap={1}>
+            {panelMessages.map((m, i) => (
+              <Text key={i}>{m}</Text>
+            ))}
+          </Stack>
+        ) : null}
+      </Box>
     </Box>
   );
 }

@@ -54,19 +54,16 @@
   - Migration file: `database/migrations/012_multigame_support.sql`
 \n+- ✅ **Player specialization card selection** - Add Player modal now presents three specialization image cards (scaled ~75%) instead of a dropdown; responsive horizontal layout stacks vertically on narrow screens for improved clarity.
 
+- ✅ **Helpful Tips Section**
+  - Added `PhaseTipsPanel` collapsible panel under Game Status and above Player Rankings
+  - Persists open/closed state and per-phase current tip index to localStorage
+  - Tips are phase-scoped and navigable with previous/next controls and index indicator
+  - Icons rendered via react-icons with Chakra's `Icon` wrapper; data is in `src/data/tips.json`
+  - Lightweight runtime validation and typed access via `getTipsForPhase()`
+
 ## Up Next
 
-### Helpful Tips Section
-
-As a player I want to be able to see some helpful tips related to the current phase of the game in the UI, but hide them if I don't need them.
-
-Add a collapsible panel (and remember player choice with localstorage) of tips below the game status box and above the leaderboard.
-
-If there is more than one tip players should be able to advance/reverse through them
-
-tips in this panel should be scoped to the current game phase
-
-create an easy to edit file, yaml or json, that allows me to manage the tips. include categorization for which phase the tip belongs in, an icon, and the tip text.
+<!-- Helpful Tips Section implemented; moved to Completed ✅ -->
 
 ## High Priority
 

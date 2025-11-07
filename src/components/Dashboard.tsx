@@ -14,6 +14,7 @@ import { GameStateDisplay } from "./GameStateDisplay";
 import { InfrastructureCards } from "./InfrastructureCards";
 import { JoinGamePrompt } from "./JoinGamePrompt";
 import { LedgerDisplay } from "./LedgerDisplay";
+import { PhaseTipsPanel } from "./PhaseTipsPanel";
 import { PlayerRankings } from "./PlayerRankings";
 
 export function Dashboard() {
@@ -74,6 +75,11 @@ export function Dashboard() {
               version={data.game_state.version}
               players={data.players}
             />
+          </Box>
+
+          {/* Phase Tips Panel (collapsible) */}
+          <Box>
+            <PhaseTipsPanel phase={data.game_state.phase} />
           </Box>
 
           {/* Player Rankings Section */}
