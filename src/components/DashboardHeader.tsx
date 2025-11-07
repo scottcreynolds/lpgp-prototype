@@ -69,7 +69,7 @@ export function DashboardHeader() {
       <Container maxW="container.xl">
         <Flex justify="space-between" align="center" gap={4}>
           <Heading size="lg">Lunar Policy Gaming Platform</Heading>
-          <HStack gap={2} flexWrap="wrap">
+          <HStack gap={2} flexWrap="wrap" align="center">
             <HStack gap={2}>
               <Input
                 readOnly

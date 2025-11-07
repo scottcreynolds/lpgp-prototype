@@ -1,6 +1,5 @@
 import { Dashboard } from "./components/Dashboard";
 import DeveloperPanel from "./components/DeveloperPanel";
-import GamesAdminButton from "./components/GamesAdminButton";
 import { Toaster } from "./components/ui/toaster";
 
 function App() {
@@ -8,8 +7,8 @@ function App() {
     <>
       <Dashboard />
       <Toaster />
+      {/* Developer tools appear at the bottom of the page */}
       <DeveloperPanel />
-      <GamesAdminButton />
     </>
   );
 }

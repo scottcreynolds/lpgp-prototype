@@ -1,10 +1,11 @@
-import { isMockSupabase } from "@/lib/supabase";
 import { Accordion, Box, Heading, Text } from "@chakra-ui/react";
 import DevHarness from "./DevHarness";
+import GamesAdminButton from "./GamesAdminButton";
+import ThemePreview from "./ThemePreview";
 
 export default function DeveloperPanel() {
-  // Only show in development and when using the mock backend
-  if (!import.meta.env.DEV || !isMockSupabase) return null;
+  // Only show in development (regardless of backend)
+  if (!import.meta.env.DEV) return null;
 
   return (
     <Box mt={10}>
@@ -14,14 +15,21 @@ export default function DeveloperPanel() {
             <Box as="span" flex="1" textAlign="left">
               <Heading size="sm">Developer</Heading>
               <Text fontSize="xs" color="fg.muted">
-                Mock-only tools and simulations
+                Dev tools (some sections only show in mock mode)
               </Text>
             </Box>
             <Accordion.ItemIndicator />
           </Accordion.ItemTrigger>
           <Accordion.ItemContent>
             <Accordion.ItemBody>
+              <ThemePreview />
               <DevHarness />
+              <Box mt={4}>
+                <Heading size="xs" mb={2}>
+                  Admin
+                </Heading>
+                <GamesAdminButton inline />
+              </Box>
             </Accordion.ItemBody>
           </Accordion.ItemContent>
         </Accordion.Item>

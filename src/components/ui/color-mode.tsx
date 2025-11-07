@@ -1,7 +1,7 @@
 "use client";
 
-import type { IconButtonProps, SpanProps } from "@chakra-ui/react";
-import { ClientOnly, IconButton, Skeleton, Span } from "@chakra-ui/react";
+import type { IconButtonProps } from "@chakra-ui/react";
+import { Box, ClientOnly, IconButton, Skeleton } from "@chakra-ui/react";
 import type { ThemeProviderProps } from "next-themes";
 import { ThemeProvider, useTheme } from "next-themes";
 import * as React from "react";
@@ -9,37 +9,43 @@ import { LuMoon, LuSun } from "react-icons/lu";
 
 export type ColorModeProviderProps = ThemeProviderProps;
 
+// Root wrapper that applies the chakra theme class based on resolved theme.
+function ThemeRoot({ children }: { children?: React.ReactNode }) {
+  const { resolvedTheme } = useTheme();
+  return (
+    <ClientOnly fallback={<>{children}</>}>
+      <Box
+        className={`chakra-theme ${
+          resolvedTheme === "dark" ? "dark" : "light"
+        }`}
+        data-color-scheme={resolvedTheme === "dark" ? "dark" : "light"}
+      >
+        {children}
+      </Box>
+    </ClientOnly>
+  );
+}
+
 export function ColorModeProvider(props: ColorModeProviderProps) {
   return (
-    <ThemeProvider attribute="class" disableTransitionOnChange {...props} />
+    <ThemeProvider attribute="class" disableTransitionOnChange {...props}>
+      <ThemeRoot>{props.children}</ThemeRoot>
+    </ThemeProvider>
   );
 }
 
 type ColorMode = "light" | "dark";
 
-interface UseColorModeReturn {
-  colorMode: ColorMode;
-  setColorMode: (colorMode: ColorMode) => void;
-  toggleColorMode: () => void;
-}
-
-function useColorMode(): UseColorModeReturn {
+function useColorModeInternal() {
   const { resolvedTheme, setTheme, forcedTheme } = useTheme();
-  const colorMode = forcedTheme || resolvedTheme;
-  const toggleColorMode = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
-  return {
-    colorMode: colorMode as ColorMode,
-    setColorMode: setTheme,
-    toggleColorMode,
-  };
+  const colorMode = (forcedTheme || resolvedTheme) as ColorMode;
+  const toggleColorMode = () =>
+    setTheme(colorMode === "dark" ? "light" : "dark");
+  return { colorMode, toggleColorMode } as const;
 }
-
-// Removed unused useColorModeValue helper to satisfy lint rules
 
 export function ColorModeIcon() {
-  const { colorMode } = useColorMode();
+  const { colorMode } = useColorModeInternal();
   return colorMode === "dark" ? <LuMoon /> : <LuSun />;
 }
 
@@ -49,7 +55,7 @@ export const ColorModeButton = React.forwardRef<
   HTMLButtonElement,
   ColorModeButtonProps
 >(function ColorModeButton(props, ref) {
-  const { toggleColorMode } = useColorMode();
+  const { toggleColorMode } = useColorModeInternal();
   return (
     <ClientOnly fallback={<Skeleton boxSize="9" />}>
       <IconButton
@@ -71,35 +77,3 @@ export const ColorModeButton = React.forwardRef<
     </ClientOnly>
   );
 });
-
-export const LightMode = React.forwardRef<HTMLSpanElement, SpanProps>(
-  function LightMode(props, ref) {
-    return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme light"
-        colorPalette="gray"
-        colorScheme="light"
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-
-export const DarkMode = React.forwardRef<HTMLSpanElement, SpanProps>(
-  function DarkMode(props, ref) {
-    return (
-      <Span
-        color="fg"
-        display="contents"
-        className="chakra-theme dark"
-        colorPalette="gray"
-        colorScheme="dark"
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);

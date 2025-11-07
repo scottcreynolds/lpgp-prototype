@@ -37,10 +37,17 @@ function formatDateTime(ts?: string) {
   }
 }
 
-export default function GamesAdminButton() {
+interface GamesAdminButtonProps {
+  inline?: boolean;
+}
+
+export default function GamesAdminButton({
+  inline = false,
+}: GamesAdminButtonProps) {
   const [open, setOpen] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const currentGameId = getCurrentGameId();
 
   const gamesQuery = useQuery({
     queryKey: ["admin", "games"],
@@ -81,16 +88,19 @@ export default function GamesAdminButton() {
       <DialogRoot open={open} onOpenChange={(d) => setOpen(d.open)}>
         <DialogTrigger asChild>
           <Button
-            position="fixed"
-            bottom="4"
-            right="4"
-            zIndex="docked"
-            colorPalette="gray"
-            variant="solid"
+            {...(!inline && {
+              position: "fixed",
+              bottom: "4",
+              right: "4",
+              zIndex: "docked",
+            })}
+            colorPalette="ridgeGold"
+            variant={inline ? "outline" : "solid"}
+            size={inline ? "sm" : "md"}
           >
             <HStack gap={2}>
               <FaGamepad />
-              <Text>Games</Text>
+              <Text fontWeight="semibold">Games</Text>
             </HStack>
           </Button>
         </DialogTrigger>
@@ -155,16 +165,33 @@ export default function GamesAdminButton() {
                             </VStack>
                           </Table.Cell>
                           <Table.Cell>
-                            <Text fontFamily="mono" fontSize="xs">
-                              {g.game_id}
-                            </Text>
+                            <HStack gap={2}>
+                              <Text fontFamily="mono" fontSize="xs">
+                                {g.game_id}
+                              </Text>
+                              {currentGameId === g.game_id && (
+                                <Badge
+                                  variant="surface"
+                                  colorPalette="ridgeGold"
+                                  size="xs"
+                                >
+                                  current
+                                </Badge>
+                              )}
+                            </HStack>
                           </Table.Cell>
                           <Table.Cell textAlign="right">
                             <IconButton
                               aria-label="Delete game"
                               colorPalette="red"
                               variant="ghost"
+                              disabled={currentGameId === g.game_id}
                               onClick={() => setConfirmId(g.game_id)}
+                              title={
+                                currentGameId === g.game_id
+                                  ? "Cannot delete the current game"
+                                  : "Delete game"
+                              }
                             >
                               <FaTrash />
                             </IconButton>

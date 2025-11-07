@@ -76,8 +76,8 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
         Player Rankings
       </Heading>
 
-      <Table.Root size="lg" variant="outline" striped>
-        <Table.ScrollArea maxH="600px">
+      <Table.ScrollArea maxH="600px">
+        <Table.Root size="lg" variant="outline" striped>
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeader fontWeight="bold">Rank</Table.ColumnHeader>
@@ -203,8 +203,8 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
               </Table.Row>
             ))}
           </Table.Body>
-        </Table.ScrollArea>
-      </Table.Root>
+        </Table.Root>
+      </Table.ScrollArea>
     </Box>
   );
 }
