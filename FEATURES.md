@@ -56,18 +56,25 @@
 
 ## Up Next
 
-- Apply the new migration to your Supabase project and smoke-test real-time updates across two browsers using the same `?game=` link
+### Helpful Tips Section
+
+As a player I want to be able to see some helpful tips related to the current phase of the game in the UI, but hide them if I don't need them.
+
+Add a collapsible panel (and remember player choice with localstorage) of tips below the game status box and above the leaderboard.
+
+If there is more than one tip players should be able to advance/reverse through them
+
+tips in this panel should be scoped to the current game phase
+
+create an easy to edit file, yaml or json, that allows me to manage the tips. include categorization for which phase the tip belongs in, an icon, and the tip text.
 
 ## High Priority
 
-- unique gameid
-- multiplayers
 - turn order in each phase
 - player stats view (basic version exists in rankings, may need expansion)
 - clean up layout
 - tips (Setup tips exist, need more)
 - auto timer start
-- styles (basic styling done, needs polish)
 - event cards
 
 ## Maybe
@@ -83,13 +90,5 @@
 
 ## Bugs
 
-- player leaderboard indicator not working correctly. The player with highest current EV should be at the top and players ranked by EV underneath
-- player names are not showing in the ledger in the player column
-- "starter" inventory is being marked as dormant when it should be always active
--total EV change and total REP change labels not working in the ledger header but we also don't need those at all.
 - panels in "infrastructure overview" should be colored in a subtle way when there is an overage/shortage. Yield panel surface should be a subtle green when positive. Net per round should be subtle red or green depending on negative/positive. use approriate chakra-ui semantic coloring to preserve contrast and light/dark mode capability
 - contracts table should be full-width of its container and responsive
-- reorder "Game Status" panel to a two column top row and then a "action row":
-  - have round label and any associated status or prompt text on the left top column and timer on the right top
-  - have all actions like create contract, next phase, and add player in the action bar bottom slot, with next phase/advance round always being right-most
-  - leave "start new game" in header
