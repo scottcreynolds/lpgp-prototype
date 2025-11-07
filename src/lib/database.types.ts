@@ -108,6 +108,7 @@ export interface Database {
           power_requirement: number | null;
           crew_requirement: number | null;
           can_be_operated_by: Specialization[];
+          player_buildable: boolean;
           is_starter: boolean;
           created_at: string;
         };
@@ -121,6 +122,7 @@ export interface Database {
           power_requirement?: number | null;
           crew_requirement?: number | null;
           can_be_operated_by: Specialization[];
+          player_buildable?: boolean;
           is_starter?: boolean;
           created_at?: string;
         };
@@ -134,6 +136,7 @@ export interface Database {
           power_requirement?: number | null;
           crew_requirement?: number | null;
           can_be_operated_by?: Specialization[];
+          player_buildable?: boolean;
           is_starter?: boolean;
           created_at?: string;
         };

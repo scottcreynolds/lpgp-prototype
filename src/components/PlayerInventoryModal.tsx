@@ -25,11 +25,13 @@ interface PlayerInventoryModalProps {
   playerId: string;
   playerName: string;
   infrastructure: PlayerInfrastructureItem[];
+  trigger?: React.ReactNode; // optional custom trigger button
 }
 
 export function PlayerInventoryModal({
   playerName,
   infrastructure,
+  trigger,
 }: PlayerInventoryModalProps) {
   const [open, setOpen] = useState(false);
   const toggleStatus = useToggleInfrastructureStatus();
@@ -74,9 +76,13 @@ export function PlayerInventoryModal({
   return (
     <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)} size="xl">
       <DialogTrigger asChild>
-        <Button colorPalette="purple" variant="outline" size="sm">
-          Inventory ({infrastructure.length})
-        </Button>
+        {trigger ? (
+          <>{trigger}</>
+        ) : (
+          <Button colorPalette="purple" variant="outline" size="sm">
+            Inventory ({infrastructure.length})
+          </Button>
+        )}
       </DialogTrigger>
 
       <Portal>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { toaster } from "../components/ui/toasterInstance";
 import type { DashboardSummary, Specialization } from "../lib/database.types";
 import { getCurrentGameId } from "../lib/gameSession";
 import { isMockSupabase, supabase } from "../lib/supabase";
@@ -210,13 +211,75 @@ export function useAdvanceRound() {
 
       return result;
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       // Start the next Governance timer automatically
       if (result?.new_phase === "Governance") {
         startTimer(result.new_round, "Governance");
       }
       // Refresh everything
       queryClient.invalidateQueries({ queryKey: gameKeys.all });
+
+      // Show a hint if any auto-deactivations occurred at round end
+      try {
+        const previousRound = result.new_round - 1;
+        if (previousRound >= 0) {
+          const { data, error } = await supabase
+            .from("ledger_entries")
+            .select(
+              "player_id, player_name, transaction_type, reason, round, created_at, infrastructure_id"
+            )
+            .eq("round", previousRound)
+            .order("created_at", { ascending: false })
+            .limit(100);
+
+          if (!error && Array.isArray(data)) {
+            type DeactEntry = {
+              player_id: string | null;
+              player_name: string | null;
+              transaction_type: string;
+              reason: string | null;
+            };
+            const auto = (data as DeactEntry[]).filter(
+              (e) =>
+                e.transaction_type === "INFRASTRUCTURE_DEACTIVATED" &&
+                typeof e.reason === "string" &&
+                (e.reason as string).startsWith("Auto-deactivated ")
+            );
+
+            if (auto.length > 0) {
+              const affectedPlayers = Array.from(
+                new Set(auto.map((e) => e.player_name || (e.player_id ?? "")))
+              ).filter(Boolean);
+
+              const title =
+                auto.length === 1
+                  ? "Infrastructure Auto-Deactivated"
+                  : "Infrastructures Auto-Deactivated";
+              const descBase =
+                auto.length === 1
+                  ? `${auto[0].reason}.`
+                  : `${auto.length} items were auto-deactivated due to insufficient resources.`;
+              const who =
+                affectedPlayers.length === 1
+                  ? ` Player: ${affectedPlayers[0]}.`
+                  : affectedPlayers.length > 1
+                  ? ` Players: ${affectedPlayers.slice(0, 3).join(", ")}$${
+                      affectedPlayers.length > 3 ? "…" : ""
+                    }.`
+                  : "";
+
+              toaster.create({
+                title,
+                description: `${descBase}${who} See Inventory or Ledger for details.`,
+                type: "warning",
+                duration: 6000,
+              });
+            }
+          }
+        }
+      } catch {
+        // Best-effort hint only; ignore failures
+      }
     },
   });
 }

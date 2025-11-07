@@ -6,6 +6,18 @@
 
 ---
 
+## Update — November 7, 2025
+
+Generalized round-end auto-deactivation logic in the mock to match the database behavior (migration `020_generic_round_end_auto_deactivate.sql`).
+
+- Before maintenance and yields, the mock now auto-deactivates any active, non-starter infrastructure that cannot meet crew or power requirements, newest-first, until capacities are non-negative.
+- Adds a ledger entry per deactivated item with a descriptive reason (insufficient crew or power).
+- Keeps existing behavior where Solar Arrays and Habitats auto-activate on build; other types remain built as inactive unless toggled by the player.
+
+This maintains feature parity between mock and real backends for round processing and ensures the UI toast and inactive indicators reflect accurate behavior in mock mode.
+
+---
+
 ## Overview
 
 Implemented a transparent mock data layer that allows development without a Supabase backend. The system automatically uses mock data when environment variables are absent, requiring **zero code changes** in components or hooks.
@@ -101,7 +113,7 @@ pnpm dev
 
 Console shows:
 
-```
+```text
 🎭 Using mock data (localStorage-based). To use real Supabase, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local
 ```
 
@@ -313,9 +325,9 @@ case 'build_infrastructure':
 
 ### Should Add (Medium Priority)
 
-6. **Build infrastructure** - When that feature is developed
-7. **Edit players** - When that feature is developed
-8. **Manual adjustments** - When that feature is developed
+1. **Build infrastructure** - When that feature is developed
+2. **Edit players** - When that feature is developed
+3. **Manual adjustments** - When that feature is developed
 
 ### Won't Add
 

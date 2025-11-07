@@ -414,6 +414,32 @@ async function rpcBuildInfrastructure(
     };
   }
 
+  // Enforce player buildable and specialization
+  const builderSpec = players[builderIndex].specialization;
+  if (!infraDef.player_buildable) {
+    return {
+      data: [
+        {
+          success: false,
+          message: "This infrastructure cannot be built by players",
+        },
+      ],
+      error: null,
+    };
+  }
+
+  if (!infraDef.can_be_operated_by.includes(builderSpec)) {
+    return {
+      data: [
+        {
+          success: false,
+          message: "Your specialization cannot build this infrastructure",
+        },
+      ],
+      error: null,
+    };
+  }
+
   // Check if builder can afford it
   if (players[builderIndex].ev < infraDef.cost) {
     return {
@@ -426,16 +452,20 @@ async function rpcBuildInfrastructure(
   players[builderIndex].ev -= infraDef.cost;
   players[builderIndex].updated_at = new Date().toISOString();
 
+  // Determine auto-activation only for Solar Array and Habitat
+  const autoActivate =
+    infrastructureType === "Solar Array" || infrastructureType === "Habitat";
+
   // Create new infrastructure entry
   const newInfra = {
     id: crypto.randomUUID(),
     player_id: ownerId,
     infrastructure_id: infraDef.id,
-    is_powered: true,
-    is_crewed: true,
+    is_powered: autoActivate,
+    is_crewed: autoActivate,
     is_starter: false,
     location: location,
-    is_active: true,
+    is_active: autoActivate,
     created_at: new Date().toISOString(),
   };
 
@@ -462,6 +492,27 @@ async function rpcBuildInfrastructure(
   };
 
   ledger.push(newLedgerEntry);
+
+  // If auto-activated, add an explicit activation ledger entry for clarity
+  if (autoActivate) {
+    const activationEntry = {
+      id: crypto.randomUUID(),
+      player_id: ownerId,
+      player_name: owner.name,
+      round: gameState.current_round,
+      transaction_type: "INFRASTRUCTURE_ACTIVATED" as const,
+      amount: 0,
+      ev_change: 0,
+      rep_change: 0,
+      reason: `Auto-activated ${infrastructureType} on build`,
+      processed: true,
+      infrastructure_id: newInfra.id,
+      contract_id: null,
+      metadata: null,
+      created_at: new Date().toISOString(),
+    };
+    ledger.push(activationEntry);
+  }
 
   // Save all updates
   localStorage.setItem(KEYS.PLAYERS, JSON.stringify(players));
@@ -926,6 +977,124 @@ async function rpcAdvanceRound(currentVersion: number) {
   }
 
   const round = gameState.current_round;
+
+  // PRE: Auto-deactivate any infrastructure that cannot meet crew/power
+  // Helper to compute capacities and usage for a player's active infra
+  function computeCaps(playerId: string) {
+    const active = infra.filter(
+      (pi: PlayerInfrastructure) => pi.player_id === playerId && pi.is_active
+    ) as PlayerInfrastructure[];
+    let powerCap = 0;
+    let powerUsed = 0;
+    let crewCap = 0;
+    let crewUsed = 0;
+    for (const pi of active) {
+      const def = infrastructureDefinitions.find(
+        (d) => d.id === pi.infrastructure_id
+      );
+      if (!def) continue;
+      if (def.capacity && def.type.includes("Solar")) powerCap += def.capacity;
+      if (def.capacity && def.type.includes("Habitat")) crewCap += def.capacity;
+      if (def.power_requirement) powerUsed += def.power_requirement;
+      if (def.crew_requirement) crewUsed += def.crew_requirement;
+    }
+    return { powerCap, powerUsed, crewCap, crewUsed };
+  }
+
+  function deactivateOne(piId: string, reason: string) {
+    const idx = infra.findIndex((p: PlayerInfrastructure) => p.id === piId);
+    if (idx >= 0) {
+      infra[idx].is_active = false;
+      infra[idx].is_powered = false;
+      infra[idx].is_crewed = false;
+      const player = players.find((p) => p.id === infra[idx].player_id);
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: infra[idx].player_id,
+        player_name: player?.name ?? null,
+        round,
+        transaction_type: "INFRASTRUCTURE_DEACTIVATED" as const,
+        amount: 0,
+        ev_change: 0,
+        rep_change: 0,
+        reason,
+        processed: true,
+        infrastructure_id: infra[idx].id,
+        contract_id: null,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  // Group by player and balance
+  for (const player of players) {
+    // Skip if player has no infra
+    const hasInfra = infra.some(
+      (pi: PlayerInfrastructure) => pi.player_id === player.id && pi.is_active
+    );
+    if (!hasInfra) continue;
+
+    // Balance crew: deactivate any active, non-starter infra with crew requirements until shortage resolved
+    // prefer most recently built first
+    let guard = 0;
+    while (guard++ < 100) {
+      const { crewCap, crewUsed } = computeCaps(player.id);
+      if (crewCap - crewUsed >= 0) break;
+
+      // find candidate active and non-starter, newest first
+      const candidate = (infra as PlayerInfrastructure[])
+        .filter((pi) => {
+          if (pi.player_id !== player.id || !pi.is_active || pi.is_starter)
+            return false;
+          const def = infrastructureDefinitions.find(
+            (d) => d.id === pi.infrastructure_id
+          );
+          return !!def && !!def.crew_requirement;
+        })
+        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
+
+      if (!candidate) break;
+      const def = infrastructureDefinitions.find(
+        (d) => d.id === candidate.infrastructure_id
+      );
+      deactivateOne(
+        candidate.id,
+        `Auto-deactivated ${
+          def?.type ?? "infrastructure"
+        } due to insufficient crew`
+      );
+    }
+
+    // Balance power: deactivate any active, non-starter infra with power requirements until shortage resolved
+    guard = 0;
+    while (guard++ < 100) {
+      const { powerCap, powerUsed } = computeCaps(player.id);
+      if (powerCap - powerUsed >= 0) break;
+
+      const candidate = (infra as PlayerInfrastructure[])
+        .filter((pi) => {
+          if (pi.player_id !== player.id || !pi.is_active || pi.is_starter)
+            return false;
+          const def = infrastructureDefinitions.find(
+            (d) => d.id === pi.infrastructure_id
+          );
+          return !!def && !!def.power_requirement;
+        })
+        .sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0];
+
+      if (!candidate) break;
+      const def = infrastructureDefinitions.find(
+        (d) => d.id === candidate.infrastructure_id
+      );
+      deactivateOne(
+        candidate.id,
+        `Auto-deactivated ${
+          def?.type ?? "infrastructure"
+        } due to insufficient power`
+      );
+    }
+  }
 
   // 1) Maintenance (rolled up per player for active, non-starter infra)
   const maintenanceByPlayer = new Map<

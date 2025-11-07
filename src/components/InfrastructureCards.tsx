@@ -1,6 +1,7 @@
 import {
   Badge,
   Box,
+  Button,
   Flex,
   Grid,
   Heading,
@@ -22,6 +23,7 @@ import {
 import { useEditPlayer } from "../hooks/useGameData";
 import type { DashboardPlayer, Specialization } from "../lib/database.types";
 import { EditPlayerModal } from "./EditPlayerModal";
+import { PlayerInventoryModal } from "./PlayerInventoryModal";
 import { toaster } from "./ui/toasterInstance";
 
 interface InfrastructureCardsProps {
@@ -104,9 +106,37 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                     <Text fontWeight="bold" fontSize="lg" color="fg">
                       {player.name}
                     </Text>
-                    <Badge size="sm" colorPalette="gray">
-                      {player.specialization}
-                    </Badge>
+                    <HStack gap={2} align="center">
+                      <Badge size="sm" colorPalette="gray">
+                        {player.specialization}
+                      </Badge>
+                      {(() => {
+                        const inactiveCount = player.infrastructure.filter(
+                          (i) => !i.is_active
+                        ).length;
+                        return inactiveCount > 0 ? (
+                          <HStack gap={2}>
+                            <Badge
+                              size="sm"
+                              colorPalette="orange"
+                              title="Some infrastructure is inactive. Open Inventory to manage."
+                            >
+                              Inactive: {inactiveCount}
+                            </Badge>
+                            <PlayerInventoryModal
+                              playerId={player.id}
+                              playerName={player.name}
+                              infrastructure={player.infrastructure}
+                              trigger={
+                                <Button size="xs" colorPalette="orange">
+                                  Manage
+                                </Button>
+                              }
+                            />
+                          </HStack>
+                        ) : null;
+                      })()}
+                    </HStack>
                   </Box>
                   <EditPlayerModal
                     playerId={player.id}
@@ -217,7 +247,9 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
                   <Box
                     p={3}
-                    bg={totals.total_yield > 0 ? "bg.success.subtle" : "bg.muted"}
+                    bg={
+                      totals.total_yield > 0 ? "bg.success.subtle" : "bg.muted"
+                    }
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"

@@ -1,11 +1,13 @@
-import { Dashboard } from './components/Dashboard';
-import { Toaster } from './components/ui/toaster';
+import { Dashboard } from "./components/Dashboard";
+import DeveloperPanel from "./components/DeveloperPanel";
+import { Toaster } from "./components/ui/toaster";
 
 function App() {
   return (
     <>
       <Dashboard />
       <Toaster />
+      <DeveloperPanel />
     </>
   );
 }
