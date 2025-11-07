@@ -31,6 +31,9 @@ import SpecializationIcon from "./SpecializationIcon";
 interface AddPlayerModalProps {
   onAddPlayer: (name: string, specialization: Specialization) => Promise<void>;
   isPending?: boolean;
+  externalOpen?: boolean; // controlled open state (optional)
+  onExternalClose?: () => void; // callback when controlled modal requests close
+  hideTrigger?: boolean; // hide built-in trigger button
 }
 
 const specializations: Specialization[] = [
@@ -64,11 +67,17 @@ const specializationMeta: Record<
 export function AddPlayerModal({
   onAddPlayer,
   isPending,
+  externalOpen,
+  onExternalClose,
+  hideTrigger,
 }: AddPlayerModalProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // internal fallback state
   const [companyName, setCompanyName] = useState("");
   const [specialization, setSpecialization] =
     useState<Specialization>("Resource Extractor");
+
+  const controlled = externalOpen !== undefined;
+  const effectiveOpen = controlled ? externalOpen! : open;
 
   const handleSubmit = async () => {
     if (!companyName.trim()) {
@@ -80,7 +89,11 @@ export function AddPlayerModal({
     // Reset form and close modal
     setCompanyName("");
     setSpecialization("Resource Extractor");
-    setOpen(false);
+    if (controlled) {
+      onExternalClose?.();
+    } else {
+      setOpen(false);
+    }
   };
 
   // Specialization images
@@ -90,13 +103,23 @@ export function AddPlayerModal({
     "Operations Manager": operationsManagerImg,
   };
 
+  const handleOpenChange = (e: { open: boolean }) => {
+    if (controlled) {
+      if (!e.open) onExternalClose?.();
+    } else {
+      setOpen(e.open);
+    }
+  };
+
   return (
-    <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)} size="xl">
-      <DialogTrigger asChild>
-        <Button colorPalette="green" variant="solid">
-          Add Player
-        </Button>
-      </DialogTrigger>
+    <DialogRoot open={effectiveOpen} onOpenChange={handleOpenChange} size="xl">
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button colorPalette="green" variant="solid">
+            Add Player
+          </Button>
+        </DialogTrigger>
+      )}
 
       <Portal>
         <DialogBackdrop />
@@ -156,36 +179,41 @@ export function AddPlayerModal({
                         }}
                         cursor="pointer"
                         position="relative"
-                        borderWidth="2px"
-                        borderColor={selected ? `${colorKey}.500` : "gray.200"}
-                        borderRadius="md"
-                        p={2}
+                        borderWidth={selected ? "3px" : "1px"}
+                        borderColor={selected ? `${colorKey}.600` : "gray.300"}
+                        borderRadius="lg"
+                        p={3}
                         w={{ base: "100%", md: "240px" }}
                         flexShrink={0}
-                        transition="transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease"
+                        transition="transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, filter 0.15s ease, background-color 0.15s ease"
                         _hover={{
-                          borderColor: `${colorKey}.600`,
-                          transform: selected
-                            ? "translateY(-2px)"
-                            : "translateY(-2px)",
+                          borderColor: selected
+                            ? `${colorKey}.700`
+                            : `${colorKey}.500`,
+                          transform: "translateY(-2px)",
                           boxShadow: selected ? "lg" : "md",
                         }}
                         _focusVisible={{
                           outline: "none",
                           boxShadow: `0 0 0 3px var(--chakra-colors-${colorKey}-200)`,
                         }}
-                        boxShadow={selected ? "lg" : "none"}
-                        bg={selected ? `${colorKey}.50` : "white"}
+                        boxShadow={selected ? "none" : "none"}
+                        bg={selected ? `${colorKey}.50` : "gray.50"}
+                        filter={
+                          selected ? "none" : "grayscale(0.4) brightness(0.95)"
+                        }
+                        opacity={selected ? 1 : 0.85}
+                        _active={{ transform: "scale(0.98)" }}
                       >
                         {/* Icon badge */}
                         <Box
                           position="absolute"
-                          top={2}
-                          left={2}
-                          bg={`${colorKey}.500`}
+                          top={3}
+                          left={3}
+                          bg={selected ? `${colorKey}.600` : `${colorKey}.400`}
                           color="white"
                           borderRadius="full"
-                          p={1.5}
+                          p={2}
                           boxShadow="sm"
                         >
                           <SpecializationIcon
@@ -201,6 +229,10 @@ export function AddPlayerModal({
                           width="100%"
                           height="auto"
                           display="block"
+                          style={{
+                            transition: "filter 0.2s ease, transform 0.2s ease",
+                            transform: selected ? "scale(1.02)" : "scale(1.0)",
+                          }}
                         />
                       </Box>
                     );

@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Heading, Stack, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { useMemo } from "react";
 import {
   useAddPlayer,
   useAdvancePhase,
@@ -30,8 +30,24 @@ export function GameStateDisplay({
   const advancePhase = useAdvancePhase();
   const advanceRound = useAdvanceRound();
   const addPlayer = useAddPlayer();
-  // Reserved for future inline message severity state; blank for now
-  const [panelMessages] = useState<string[]>([]);
+
+  // Setup phase button enable + warning logic
+  const { canBeginRound1, warningMessage } = useMemo(() => {
+    if (phase !== "Setup" || !players) {
+      return { canBeginRound1: true, warningMessage: "" };
+    }
+    const specs = players.map((p) => p.specialization);
+    const hasPlayers = specs.length > 0;
+    const hasInfrastructureProvider = specs.includes("Infrastructure Provider");
+    const distinctCount = new Set(specs).size;
+    const hasMultipleTypes = distinctCount > 1;
+    const canStart =
+      hasPlayers && (hasInfrastructureProvider || hasMultipleTypes);
+    const warn = canStart
+      ? ""
+      : "You must either have a player specialize as Infrastructure Provider or have more than one type of player specialization chosen in order to build all infrastructure types";
+    return { canBeginRound1: canStart, warningMessage: warn };
+  }, [phase, players]);
 
   const handleAdvancePhase = async () => {
     try {
@@ -213,6 +229,7 @@ export function GameStateDisplay({
             colorPalette="blue"
             size="lg"
             width={{ base: "full", md: "auto" }}
+            disabled={phase === "Setup" && !canBeginRound1}
           >
             {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
           </Button>
@@ -231,13 +248,11 @@ export function GameStateDisplay({
         color="fg"
         fontSize="sm"
       >
-        {panelMessages.length > 0 ? (
-          <Stack gap={1}>
-            {panelMessages.map((m, i) => (
-              <Text key={i}>{m}</Text>
-            ))}
-          </Stack>
-        ) : null}
+        {warningMessage && (
+          <Text color="fg.muted" fontSize="sm">
+            {warningMessage}
+          </Text>
+        )}
       </Box>
     </Box>
   );
