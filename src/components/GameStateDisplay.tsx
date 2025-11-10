@@ -43,6 +43,9 @@ export function GameStateDisplay({
   const advanceRound = useAdvanceRound();
   const addPlayer = useAddPlayer();
   const turnOrder = useGameStore((s) => s.operationsTurnOrder[round]);
+  const gameEnded = useGameStore((s) => s.gameEnded);
+  const victoryType = useGameStore((s) => s.victoryType);
+  const winnerIds = useGameStore((s) => s.winnerIds);
 
   // Setup phase button enable + warning logic
   const { canBeginRound1, warningMessage } = useMemo(() => {
@@ -140,7 +143,7 @@ export function GameStateDisplay({
       mx="auto"
     >
       <Heading size="lg" mb={4} color="fg.emphasized">
-        Game Status
+        {gameEnded ? "Game Ended" : "Game Status"}
       </Heading>
       {/* Main content split: 2/3 game status meta + 1/3 tips panel */}
       <Grid
@@ -160,7 +163,19 @@ export function GameStateDisplay({
             {/* Left Column: Round/Status Info */}
             <Box flex="1" minW={{ base: "full", md: "300px" }}>
               <Heading size="xl" mb={1} color="fg">
-                {phase === "Setup" ? (
+                {gameEnded ? (
+                  <>
+                    Game Ended –{" "}
+                    {(() => {
+                      if (victoryType === "cooperative")
+                        return "Cooperative Victory";
+                      if (victoryType === "tiebreaker")
+                        return "Tiebreaker Victory";
+                      if (victoryType === "single") return "Victory";
+                      return "Victory";
+                    })()}
+                  </>
+                ) : phase === "Setup" ? (
                   <>Setup Phase</>
                 ) : (
                   <>
@@ -168,6 +183,15 @@ export function GameStateDisplay({
                   </>
                 )}
               </Heading>
+              {gameEnded && players && winnerIds.length > 0 && (
+                <Text color="fg" fontSize="sm" fontWeight="medium" mb={2}>
+                  Winner{winnerIds.length > 1 ? "s" : ""}:{" "}
+                  {players
+                    .filter((p) => winnerIds.includes(p.id))
+                    .map((p) => p.name)
+                    .join(", ")}
+                </Text>
+              )}
               {/* Highest Rep label */}
               {players && players.length > 0 && phase !== "Setup" && (
                 <Text color="fg" fontSize="sm" fontWeight="medium" mb={1}>
@@ -200,6 +224,10 @@ export function GameStateDisplay({
                     During Setup:
                   </Text>
                   <Box as="ol" pl={5} style={{ listStyle: "decimal" }}>
+                    <Box as="li">
+                      Choose one player to act as game facilitator to advance
+                      game state and keep time.
+                    </Box>
                     <Box as="li">Choose your player name.</Box>
                     <Box as="li">Select your specialization.</Box>
                     <Box as="li">
@@ -217,7 +245,9 @@ export function GameStateDisplay({
 
             {/* Right Column: Timer */}
             <Box flexShrink={0}>
-              {phase !== "Setup" && <PhaseTimer round={round} phase={phase} />}
+              {phase !== "Setup" && !gameEnded && (
+                <PhaseTimer round={round} phase={phase} />
+              )}
             </Box>
           </Flex>
 
@@ -228,16 +258,16 @@ export function GameStateDisplay({
             align={{ base: "stretch", md: "center" }}
             gap={3}
           >
-            {phase === "Governance" && players && (
+            {phase === "Governance" && players && !gameEnded && (
               <CreateContractModal
                 players={players}
                 currentRound={round}
-                disabled={false}
+                disabled={gameEnded}
               />
             )}
 
             {/* Add Player Button (only during Setup) */}
-            {phase === "Setup" && (
+            {phase === "Setup" && !gameEnded && (
               <AddPlayerModal
                 onAddPlayer={handleAddPlayer}
                 isPending={addPlayer.isPending}
@@ -245,7 +275,7 @@ export function GameStateDisplay({
             )}
 
             {/* Generate Turn Order (only during Operations and when none yet) */}
-            {phase === "Operations" && players && (
+            {phase === "Operations" && players && !gameEnded && (
               <TurnOrderModal players={players} round={round} />
             )}
 
@@ -260,6 +290,7 @@ export function GameStateDisplay({
                 colorPalette="flamingoGold"
                 size="lg"
                 width={{ base: "full", md: "auto" }}
+                disabled={gameEnded}
               >
                 Advance Round
               </Button>
@@ -270,7 +301,7 @@ export function GameStateDisplay({
                 colorPalette="flamingoGold"
                 size="lg"
                 width={{ base: "full", md: "auto" }}
-                disabled={phase === "Setup" && !canBeginRound1}
+                disabled={(phase === "Setup" && !canBeginRound1) || gameEnded}
               >
                 {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
               </Button>

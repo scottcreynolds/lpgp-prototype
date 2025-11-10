@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { toaster } from "../components/ui/toasterInstance";
+import { gameSettings } from "../config/gameSettings";
 import type { DashboardSummary, Specialization } from "../lib/database.types";
 import { getCurrentGameId } from "../lib/gameSession";
 import { isMockSupabase, supabase } from "../lib/supabase";
+import { evaluateWinners } from "../lib/winCondition";
 import { useGameStore } from "../store/gameStore";
 
 // Query key factory
@@ -99,6 +101,19 @@ export function useDashboardData() {
         () => {
           // Refetch dashboard when game state changes
           queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "ledger_entries",
+          filter: gameId ? `game_id=eq.${gameId}` : undefined,
+        },
+        () => {
+          // Refresh ledger view on any new entries (e.g., GAME_ENDED)
+          queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
         }
       )
       .on(
@@ -279,6 +294,41 @@ export function useAdvanceRound() {
         }
       } catch {
         // Best-effort hint only; ignore failures
+      }
+
+      // Automatic win evaluation (after round advance)
+      try {
+        if (gameSettings.win.autoWinEnabled) {
+          const summary = queryClient.getQueryData<DashboardSummary>(
+            gameKeys.dashboard()
+          );
+          if (summary) {
+            const gsExt = summary.game_state as typeof summary.game_state & {
+              ended?: boolean;
+            };
+            if (gsExt.ended) {
+              return;
+            }
+            const evalRes = evaluateWinners(summary.players, {
+              evThreshold: gameSettings.win.evThreshold,
+              repThreshold: gameSettings.win.repThreshold,
+            });
+            if (evalRes.ended && evalRes.winners.length > 0) {
+              // Fire RPC to persist end-game (non-force path)
+              await supabase.rpc("evaluate_end_game", {
+                p_game_id: getCurrentGameId(),
+                p_force: false,
+                p_ev_threshold: gameSettings.win.evThreshold,
+                p_rep_threshold: gameSettings.win.repThreshold,
+              });
+              queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+              queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
+            }
+          }
+        }
+      } catch (e) {
+        // Silent fail; endgame evaluation shouldn't break round advance flow
+        console.warn("Endgame auto-evaluation failed", e);
       }
     },
   });
@@ -727,6 +777,47 @@ export function useManualAdjustment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
       queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
+    },
+  });
+}
+
+// Manual end-game hook
+export function useEndGame() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("evaluate_end_game", {
+        p_game_id: getCurrentGameId(),
+        p_force: true,
+        p_ev_threshold: gameSettings.win.evThreshold,
+        p_rep_threshold: gameSettings.win.repThreshold,
+      });
+      if (error) {
+        throw new Error(
+          `Failed to end game: ${error.message}. If this mentions evaluate_end_game missing, apply migrations 022–025 to Supabase.`
+        );
+      }
+      return data?.[0];
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
+      queryClient.invalidateQueries({ queryKey: gameKeys.ledger() });
+      if (result?.victory_type) {
+        toaster.create({
+          title: "Game Ended",
+          description: `Victory: ${result.victory_type}`,
+          type: "success",
+          duration: 4000,
+        });
+      }
+    },
+    onError: (err: Error) => {
+      toaster.create({
+        title: "End Game Failed",
+        description: err.message,
+        type: "error",
+        duration: 6000,
+      });
     },
   });
 }

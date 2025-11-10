@@ -136,6 +136,9 @@ const config = defineConfig({
           950: { value: "#241B0F" },
         },
       },
+      fonts: {
+        heading: { value: "Orbitron" },
+      },
     },
     semanticTokens: {
       colors: {

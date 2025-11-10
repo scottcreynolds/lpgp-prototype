@@ -16,6 +16,16 @@ import {
   initialPlayers,
 } from "./mockData";
 
+// Augment the base game state with optional endgame fields
+type AugmentedGameState = typeof initialGameState & {
+  ended?: boolean;
+  ended_at?: string;
+  winner_player_ids?: string[];
+  victory_type?: string | null;
+  win_ev_threshold?: number;
+  win_rep_threshold?: number;
+};
+
 // Storage key helper scoped by game id
 function getKeys(gameId: string) {
   return {
@@ -45,7 +55,7 @@ function initializeStorage() {
 }
 
 // Get data from localStorage
-function getGameState() {
+function getGameState(): AugmentedGameState {
   initializeStorage();
   const gid = getCurrentGameId();
   const KEYS = getKeys(gid!);
@@ -1784,6 +1794,104 @@ export const mockSupabaseClient = {
           ],
           error: null,
         });
+      case "evaluate_end_game": {
+        const gid = getCurrentGameId();
+        const KEYS = getKeys(gid!);
+        const gameState = getGameState();
+        const players = getPlayers() as Player[];
+
+        // Idempotent: return existing end state
+        if (gameState.ended) {
+          return Promise.resolve({
+            data: [
+              {
+                success: true,
+                ended: true,
+                victory_type: gameState.victory_type || null,
+                winner_player_ids: gameState.winner_player_ids || [],
+                threshold_met: true,
+              },
+            ],
+            error: null,
+          });
+        }
+
+        const p_force = params?.p_force as boolean | undefined;
+        const evTh = (params?.p_ev_threshold as number) ?? 0;
+        const repTh = (params?.p_rep_threshold as number) ?? 0;
+
+        const qualifiers = players.filter((p) => {
+          const meetsEv = p.ev >= evTh;
+          const meetsRep = repTh === 0 ? true : p.rep >= repTh;
+          return meetsEv && meetsRep;
+        });
+
+        const thresholdMet = qualifiers.length > 0;
+        let winners: Player[] = [];
+        let victoryType: string | null = null;
+
+        if (p_force || thresholdMet) {
+          const pool = thresholdMet ? qualifiers : players.slice();
+          let maxAgg = -Infinity;
+          pool.forEach((pl) => {
+            const agg = pl.ev + pl.rep;
+            if (agg > maxAgg) maxAgg = agg;
+          });
+          winners = pool.filter((pl) => pl.ev + pl.rep === maxAgg);
+          if (winners.length === 1) {
+            victoryType = qualifiers.length > 1 ? "tiebreaker" : "single";
+          } else {
+            victoryType = "cooperative";
+          }
+        }
+
+        if (winners.length > 0) {
+          gameState.ended = true;
+          gameState.ended_at = new Date().toISOString();
+          gameState.winner_player_ids = winners.map((w) => w.id);
+          gameState.victory_type = victoryType;
+          gameState.win_ev_threshold = evTh;
+          gameState.win_rep_threshold = repTh;
+          localStorage.setItem(KEYS.GAME_STATE, JSON.stringify(gameState));
+
+          const ledger = JSON.parse(localStorage.getItem(KEYS.LEDGER)!);
+          ledger.unshift({
+            id: crypto.randomUUID(),
+            player_id: null,
+            player_name: "System",
+            round: gameState.current_round,
+            transaction_type: "GAME_ENDED",
+            amount: 0,
+            ev_change: 0,
+            rep_change: 0,
+            reason: `Game ended with ${victoryType} victory: ${winners
+              .map((w) => w.name)
+              .join(", ")}`,
+            processed: true,
+            infrastructure_id: null,
+            contract_id: null,
+            metadata: null,
+            created_at: new Date().toISOString(),
+          });
+          localStorage.setItem(KEYS.LEDGER, JSON.stringify(ledger));
+          notifySubscribers("game_state");
+          notifySubscribers("ledger_entries");
+        }
+
+        return Promise.resolve({
+          data: [
+            {
+              success: true,
+              ended: winners.length > 0,
+              victory_type: victoryType,
+              winner_player_ids:
+                winners.length > 0 ? winners.map((w) => w.id) : null,
+              threshold_met: thresholdMet,
+            },
+          ],
+          error: null,
+        });
+      }
       default:
         return Promise.resolve({
           data: null,

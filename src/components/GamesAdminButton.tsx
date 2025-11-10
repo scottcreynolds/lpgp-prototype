@@ -5,19 +5,9 @@ import {
   Badge,
   Box,
   Button,
-  DialogActionTrigger,
-  DialogBackdrop,
-  DialogBody,
-  DialogCloseTrigger,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
   HStack,
   IconButton,
-  Portal,
+  Input,
   Spinner,
   Table,
   Text,
@@ -25,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { FaGamepad, FaTrash } from "react-icons/fa";
+import { FaGamepad, FaSearch, FaSync, FaTrash } from "react-icons/fa";
 
 function formatDateTime(ts?: string) {
   if (!ts) return "—";
@@ -44,19 +34,21 @@ interface GamesAdminButtonProps {
 export default function GamesAdminButton({
   inline = false,
 }: GamesAdminButtonProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // retained for non-inline legacy modal usage
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
   const queryClient = useQueryClient();
   const currentGameId = getCurrentGameId();
 
   const gamesQuery = useQuery({
     queryKey: ["admin", "games"],
-    enabled: open,
+    enabled: inline ? true : open,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("list_games");
       if (error) throw new Error(error.message || "Failed to load games");
       return (data || []) as GameListItem[];
     },
+    staleTime: 10_000,
   });
 
   const deleteMutation = useMutation({
@@ -75,188 +67,183 @@ export default function GamesAdminButton({
   const handleDelete = async (gameId: string) => {
     await deleteMutation.mutateAsync(gameId);
     setConfirmId(null);
-
-    // If we deleted the current game, consider refreshing state (URL still points to it).
-    const current = getCurrentGameId();
-    if (current === gameId) {
-      // No hard navigation here; user can start a new game from header. Keep it simple.
+    if (getCurrentGameId() === gameId) {
+      // If current game deleted, we intentionally do not auto-navigate; user can create a new one.
     }
   };
 
-  return (
-    <>
-      <DialogRoot open={open} onOpenChange={(d) => setOpen(d.open)}>
-        <DialogTrigger asChild>
-          <Button
-            {...(!inline && {
-              position: "fixed",
-              bottom: "4",
-              right: "4",
-              zIndex: "docked",
-            })}
-            colorPalette="flamingoGold"
-            variant={inline ? "outline" : "solid"}
-            size={inline ? "sm" : "md"}
-          >
-            <HStack gap={2}>
-              <FaGamepad />
-              <Text fontWeight="semibold">Games</Text>
+  if (inline) {
+    const filtered = (gamesQuery.data || []).filter((g) => {
+      if (!filter.trim()) return true;
+      const needle = filter.toLowerCase();
+      return (
+        g.game_id.toLowerCase().includes(needle) ||
+        g.player_names.some((n) => n.toLowerCase().includes(needle)) ||
+        g.phase.toLowerCase().includes(needle)
+      );
+    });
+
+    return (
+      <Box borderWidth={1} borderRadius="md" p={3} mt={2} bg="bg.subtle">
+        <HStack justify="space-between" mb={2} align="center">
+          <HStack gap={2}>
+            <FaGamepad />
+            <Text fontWeight="semibold" fontSize="sm">
+              Games ({filtered.length})
+            </Text>
+            {gamesQuery.isFetching && <Spinner size="xs" />}
+          </HStack>
+          <HStack gap={2}>
+            <HStack gap={1}>
+              <FaSearch style={{ opacity: 0.6 }} />
+              <Input
+                size="xs"
+                placeholder="Filter games..."
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                width="160px"
+              />
             </HStack>
-          </Button>
-        </DialogTrigger>
+            <IconButton
+              aria-label="Refresh games"
+              size="xs"
+              variant="outline"
+              onClick={() =>
+                queryClient.invalidateQueries({ queryKey: ["admin", "games"] })
+              }
+            >
+              <FaSync />
+            </IconButton>
+          </HStack>
+        </HStack>
+        {gamesQuery.isLoading ? (
+          <HStack justify="center" py={4}>
+            <Spinner />
+            <Text fontSize="sm">Loading…</Text>
+          </HStack>
+        ) : filtered.length === 0 ? (
+          <Text fontSize="sm" color="fg.muted">
+            No games found
+          </Text>
+        ) : (
+          <Table.ScrollArea maxH="240px">
+            <Table.Root size="sm" variant="outline" width="full">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Updated</Table.ColumnHeader>
+                  <Table.ColumnHeader>Round</Table.ColumnHeader>
+                  <Table.ColumnHeader>Players</Table.ColumnHeader>
+                  <Table.ColumnHeader>Game ID</Table.ColumnHeader>
+                  <Table.ColumnHeader></Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {filtered.map((g) => (
+                  <Table.Row key={g.game_id}>
+                    <Table.Cell>{formatDateTime(g.updated_at)}</Table.Cell>
+                    <Table.Cell>
+                      <HStack gap={2}>
+                        <Badge variant="surface">{g.phase}</Badge>
+                        <Text>R{g.round}</Text>
+                      </HStack>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <VStack align="start" gap={1}>
+                        {g.player_names.length > 0 ? (
+                          g.player_names.map((n) => (
+                            <Text key={n} fontSize="xs">
+                              {n}
+                            </Text>
+                          ))
+                        ) : (
+                          <Text fontSize="xs" color="fg">
+                            No players
+                          </Text>
+                        )}
+                      </VStack>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <HStack gap={2}>
+                        <Text fontFamily="mono" fontSize="10px">
+                          {g.game_id}
+                        </Text>
+                        {currentGameId === g.game_id && (
+                          <Badge
+                            variant="surface"
+                            colorPalette="flamingoGold"
+                            size="xs"
+                          >
+                            current
+                          </Badge>
+                        )}
+                      </HStack>
+                    </Table.Cell>
+                    <Table.Cell textAlign="right">
+                      <IconButton
+                        aria-label="Delete game"
+                        colorPalette="red"
+                        variant="ghost"
+                        size="xs"
+                        disabled={
+                          currentGameId === g.game_id ||
+                          deleteMutation.isPending
+                        }
+                        onClick={() => setConfirmId(g.game_id)}
+                        title={
+                          currentGameId === g.game_id
+                            ? "Cannot delete the current game"
+                            : "Delete game"
+                        }
+                      >
+                        <FaTrash />
+                      </IconButton>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Root>
+          </Table.ScrollArea>
+        )}
+        {confirmId && (
+          <HStack mt={3} gap={2}>
+            <Text fontSize="xs">Delete game {confirmId}?</Text>
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() => setConfirmId(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="xs"
+              colorPalette="red"
+              loading={deleteMutation.isPending}
+              onClick={() => handleDelete(confirmId)}
+            >
+              Delete
+            </Button>
+          </HStack>
+        )}
+      </Box>
+    );
+  }
 
-        <Portal>
-          <DialogBackdrop />
-          <DialogContent
-            css={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "min(960px, 95vw)",
-            }}
-          >
-            <DialogHeader>
-              <DialogTitle>Games</DialogTitle>
-            </DialogHeader>
-            <DialogBody>
-              {gamesQuery.isLoading ? (
-                <HStack justify="center" py={6}>
-                  <Spinner />
-                  <Text>Loading…</Text>
-                </HStack>
-              ) : gamesQuery.data && gamesQuery.data.length > 0 ? (
-                <Box overflowX="auto">
-                  <Table.Root size="sm">
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.ColumnHeader>Updated</Table.ColumnHeader>
-                        <Table.ColumnHeader>Round</Table.ColumnHeader>
-                        <Table.ColumnHeader>Players</Table.ColumnHeader>
-                        <Table.ColumnHeader>Game ID</Table.ColumnHeader>
-                        <Table.ColumnHeader></Table.ColumnHeader>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {gamesQuery.data.map((g) => (
-                        <Table.Row key={g.game_id}>
-                          <Table.Cell>
-                            {formatDateTime(g.updated_at)}
-                          </Table.Cell>
-                          <Table.Cell>
-                            <HStack gap={2}>
-                              <Badge variant="surface">{g.phase}</Badge>
-                              <Text>R{g.round}</Text>
-                            </HStack>
-                          </Table.Cell>
-                          <Table.Cell>
-                            <VStack align="start" gap={1}>
-                              {g.player_names.length > 0 ? (
-                                g.player_names.map((n) => (
-                                  <Text key={n} fontSize="sm">
-                                    {n}
-                                  </Text>
-                                ))
-                              ) : (
-                                <Text fontSize="sm" color="fg">
-                                  No players
-                                </Text>
-                              )}
-                            </VStack>
-                          </Table.Cell>
-                          <Table.Cell>
-                            <HStack gap={2}>
-                              <Text fontFamily="mono" fontSize="xs">
-                                {g.game_id}
-                              </Text>
-                              {currentGameId === g.game_id && (
-                                <Badge
-                                  variant="surface"
-                                  colorPalette="flamingoGold"
-                                  size="xs"
-                                >
-                                  current
-                                </Badge>
-                              )}
-                            </HStack>
-                          </Table.Cell>
-                          <Table.Cell textAlign="right">
-                            <IconButton
-                              aria-label="Delete game"
-                              colorPalette="red"
-                              variant="ghost"
-                              disabled={currentGameId === g.game_id}
-                              onClick={() => setConfirmId(g.game_id)}
-                              title={
-                                currentGameId === g.game_id
-                                  ? "Cannot delete the current game"
-                                  : "Delete game"
-                              }
-                            >
-                              <FaTrash />
-                            </IconButton>
-                          </Table.Cell>
-                        </Table.Row>
-                      ))}
-                    </Table.Body>
-                  </Table.Root>
-                </Box>
-              ) : (
-                <Text color="fg">No games found</Text>
-              )}
-            </DialogBody>
-            <DialogFooter>
-              <DialogActionTrigger asChild>
-                <Button variant="outline">Close</Button>
-              </DialogActionTrigger>
-            </DialogFooter>
-            <DialogCloseTrigger />
-          </DialogContent>
-        </Portal>
-      </DialogRoot>
-
-      {/* Confirm delete dialog */}
-      <DialogRoot
-        open={!!confirmId}
-        onOpenChange={(d) => !d.open && setConfirmId(null)}
-      >
-        <Portal>
-          <DialogBackdrop />
-          <DialogContent
-            css={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "min(520px, 95vw)",
-            }}
-          >
-            <DialogHeader>
-              <DialogTitle>Delete game?</DialogTitle>
-            </DialogHeader>
-            <DialogBody>
-              <Text>
-                This will permanently remove the game, its players,
-                infrastructure, ledger, and contracts. This action cannot be
-                undone.
-              </Text>
-            </DialogBody>
-            <DialogFooter>
-              <DialogActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogActionTrigger>
-              <Button
-                colorPalette="red"
-                loading={deleteMutation.isPending}
-                onClick={() => confirmId && handleDelete(confirmId)}
-              >
-                Delete
-              </Button>
-            </DialogFooter>
-            <DialogCloseTrigger />
-          </DialogContent>
-        </Portal>
-      </DialogRoot>
-    </>
+  // Fallback: original modal behavior (non-inline usage retained if needed elsewhere)
+  return (
+    <Button
+      position="fixed"
+      bottom="4"
+      right="4"
+      zIndex="docked"
+      colorPalette="flamingoGold"
+      variant="solid"
+      size="md"
+      onClick={() => setOpen(true)}
+    >
+      <HStack gap={2}>
+        <FaGamepad />
+        <Text fontWeight="semibold">Games (modal deprecated)</Text>
+      </HStack>
+    </Button>
   );
 }

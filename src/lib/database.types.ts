@@ -29,7 +29,8 @@ export type TransactionType =
   | "CONTRACT_ENDED"
   | "CONTRACT_BROKEN"
   | "INFRASTRUCTURE_ACTIVATED"
-  | "INFRASTRUCTURE_DEACTIVATED";
+  | "INFRASTRUCTURE_DEACTIVATED"
+  | "GAME_ENDED";
 
 export type ContractStatus = "active" | "ended" | "broken";
 
@@ -45,6 +46,12 @@ export interface Database {
           created_at: string;
           updated_at: string;
           game_id: string;
+          ended?: boolean; // nullable for backward compatibility
+          ended_at?: string | null;
+          winner_player_ids?: string[] | null;
+          victory_type?: string | null; // 'single' | 'tiebreaker' | 'cooperative'
+          win_ev_threshold?: number | null;
+          win_rep_threshold?: number | null;
         };
         Insert: {
           id?: number;
@@ -54,6 +61,12 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           game_id?: string;
+          ended?: boolean;
+          ended_at?: string | null;
+          winner_player_ids?: string[] | null;
+          victory_type?: string | null;
+          win_ev_threshold?: number | null;
+          win_rep_threshold?: number | null;
         };
         Update: {
           id?: number;
@@ -63,6 +76,12 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           game_id?: string;
+          ended?: boolean;
+          ended_at?: string | null;
+          winner_player_ids?: string[] | null;
+          victory_type?: string | null;
+          win_ev_threshold?: number | null;
+          win_rep_threshold?: number | null;
         };
       };
       players: {
@@ -424,6 +443,21 @@ export interface Database {
       ensure_game: {
         Args: { p_game_id: string };
         Returns: void;
+      };
+      evaluate_end_game: {
+        Args: {
+          p_game_id: string;
+          p_force?: boolean;
+          p_ev_threshold?: number;
+          p_rep_threshold?: number;
+        };
+        Returns: {
+          success: boolean;
+          ended: boolean;
+          victory_type: string | null;
+          winner_player_ids: string[] | null;
+          threshold_met: boolean;
+        }[];
       };
       list_games: {
         Args: Record<string, never>;

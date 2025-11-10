@@ -24,6 +24,7 @@ interface PlayerRankingsProps {
 export function PlayerRankings({ players }: PlayerRankingsProps) {
   const editPlayer = useEditPlayer();
   const currentPhase = useGameStore((state) => state.currentPhase);
+  const gameEnded = useGameStore((s) => s.gameEnded);
   // Removed self-labeling of player ("You") per updated requirement.
 
   const getSpecializationBadge = (specialization: string) => {
@@ -197,6 +198,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       builderEv={player.ev}
                       players={players}
                       disabled={currentPhase !== "Operations"}
+                      gameEnded={gameEnded}
                     />
                     <PlayerInventoryModal
                       playerId={player.id}

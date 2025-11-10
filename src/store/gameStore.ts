@@ -18,6 +18,9 @@ interface GameStore {
   currentRound: number;
   currentPhase: GamePhase;
   version: number;
+  gameEnded: boolean;
+  victoryType: string | null;
+  winnerIds: string[];
 
   // Dashboard data
   dashboardData: DashboardSummary | null;
@@ -50,6 +53,9 @@ const initialState = {
   currentRound: 0,
   currentPhase: "Setup" as GamePhase,
   version: 0,
+  gameEnded: false,
+  victoryType: null as string | null,
+  winnerIds: [] as string[],
   dashboardData: null,
   timers: {} as Record<PhaseKey, PhaseTimerState>,
   operationsTurnOrder: {} as Record<number, string[]>,
@@ -84,11 +90,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
         },
         players: data.players ?? [],
       };
+      // Narrow type for extended game_state shape
+      const gsExt = safe.game_state as typeof safe.game_state & {
+        ended?: boolean;
+        victory_type?: string | null;
+        winner_player_ids?: string[] | null;
+      };
       return {
         dashboardData: safe,
         currentRound: safe.game_state.round,
         currentPhase: safe.game_state.phase,
         version: safe.game_state.version,
+        gameEnded: gsExt.ended ?? false,
+        victoryType: gsExt.victory_type ?? null,
+        winnerIds: gsExt.winner_player_ids ?? [],
       };
     }),
 

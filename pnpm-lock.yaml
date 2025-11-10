@@ -14,6 +14,9 @@ importers:
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.2)(react@19.2.0)
+      '@fontsource-variable/exo-2':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@supabase/supabase-js':
         specifier: ^2.79.0
         version: 2.79.0
@@ -427,6 +430,9 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@fontsource-variable/exo-2@5.2.8':
+    resolution: {integrity: sha512-P3k8XX+RE1E8QA4/EpR0wSmcvenHjYd7NUNbPNH8iUSA9mGDkPVxE6cxOsx7ksRKY1p0R1ExndDNTpzwwLgkVg==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2048,6 +2054,8 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@fontsource-variable/exo-2@5.2.8': {}
 
   '@humanfs/core@0.19.1': {}
 

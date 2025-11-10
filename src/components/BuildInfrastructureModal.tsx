@@ -34,6 +34,7 @@ interface BuildInfrastructureModalProps {
   builderEv: number;
   players: DashboardPlayer[];
   disabled?: boolean;
+  gameEnded?: boolean; // explicit override if game has ended
 }
 
 export function BuildInfrastructureModal({
@@ -42,6 +43,7 @@ export function BuildInfrastructureModal({
   builderEv,
   players,
   disabled = false,
+  gameEnded = false,
 }: BuildInfrastructureModalProps) {
   const [open, setOpen] = useState(false);
   const [ownerId, setOwnerId] = useState(builderId);
@@ -195,7 +197,7 @@ export function BuildInfrastructureModal({
           colorPalette="blue"
           variant="outline"
           size="sm"
-          disabled={disabled}
+          disabled={disabled || gameEnded}
         >
           Build
         </Button>
@@ -461,7 +463,8 @@ export function BuildInfrastructureModal({
               disabled={
                 !infrastructureType ||
                 !canAfford ||
-                buildInfrastructure.isPending
+                buildInfrastructure.isPending ||
+                gameEnded
               }
             >
               Build Infrastructure

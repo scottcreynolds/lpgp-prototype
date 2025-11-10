@@ -1,3 +1,4 @@
+import { useGameStore } from "@/store/gameStore";
 import {
   Box,
   Button,
@@ -8,6 +9,7 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
+import { useEndGame } from "../hooks/useGameData";
 import { createNewGameAndNavigate, getShareUrl } from "../lib/gameSession";
 import { toaster } from "./ui/toasterInstance";
 
@@ -64,6 +66,9 @@ export function DashboardHeader() {
     }
   };
 
+  const endGame = useEndGame();
+  const gameEnded = useGameStore((s) => s.gameEnded);
+
   return (
     <Box bg="bg" borderBottomWidth={1} borderColor="border" py={4}>
       <Container maxW="container.xl">
@@ -91,6 +96,26 @@ export function DashboardHeader() {
             >
               Start New Game
             </Button>
+            {!gameEnded && (
+              <Button
+                variant="outline"
+                size="sm"
+                loading={endGame.isPending}
+                onClick={async () => {
+                  const confirmed = window.confirm(
+                    "End Game now? This will force a final winner calculation using EV+REP ranking (cooperative if tied)."
+                  );
+                  if (!confirmed) return;
+                  try {
+                    await endGame.mutateAsync();
+                  } catch {
+                    // onError in hook shows toast
+                  }
+                }}
+              >
+                End Game
+              </Button>
+            )}
           </HStack>
         </Flex>
       </Container>

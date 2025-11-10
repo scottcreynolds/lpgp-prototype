@@ -1,3 +1,4 @@
+import { useGameStore } from "@/store/gameStore";
 import {
   Badge,
   Box,
@@ -25,6 +26,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
     filterPlayerId === "all" ? undefined : filterPlayerId
   );
   const endContract = useEndContract();
+  const gameEnded = useGameStore((s) => s.gameEnded);
 
   const handleEndContract = async (contractId: string, isBroken: boolean) => {
     const reason = isBroken
@@ -146,8 +148,8 @@ export function ContractsListView({ players }: ContractsListViewProps) {
               <Heading size="md" mb={3} color="fg.emphasized">
                 Active Contracts ({activeContracts.length})
               </Heading>
-              <Table.Root size="md" variant="outline" width="full">
-                <Table.ScrollArea maxH="400px">
+              <Table.ScrollArea maxH="400px">
+                <Table.Root size="md" variant="outline" width="full">
                   <Table.Header>
                     <Table.Row>
                       <Table.ColumnHeader fontWeight="bold">
@@ -293,6 +295,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                                   handleEndContract(contract.id, false)
                                 }
                                 loading={endContract.isPending}
+                                disabled={gameEnded}
                               >
                                 End
                               </Button>
@@ -304,6 +307,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                                   handleEndContract(contract.id, true)
                                 }
                                 loading={endContract.isPending}
+                                disabled={gameEnded}
                               >
                                 Break
                               </Button>
@@ -313,8 +317,8 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                       );
                     })}
                   </Table.Body>
-                </Table.ScrollArea>
-              </Table.Root>
+                </Table.Root>
+              </Table.ScrollArea>
             </Box>
           )}
 
@@ -324,8 +328,8 @@ export function ContractsListView({ players }: ContractsListViewProps) {
               <Heading size="md" mb={3} color="fg.emphasized">
                 Past Contracts ({inactiveContracts.length})
               </Heading>
-              <Table.Root size="sm" variant="outline" width="full">
-                <Table.ScrollArea maxH="300px">
+              <Table.ScrollArea maxH="300px">
+                <Table.Root size="sm" variant="outline" width="full">
                   <Table.Header>
                     <Table.Row>
                       <Table.ColumnHeader fontWeight="bold">
@@ -384,8 +388,8 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                       );
                     })}
                   </Table.Body>
-                </Table.ScrollArea>
-              </Table.Root>
+                </Table.Root>
+              </Table.ScrollArea>
             </Box>
           )}
         </VStack>

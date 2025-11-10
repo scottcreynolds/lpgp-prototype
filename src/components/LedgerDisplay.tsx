@@ -18,6 +18,7 @@ interface LedgerDisplayProps {
 
 const transactionTypeLabels: Record<string, string> = {
   GAME_START: "Game Start",
+  GAME_ENDED: "Game Ended",
   INFRASTRUCTURE_BUILT: "Infrastructure Built",
   INFRASTRUCTURE_MAINTENANCE: "Maintenance",
   INFRASTRUCTURE_YIELD: "Yield",
@@ -32,6 +33,7 @@ const transactionTypeLabels: Record<string, string> = {
 
 const transactionTypeColors: Record<string, string> = {
   GAME_START: "blue",
+  GAME_ENDED: "purple",
   INFRASTRUCTURE_BUILT: "purple",
   INFRASTRUCTURE_MAINTENANCE: "orange",
   INFRASTRUCTURE_YIELD: "green",
@@ -155,8 +157,8 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
           </Text>
         </Box>
       ) : (
-        <Table.Root size="sm" variant="outline">
-          <Table.ScrollArea maxH="500px">
+        <Table.ScrollArea maxH="500px">
+          <Table.Root size="sm" variant="outline">
             <Table.Header>
               <Table.Row bg="bg">
                 <Table.ColumnHeader fontWeight="bold" color="fg">
@@ -256,8 +258,8 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                 </Table.Row>
               ))}
             </Table.Body>
-          </Table.ScrollArea>
-        </Table.Root>
+          </Table.Root>
+        </Table.ScrollArea>
       )}
     </Box>
   );

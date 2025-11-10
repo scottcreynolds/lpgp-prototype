@@ -28,6 +28,7 @@ interface ManualAdjustmentModalProps {
   playerName: string;
   currentEv: number;
   currentRep: number;
+  disabled?: boolean;
 }
 
 export function ManualAdjustmentModal({
@@ -35,6 +36,7 @@ export function ManualAdjustmentModal({
   playerName,
   currentEv,
   currentRep,
+  disabled = false,
 }: ManualAdjustmentModalProps) {
   const [open, setOpen] = useState(false);
   const [evChange, setEvChange] = useState(0);
@@ -111,7 +113,12 @@ export function ManualAdjustmentModal({
   return (
     <DialogRoot open={open} onOpenChange={handleOpenChange} size="lg">
       <DialogTrigger asChild>
-        <Button colorPalette="orange" variant="outline" size="sm">
+        <Button
+          colorPalette="orange"
+          variant="outline"
+          size="sm"
+          disabled={disabled}
+        >
           Adjust
         </Button>
       </DialogTrigger>
@@ -273,7 +280,8 @@ export function ManualAdjustmentModal({
               disabled={
                 !reason.trim() ||
                 (evChange === 0 && repChange === 0) ||
-                manualAdjustment.isPending
+                manualAdjustment.isPending ||
+                disabled
               }
             >
               Apply Adjustment

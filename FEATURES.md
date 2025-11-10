@@ -1,4 +1,12 @@
-# Missing Features
+# Features
+
+## Dev Panel: Games list
+
+- The games list now renders inline as a scrollable table inside the Developer panel, replacing the previous modal UX.
+- Includes quick filtering, refresh, and inline delete confirmation.
+- Only visible in development builds via `DeveloperPanel` (guarded by `import.meta.env.DEV`).
+
+## Missing Features
 
 ## Completed ✅
 
@@ -75,9 +83,6 @@
 
 ## High Priority
 
-- determine a winner
-- player stats view (basic version exists in rankings, may need expansion)
-- clean up layout
 - tips (Setup tips exist, need more)
 - auto timer start
 - event cards
