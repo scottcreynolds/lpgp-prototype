@@ -386,24 +386,37 @@ export function BuildInfrastructureModal({
                       </VStack>
 
                       {activationPrediction && (
-                        <Box mt={3} p={2} borderWidth={1} borderRadius="md" borderColor="border">
+                        <Box
+                          mt={3}
+                          p={2}
+                          borderWidth={1}
+                          borderRadius="md"
+                          borderColor="border"
+                        >
                           <HStack justify="space-between" align="start">
                             <VStack gap={1} align="start" flex={1}>
-                              <Text fontSize="xs" fontWeight="bold" color="fg.emphasized">
+                              <Text
+                                fontSize="xs"
+                                fontWeight="bold"
+                                color="fg.emphasized"
+                              >
                                 Activation on Build
                               </Text>
                               {activationPrediction.willAutoActivate ? (
                                 <Text fontSize="xs" color="fg">
-                                  Will <strong>auto-activate</strong>: {activationPrediction.reason}
+                                  Will <strong>auto-activate</strong>:{" "}
+                                  {activationPrediction.reason}
                                 </Text>
                               ) : (
                                 <Text fontSize="xs" color="fg">
-                                  Will start <strong>dormant</strong>: {activationPrediction.reason}
+                                  Will start <strong>dormant</strong>:{" "}
+                                  {activationPrediction.reason}
                                 </Text>
                               )}
                               {activationPrediction.missing.length > 0 && (
                                 <Text fontSize="xs" color="fg.muted">
-                                  Missing: {activationPrediction.missing.join(", ")}
+                                  Missing:{" "}
+                                  {activationPrediction.missing.join(", ")}
                                 </Text>
                               )}
                             </VStack>
