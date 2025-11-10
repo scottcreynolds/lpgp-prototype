@@ -142,37 +142,37 @@ const config = defineConfig({
         // Base application surfaces
         bg: {
           value: {
-            _light: "{colors.duneSand.50}",
+            _light: "{colors.softOchre.400}",
             _dark: "{colors.voidNavy.900}",
           },
         },
         "bg.subtle": {
           value: {
-            _light: "{colors.duneSand.100}",
+            _light: "{colors.softOchre.100}",
             _dark: "{colors.voidNavy.800}",
           },
         },
         "bg.muted": {
           value: {
-            _light: "{colors.duneSand.200}",
+            _light: "{colors.softOchre.200}",
             _dark: "{colors.voidNavy.700}",
           },
         },
         "bg.emphasized": {
           value: {
             _light: "{colors.voidNavy.800}",
-            _dark: "{colors.duneSand.200}",
+            _dark: "{colors.softOchre.200}",
           },
         },
         "bg.inverted": {
           value: {
-            _light: "{colors.voidNavy.900}",
-            _dark: "{colors.duneSand.50}",
+            _light: "{colors.voidNavy.700}",
+            _dark: "{colors.softOchre.200}",
           },
         },
         "bg.panel": {
           value: {
-            _light: "{colors.duneSand.100}",
+            _light: "{colors.duneSand.300}",
             _dark: "{colors.voidNavy.800}",
           },
         },
@@ -180,25 +180,25 @@ const config = defineConfig({
         // Text colors — tuned for AA contrast on the bg tokens above
         fg: {
           value: {
-            _light: "{colors.voidNavy.900}",
+            _light: "{colors.subduedCrystal.400}",
             _dark: "{colors.softOchre.500}",
           },
         },
         "fg.muted": {
           value: {
-            _light: "{colors.voidNavy.700}",
+            _light: "{colors.subduedCrystal.800}",
             _dark: "{colors.softOchre.300}",
           },
         },
         "fg.subtle": {
           value: {
-            _light: "{colors.voidNavy.600}",
+            _light: "{colors.subduedCrystal.700}",
             _dark: "{colors.softOchre.400}",
           },
         },
         "fg.inverted": {
           value: {
-            _light: "{colors.softOchre.50}",
+            _light: "{colors.subduedCrystal.50}",
             _dark: "{colors.sapphireWool.700}",
           },
         },
@@ -206,25 +206,25 @@ const config = defineConfig({
         // Borders
         border: {
           value: {
-            _light: "{colors.voidNavy.200}",
+            _light: "{colors.flamingoGold.400}",
             _dark: "{colors.voidNavy.700}",
           },
         },
         "border.muted": {
           value: {
-            _light: "{colors.voidNavy.100}",
+            _light: "{colors.flamingoGold.300}",
             _dark: "{colors.voidNavy.800}",
           },
         },
         "border.subtle": {
           value: {
-            _light: "{colors.duneSand.200}",
+            _light: "{colors.sapphireWool.200}",
             _dark: "{colors.voidNavy.700}",
           },
         },
         "border.emphasized": {
           value: {
-            _light: "{colors.voidNavy.600}",
+            _light: "{colors.sapphireWool.200}",
             _dark: "{colors.duneSand.400}",
           },
         },
@@ -235,11 +235,11 @@ const config = defineConfig({
           },
         },
         flamingoGold: {
-          solid: { value: "{colors.flamingoGold.400}" },
+          solid: { value: "{colors.flamingoGold.500}" },
           contrast: { value: "{colors.duneSand.300}" },
           fg: {
             value: {
-              _light: "{colors.flamingoGold.800}",
+              _light: "{colors.softOchre.400}",
               _dark: "{colors.flamingoGold.400}",
             },
           },
@@ -247,20 +247,6 @@ const config = defineConfig({
           subtle: { value: "{colors.flamingoGold.700}" },
           emphasized: { value: "{colors.flamingoGold.300}" },
           focusRing: { value: "{colors.flamingoGold.300}" },
-        },
-        ridgeGold: {
-          solid: { value: "{colors.flamingoGold.400}" },
-          contrast: { value: "{colors.duneSand.300}" },
-          fg: {
-            value: {
-              _light: "{colors.flamingoGold.400}",
-              _dark: "{colors.flamingoGold.300}",
-            },
-          },
-          muted: { value: "{colors.flamingoGold.300}" },
-          subtle: { value: "{colors.flamingoGold.700}" },
-          emphasized: { value: "{colors.flamingoGold.600}" },
-          focusRing: { value: "{colors.flamingoGold.500}" },
         },
         // Primary (gold) semantic mapping for colorPalette="ridgeGold"
         // ridgeGold: {
@@ -282,27 +268,13 @@ const config = defineConfig({
           contrast: { value: "{colors.duneSand.300}" },
           fg: {
             value: {
-              _light: "{colors.sapphireWool.200}",
-              _dark: "{colors.sapphireWool.700}",
+              _light: "{colors.sapphireWool.500}",
+              _dark: "{colors.sapphireWool.500}",
             },
           },
-          muted: { value: "{colors.sapphireWool.800}" },
+          muted: { value: "{colors.sapphireWool.200}" },
           subtle: { value: "{colors.sapphireWool.700}" },
-          emphasized: { value: "{colors.sapphireWool.600}" },
-          focusRing: { value: "{colors.sapphireWool.500}" },
-        },
-        driftTeal: {
-          solid: { value: "{colors.sapphireWool.400}" },
-          contrast: { value: "{colors.duneSand.300}" },
-          fg: {
-            value: {
-              _light: "{colors.sapphireWool.200}",
-              _dark: "{colors.sapphireWool.700}",
-            },
-          },
-          muted: { value: "{colors.sapphireWool.800}" },
-          subtle: { value: "{colors.sapphireWool.700}" },
-          emphasized: { value: "{colors.sapphireWool.600}" },
+          emphasized: { value: "{colors.sapphireWool.400}" },
           focusRing: { value: "{colors.sapphireWool.500}" },
         },
         // Secondary (teal) mapping for colorPalette="driftTeal"

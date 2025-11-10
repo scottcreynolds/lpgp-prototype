@@ -115,7 +115,7 @@ export function AddPlayerModal({
     <DialogRoot open={effectiveOpen} onOpenChange={handleOpenChange} size="xl">
       {!hideTrigger && (
         <DialogTrigger asChild>
-          <Button colorPalette="green" variant="solid">
+          <Button colorPalette="flamingoGold" variant="solid">
             Add Player
           </Button>
         </DialogTrigger>
@@ -245,7 +245,7 @@ export function AddPlayerModal({
                   borderWidth="1px"
                   borderColor="gray.200"
                   borderRadius="md"
-                  bg="bg.muted"
+                  bg="bg"
                 >
                   <Heading size="sm" mb={2} color="fg.emphasized">
                     {specializationMeta[specialization].title}
@@ -260,10 +260,12 @@ export function AddPlayerModal({
 
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button colorPalette="sapphireWool" variant="outline">
+                Cancel
+              </Button>
             </DialogActionTrigger>
             <Button
-              colorPalette="green"
+              colorPalette="flamingoGold"
               onClick={handleSubmit}
               loading={isPending}
               disabled={!companyName.trim()}

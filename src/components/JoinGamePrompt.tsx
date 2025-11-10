@@ -106,7 +106,7 @@ export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
             </DialogHeader>
             <DialogBody>
               <VStack gap={4} align="stretch">
-                <Text color="fg.muted">
+                <Text color="fg">
                   Choose how you'd like to view this game. Player joining is
                   only allowed during Setup.
                 </Text>

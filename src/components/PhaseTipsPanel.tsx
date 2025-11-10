@@ -76,21 +76,21 @@ export function PhaseTipsPanel({ phase }: PhaseTipsPanelProps) {
   }
 
   return (
-    <Card.Root variant="subtle" bg="bg.muted" borderColor="border">
+    <Card.Root variant="outline" colorPalette="gray">
       <Card.Body>
         <Collapsible.Root open={isOpen} onOpenChange={(e) => setIsOpen(e.open)}>
           <Collapsible.Trigger asChild>
             <Button
               size="sm"
               variant="ghost"
-              colorPalette="blue"
+              colorPalette="gray"
               justifyContent="space-between"
               w="full"
             >
               <HStack gap={2} flex={1} justify="flex-start">
                 <Icon as={IconCmp} />
                 <Text fontWeight="semibold">Helpful Tips</Text>
-                <Text color="fg.muted" fontSize="sm">
+                <Text color="fg" fontSize="sm">
                   ({phase})
                 </Text>
               </HStack>
@@ -143,7 +143,7 @@ export function PhaseTipsPanel({ phase }: PhaseTipsPanelProps) {
                       <Icon as={FiChevronRight} />
                     </IconButton>
                   </HStack>
-                  <Box as="span" color="fg.muted" fontSize="sm">
+                  <Box as="span" color="fg" fontSize="sm">
                     {index + 1}/{count}
                   </Box>
                 </HStack>

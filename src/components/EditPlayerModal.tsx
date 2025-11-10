@@ -133,7 +133,7 @@ export function EditPlayerModal({
                   </NativeSelect.Field>
                   <NativeSelect.Indicator />
                 </NativeSelect.Root>
-                <Text fontSize="sm" color="fg.muted" mt={2} fontWeight="medium">
+                <Text fontSize="sm" color="fg" mt={2} fontWeight="medium">
                   {specializationDescriptions[specialization]}
                 </Text>
               </Field.Root>

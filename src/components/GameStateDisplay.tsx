@@ -118,15 +118,17 @@ export function GameStateDisplay({
 
   return (
     <Box
-      bg="bg"
+      bg="bg.panel"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="border"
+      borderColor="border.emphasized"
       shadow="sm"
-      maxW={{ base: "full", lg: "4xl" }}
       mx="auto"
     >
+      <Heading size="lg" mb={4} color="fg.emphasized">
+        Game Status
+      </Heading>
       {/* Top Row: Two columns */}
       <Flex
         justify="space-between"
@@ -148,7 +150,7 @@ export function GameStateDisplay({
           </Heading>
           {/* Highest Rep label */}
           {players && players.length > 0 && phase !== "Setup" && (
-            <Text color="fg.muted" fontSize="sm" fontWeight="medium" mb={1}>
+            <Text color="fg" fontSize="sm" fontWeight="medium" mb={1}>
               {(() => {
                 const maxRep = Math.max(...players.map((p) => p.rep));
                 const leaders = players.filter((p) => p.rep === maxRep);
@@ -160,7 +162,7 @@ export function GameStateDisplay({
             </Text>
           )}
           {phase === "Setup" && (
-            <Box mt={3} color="fg.muted" fontSize="sm" lineHeight={1.4}>
+            <Box mt={3} color="fg" fontSize="sm" lineHeight={1.4}>
               <Text mb={1} fontWeight="medium">
                 During Setup:
               </Text>
@@ -216,7 +218,7 @@ export function GameStateDisplay({
           <Button
             onClick={handleAdvanceRound}
             loading={advanceRound.isPending}
-            colorPalette="blue"
+            colorPalette="flamingoGold"
             size="lg"
             width={{ base: "full", md: "auto" }}
           >
@@ -226,7 +228,7 @@ export function GameStateDisplay({
           <Button
             onClick={handleAdvancePhase}
             loading={advancePhase.isPending}
-            colorPalette="blue"
+            colorPalette="sapphireWool"
             size="lg"
             width={{ base: "full", md: "auto" }}
             disabled={phase === "Setup" && !canBeginRound1}
@@ -249,7 +251,7 @@ export function GameStateDisplay({
         fontSize="sm"
       >
         {warningMessage && (
-          <Text color="fg.muted" fontSize="sm">
+          <Text color="fg" fontSize="sm">
             {warningMessage}
           </Text>
         )}

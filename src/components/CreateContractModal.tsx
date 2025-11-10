@@ -209,7 +209,7 @@ export function CreateContractModal({
     <DialogRoot open={open} onOpenChange={handleOpenChange} size="xl">
       <DialogTrigger asChild>
         <Button
-          colorPalette="purple"
+          colorPalette="flamingoGold"
           variant="solid"
           disabled={disabled}
           size="md"
@@ -326,7 +326,7 @@ export function CreateContractModal({
                         </NativeSelect.Field>
                         <NativeSelect.Indicator />
                       </NativeSelect.Root>
-                      <Text fontSize="xs" color="fg.muted" mt={1}>
+                      <Text fontSize="xs" color="fg" mt={1}>
                         {evIsPerRound
                           ? "Payment occurs each round while contract is active"
                           : "Payment occurs only when contract is created"}
@@ -398,7 +398,7 @@ export function CreateContractModal({
                     onChange={(e) => setDurationRounds(e.target.value)}
                     placeholder="Leave empty for permanent"
                   />
-                  <Text fontSize="xs" color="fg.muted" mt={1}>
+                  <Text fontSize="xs" color="fg" mt={1}>
                     Leave empty for a permanent contract
                   </Text>
                 </Field.Root>
@@ -414,7 +414,7 @@ export function CreateContractModal({
                   {/* Party A Net Flows */}
                   <Box
                     p={3}
-                    bg="bg.muted"
+                    bg="bg"
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
@@ -425,7 +425,7 @@ export function CreateContractModal({
                     <VStack gap={1} align="stretch">
                       {(evAToB > 0 || evBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             EV:
                           </Text>
                           <Badge
@@ -440,7 +440,7 @@ export function CreateContractModal({
                       )}
                       {(powerAToB > 0 || powerBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             Power:
                           </Text>
                           <Badge
@@ -454,7 +454,7 @@ export function CreateContractModal({
                       )}
                       {(crewAToB > 0 || crewBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             Crew:
                           </Text>
                           <Badge
@@ -472,7 +472,7 @@ export function CreateContractModal({
                   {/* Party B Net Flows */}
                   <Box
                     p={3}
-                    bg="bg.muted"
+                    bg="bg"
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
@@ -483,7 +483,7 @@ export function CreateContractModal({
                     <VStack gap={1} align="stretch">
                       {(evAToB > 0 || evBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             EV:
                           </Text>
                           <Badge
@@ -498,7 +498,7 @@ export function CreateContractModal({
                       )}
                       {(powerAToB > 0 || powerBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             Power:
                           </Text>
                           <Badge
@@ -512,7 +512,7 @@ export function CreateContractModal({
                       )}
                       {(crewAToB > 0 || crewBToA > 0) && (
                         <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             Crew:
                           </Text>
                           <Badge
@@ -533,10 +533,12 @@ export function CreateContractModal({
 
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button colorPalette="sapphireWool" variant="outline">
+                Cancel
+              </Button>
             </DialogActionTrigger>
             <Button
-              colorPalette="purple"
+              colorPalette="flamingoGold"
               onClick={handleSubmit}
               loading={createContract.isPending}
               disabled={!partyAId || !partyBId || partyAId === partyBId}

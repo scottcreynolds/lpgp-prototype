@@ -64,11 +64,11 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
 
   return (
     <Box
-      bg="bg"
+      bg="bg.panel"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="border"
+      borderColor="border.emphasized"
       shadow="sm"
     >
       <Heading size="lg" mb={4} color="fg.emphasized">
@@ -76,7 +76,12 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
       </Heading>
 
       <Table.ScrollArea maxH="600px">
-        <Table.Root size="lg" variant="outline" striped>
+        <Table.Root
+          size="lg"
+          variant="outline"
+          striped
+          colorPalette="sapphireWool"
+        >
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeader fontWeight="bold">Rank</Table.ColumnHeader>
@@ -156,7 +161,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                     <Text fontSize="sm" fontWeight="semibold" color="fg">
                       {player.totals.available_power}
                     </Text>
-                    <Text fontSize="xs" color="fg.muted">
+                    <Text fontSize="xs" color="fg">
                       (
                       {player.totals.total_power_capacity -
                         player.totals.total_power_used}{" "}
@@ -169,7 +174,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                     <Text fontSize="sm" fontWeight="semibold" color="fg">
                       {player.totals.available_crew}
                     </Text>
-                    <Text fontSize="xs" color="fg.muted">
+                    <Text fontSize="xs" color="fg">
                       (
                       {player.totals.total_crew_capacity -
                         player.totals.total_crew_used}{" "}

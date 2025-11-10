@@ -137,7 +137,7 @@ export function ManualAdjustmentModal({
               {/* Current Values */}
               <Box
                 p={3}
-                bg="bg.muted"
+                bg="bg"
                 borderRadius="md"
                 borderWidth={1}
                 borderColor="border"
@@ -151,7 +151,7 @@ export function ManualAdjustmentModal({
                   Current Values:
                 </Text>
                 <HStack justify="space-between">
-                  <Text fontSize="sm" color="fg.muted">
+                  <Text fontSize="sm" color="fg">
                     EV:
                   </Text>
                   <Text fontSize="sm" fontWeight="semibold" color="fg">
@@ -159,7 +159,7 @@ export function ManualAdjustmentModal({
                   </Text>
                 </HStack>
                 <HStack justify="space-between">
-                  <Text fontSize="sm" color="fg.muted">
+                  <Text fontSize="sm" color="fg">
                     REP:
                   </Text>
                   <Text fontSize="sm" fontWeight="semibold" color="fg">
@@ -208,7 +208,7 @@ export function ManualAdjustmentModal({
               {(evChange !== 0 || repChange !== 0) && (
                 <Box
                   p={3}
-                  bg="bg.muted"
+                  bg="bg"
                   borderRadius="md"
                   borderWidth={1}
                   borderColor="border"
@@ -223,7 +223,7 @@ export function ManualAdjustmentModal({
                   </Text>
                   {evChange !== 0 && (
                     <HStack justify="space-between">
-                      <Text fontSize="sm" color="fg.muted">
+                      <Text fontSize="sm" color="fg">
                         EV:
                       </Text>
                       <Text fontSize="sm" fontWeight="semibold" color="fg">
@@ -234,7 +234,7 @@ export function ManualAdjustmentModal({
                   )}
                   {repChange !== 0 && (
                     <HStack justify="space-between">
-                      <Text fontSize="sm" color="fg.muted">
+                      <Text fontSize="sm" color="fg">
                         REP:
                       </Text>
                       <Text fontSize="sm" fontWeight="semibold" color="fg">

@@ -113,7 +113,7 @@ export function PhaseTimer({ round, phase }: PhaseTimerProps) {
     <Box
       px={4}
       py={3}
-      bg="bg.muted"
+      bg="bg"
       borderRadius="md"
       borderWidth={1}
       borderColor="border"

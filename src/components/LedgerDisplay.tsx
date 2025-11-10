@@ -142,14 +142,13 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
         </Box>
       </HStack>
 
-
       {/* Ledger Table */}
       {!ledgerEntries || ledgerEntries.length === 0 ? (
         <Box p={8} textAlign="center">
-          <Text color="fg.muted" fontSize="lg">
+          <Text color="fg" fontSize="lg">
             No transactions found
           </Text>
-          <Text color="fg.muted" fontSize="sm" mt={2}>
+          <Text color="fg" fontSize="sm" mt={2}>
             {filterPlayerId !== "all" || filterRound !== "all"
               ? "Try adjusting your filters"
               : "Transactions will appear here as the game progresses"}
@@ -159,7 +158,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
         <Table.Root size="sm" variant="outline">
           <Table.ScrollArea maxH="500px">
             <Table.Header>
-              <Table.Row bg="bg.muted">
+              <Table.Row bg="bg">
                 <Table.ColumnHeader fontWeight="bold" color="fg">
                   Round
                 </Table.ColumnHeader>
@@ -237,7 +236,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                     </Text>
                   </Table.Cell>
                   <Table.Cell>
-                    <Text fontSize="xs" color="fg.muted" maxW="300px">
+                    <Text fontSize="xs" color="fg" maxW="300px">
                       {entry.reason}
                     </Text>
                   </Table.Cell>
@@ -250,7 +249,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                     </Badge>
                   </Table.Cell>
                   <Table.Cell>
-                    <Text fontSize="xs" color="fg.muted">
+                    <Text fontSize="xs" color="fg">
                       {new Date(entry.created_at).toLocaleString()}
                     </Text>
                   </Table.Cell>

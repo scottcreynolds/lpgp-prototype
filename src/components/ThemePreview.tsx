@@ -20,7 +20,7 @@ function Swatch({ label, token }: { label: string; token: string }) {
         h="10"
         borderRadius="md"
       />
-      <Text fontSize="xs" color="fg.muted">
+      <Text fontSize="xs" color="fg">
         {label}
       </Text>
     </VStack>
@@ -34,18 +34,18 @@ export function ThemePreview() {
     <Box mt={6} p={4} borderWidth="1px" borderRadius="md" bg="bg.panel">
       <Stack gap={3}>
         <Heading size="sm">Theme Preview</Heading>
-        <Text color="fg.muted" fontSize="sm">
+        <Text fontSize="sm">
           Current mode: <b>{resolvedTheme}</b>
         </Text>
         <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
           <Swatch label="bg" token="bg" />
           <Swatch label="bg.panel" token="bg.panel" />
-          <Swatch label="ridgeGold.solid" token="ridgeGold.solid" />
-          <Swatch label="driftTeal.solid" token="driftTeal.solid" />
+          <Swatch label="flamingoGold.solid" token="flamingoGold.solid" />
+          <Swatch label="sapphireWool.solid" token="sapphireWool.solid" />
         </SimpleGrid>
         <HStack gap={2} pt={2}>
-          <Button colorPalette="ridgeGold">Primary</Button>
-          <Button colorPalette="driftTeal" variant="outline">
+          <Button colorPalette="flamingoGold">Primary</Button>
+          <Button colorPalette="sapphireWool" variant="surface">
             Secondary
           </Button>
         </HStack>

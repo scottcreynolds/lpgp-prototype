@@ -104,7 +104,7 @@ export function PlayerInventoryModal({
               {/* Summary */}
               <Box
                 p={3}
-                bg="bg.muted"
+                bg="bg"
                 borderRadius="md"
                 borderWidth={1}
                 borderColor="border"
@@ -140,7 +140,7 @@ export function PlayerInventoryModal({
               </Box>
 
               {infrastructure.length === 0 ? (
-                <Text color="fg.muted" textAlign="center" py={4}>
+                <Text color="fg" textAlign="center" py={4}>
                   No infrastructure yet
                 </Text>
               ) : (
@@ -183,7 +183,7 @@ export function PlayerInventoryModal({
                           </VStack>
                         </Table.Cell>
                         <Table.Cell>
-                          <Text fontSize="sm" color="fg.muted">
+                          <Text fontSize="sm" color="fg">
                             {item.location || "Not specified"}
                           </Text>
                         </Table.Cell>
@@ -193,7 +193,7 @@ export function PlayerInventoryModal({
                               {item.power_requirement}
                             </Badge>
                           ) : (
-                            <Text fontSize="xs" color="fg.muted">
+                            <Text fontSize="xs" color="fg">
                               -
                             </Text>
                           )}
@@ -204,7 +204,7 @@ export function PlayerInventoryModal({
                               {item.crew_requirement}
                             </Badge>
                           ) : (
-                            <Text fontSize="xs" color="fg.muted">
+                            <Text fontSize="xs" color="fg">
                               -
                             </Text>
                           )}
@@ -242,7 +242,7 @@ export function PlayerInventoryModal({
               {infrastructure.length > 0 && (
                 <Box
                   p={3}
-                  bg="bg.muted"
+                  bg="bg"
                   borderRadius="md"
                   borderWidth={1}
                   borderColor="border"
@@ -255,7 +255,7 @@ export function PlayerInventoryModal({
                   >
                     Notes:
                   </Text>
-                  <VStack align="start" gap={1} fontSize="xs" color="fg.muted">
+                  <VStack align="start" gap={1} fontSize="xs" color="fg">
                     <Text>
                       • Starter infrastructure is always active and cannot be
                       deactivated

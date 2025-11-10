@@ -185,7 +185,7 @@ export function BuildInfrastructureModal({
                 {/* Builder Info */}
                 <Box
                   p={3}
-                  bg="bg.muted"
+                  bg="bg"
                   borderRadius="md"
                   borderWidth={1}
                   borderColor="border"
@@ -278,7 +278,7 @@ export function BuildInfrastructureModal({
                     <Box
                       flex={1}
                       p={3}
-                      bg="bg.muted"
+                      bg="bg"
                       borderRadius="md"
                       borderWidth={1}
                       borderColor="border"
@@ -293,7 +293,7 @@ export function BuildInfrastructureModal({
                       </Text>
                       <VStack gap={1} align="stretch" fontSize="sm">
                         <HStack justify="space-between">
-                          <Text color="fg.muted">Build Cost:</Text>
+                          <Text color="fg">Build Cost:</Text>
                           <Badge
                             colorPalette={canAfford ? "green" : "red"}
                             variant="subtle"
@@ -302,14 +302,14 @@ export function BuildInfrastructureModal({
                           </Badge>
                         </HStack>
                         <HStack justify="space-between">
-                          <Text color="fg.muted">Maintenance (per round):</Text>
+                          <Text color="fg">Maintenance (per round):</Text>
                           <Text color="fg">
                             {selectedInfrastructure.maintenance_cost} EV
                           </Text>
                         </HStack>
                         {selectedInfrastructure.yield && (
                           <HStack justify="space-between">
-                            <Text color="fg.muted">Yield (per round):</Text>
+                            <Text color="fg">Yield (per round):</Text>
                             <Badge colorPalette="green" variant="subtle">
                               +{selectedInfrastructure.yield} EV
                             </Badge>
@@ -317,7 +317,7 @@ export function BuildInfrastructureModal({
                         )}
                         {selectedInfrastructure.capacity && (
                           <HStack justify="space-between">
-                            <Text color="fg.muted">Capacity:</Text>
+                            <Text color="fg">Capacity:</Text>
                             <Text color="fg">
                               {selectedInfrastructure.capacity}
                             </Text>
@@ -325,7 +325,7 @@ export function BuildInfrastructureModal({
                         )}
                         {selectedInfrastructure.power_requirement && (
                           <HStack justify="space-between">
-                            <Text color="fg.muted">Power Requirement:</Text>
+                            <Text color="fg">Power Requirement:</Text>
                             <Text color="fg">
                               {selectedInfrastructure.power_requirement}
                             </Text>
@@ -333,7 +333,7 @@ export function BuildInfrastructureModal({
                         )}
                         {selectedInfrastructure.crew_requirement && (
                           <HStack justify="space-between">
-                            <Text color="fg.muted">Crew Requirement:</Text>
+                            <Text color="fg">Crew Requirement:</Text>
                             <Text color="fg">
                               {selectedInfrastructure.crew_requirement}
                             </Text>

@@ -79,7 +79,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
         p={6}
         borderRadius="lg"
         borderWidth={1}
-        borderColor="border"
+        borderColor="border.emphasized"
         shadow="sm"
       >
         <Text>Loading contracts...</Text>
@@ -98,11 +98,11 @@ export function ContractsListView({ players }: ContractsListViewProps) {
 
   return (
     <Box
-      bg="bg"
+      bg="bg.panel"
       p={6}
       borderRadius="lg"
       borderWidth={1}
-      borderColor="border"
+      borderColor="border.emphasized"
       shadow="sm"
       width="full"
     >
@@ -129,10 +129,10 @@ export function ContractsListView({ players }: ContractsListViewProps) {
 
       {activeContracts.length === 0 && inactiveContracts.length === 0 ? (
         <Box p={8} textAlign="center">
-          <Text color="fg.muted" fontSize="lg">
+          <Text color="fg" fontSize="lg">
             No contracts found
           </Text>
-          <Text color="fg.muted" fontSize="sm" mt={2}>
+          <Text color="fg" fontSize="sm" mt={2}>
             {filterPlayerId === "all"
               ? "Create a contract during the Governance phase"
               : "This player has no contracts"}
@@ -185,7 +185,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                               <Text fontWeight="semibold" fontSize="sm">
                                 {partyAName}
                               </Text>
-                              <Text fontSize="xs" color="fg.muted">
+                              <Text fontSize="xs" color="fg">
                                 ⇄
                               </Text>
                               <Text fontWeight="semibold" fontSize="sm">
@@ -213,7 +213,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                               )}
                               {contract.ev_from_a_to_b === 0 &&
                                 contract.ev_from_b_to_a === 0 && (
-                                  <Text fontSize="sm" color="fg.muted">
+                                  <Text fontSize="sm" color="fg">
                                     None
                                   </Text>
                                 )}
@@ -233,7 +233,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                               )}
                               {contract.power_from_a_to_b === 0 &&
                                 contract.power_from_b_to_a === 0 && (
-                                  <Text fontSize="sm" color="fg.muted">
+                                  <Text fontSize="sm" color="fg">
                                     None
                                   </Text>
                                 )}
@@ -253,7 +253,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                               )}
                               {contract.crew_from_a_to_b === 0 &&
                                 contract.crew_from_b_to_a === 0 && (
-                                  <Text fontSize="sm" color="fg.muted">
+                                  <Text fontSize="sm" color="fg">
                                     None
                                   </Text>
                                 )}
@@ -269,7 +269,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                                 <Text fontSize="sm" fontWeight="semibold">
                                   {contract.rounds_remaining} left
                                 </Text>
-                                <Text fontSize="xs" color="fg.muted">
+                                <Text fontSize="xs" color="fg">
                                   of {contract.duration_rounds}
                                 </Text>
                               </VStack>
@@ -376,7 +376,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                             </Badge>
                           </Table.Cell>
                           <Table.Cell>
-                            <Text fontSize="xs" color="fg.muted">
+                            <Text fontSize="xs" color="fg">
                               {contract.reason_for_ending || "N/A"}
                             </Text>
                           </Table.Cell>

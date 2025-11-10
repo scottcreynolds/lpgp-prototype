@@ -81,12 +81,12 @@ export function DashboardHeader() {
                 Copy Link
               </Button>
             </HStack>
-            <Text display={{ base: "none", md: "block" }} color="fg.muted">
+            <Text display={{ base: "none", md: "block" }} color="fg">
               Share this link for others to join
             </Text>
             <Button
               onClick={handleStartNewGame}
-              variant="surface"
+              variant="solid"
               colorPalette="flamingoGold"
             >
               Start New Game

@@ -1,15 +1,8 @@
-import {
-  Alert,
-  Box,
-  Container,
-  Heading,
-  Spinner,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { Alert, Box, Container, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useDashboardData } from "../hooks/useGameData";
 import { ContractsListView } from "./ContractsListView";
 import { DashboardHeader } from "./DashboardHeader";
+import DeveloperPanel from "./DeveloperPanel";
 import { GameStateDisplay } from "./GameStateDisplay";
 import { InfrastructureCards } from "./InfrastructureCards";
 import { JoinGamePrompt } from "./JoinGamePrompt";
@@ -56,7 +49,7 @@ export function Dashboard() {
   }
 
   return (
-    <Box minH="100vh" bg="bg">
+    <Box minH="100vh" minW="100vw" bg="bg.inverted">
       <DashboardHeader />
 
       <Container maxW="container.xl" py={8}>
@@ -66,9 +59,6 @@ export function Dashboard() {
 
           {/* Game Status Section */}
           <Box>
-            <Heading size="md" mb={3} color="fg">
-              Game Status
-            </Heading>
             <GameStateDisplay
               round={data.game_state.round}
               phase={data.game_state.phase}
@@ -107,6 +97,8 @@ export function Dashboard() {
               currentRound={data.game_state.round}
             />
           </Box>
+          {/* Developer tools appear at the bottom of the page */}
+          <DeveloperPanel />
         </VStack>
       </Container>
     </Box>

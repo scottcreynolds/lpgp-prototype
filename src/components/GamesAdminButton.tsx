@@ -94,7 +94,7 @@ export default function GamesAdminButton({
               right: "4",
               zIndex: "docked",
             })}
-            colorPalette="ridgeGold"
+            colorPalette="flamingoGold"
             variant={inline ? "outline" : "solid"}
             size={inline ? "sm" : "md"}
           >
@@ -158,7 +158,7 @@ export default function GamesAdminButton({
                                   </Text>
                                 ))
                               ) : (
-                                <Text fontSize="sm" color="fg.muted">
+                                <Text fontSize="sm" color="fg">
                                   No players
                                 </Text>
                               )}
@@ -172,7 +172,7 @@ export default function GamesAdminButton({
                               {currentGameId === g.game_id && (
                                 <Badge
                                   variant="surface"
-                                  colorPalette="ridgeGold"
+                                  colorPalette="flamingoGold"
                                   size="xs"
                                 >
                                   current
@@ -202,7 +202,7 @@ export default function GamesAdminButton({
                   </Table.Root>
                 </Box>
               ) : (
-                <Text color="fg.muted">No games found</Text>
+                <Text color="fg">No games found</Text>
               )}
             </DialogBody>
             <DialogFooter>

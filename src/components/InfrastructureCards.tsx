@@ -77,7 +77,14 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   };
 
   return (
-    <Box>
+    <Box
+      bg="bg.panel"
+      p={6}
+      borderRadius="lg"
+      borderWidth={1}
+      borderColor="border.emphasized"
+      shadow="sm"
+    >
       <Heading size="lg" mb={4} color="fg">
         Infrastructure Overview
       </Heading>
@@ -183,7 +190,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                     {Object.entries(infrastructureCounts).map(
                       ([type, count]) => (
                         <HStack key={type} gap={2}>
-                          <Box color="fg.muted" fontSize="sm">
+                          <Box color="fg" fontSize="sm">
                             {getInfrastructureIcon(type)}
                           </Box>
                           <Text fontSize="sm" color="fg">
@@ -200,13 +207,13 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   {/* Power */}
                   <Box
                     p={3}
-                    bg={powerShortage ? "bg.error.subtle" : "bg.muted"}
+                    bg={powerShortage ? "bg.error.subtle" : "bg"}
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
                   >
                     <HStack gap={2} mb={1}>
-                      <Box color={powerShortage ? "fg" : "fg.muted"}>
+                      <Box color={powerShortage ? "fg" : "fg"}>
                         <FaBolt />
                       </Box>
                       <Text fontSize="xs" fontWeight="bold" color="fg">
@@ -226,13 +233,13 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   {/* Crew */}
                   <Box
                     p={3}
-                    bg={crewShortage ? "bg.error.subtle" : "bg.muted"}
+                    bg={crewShortage ? "bg.error.subtle" : "bg"}
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
                   >
                     <HStack gap={2} mb={1}>
-                      <Box color={crewShortage ? "fg" : "fg.muted"}>
+                      <Box color={crewShortage ? "fg" : "fg"}>
                         <FaUsers />
                       </Box>
                       <Text fontSize="xs" fontWeight="bold" color="fg">
@@ -254,13 +261,13 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                 <SimpleGrid columns={2} gap={3}>
                   <Box
                     p={3}
-                    bg="bg.muted"
+                    bg="bg"
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
                   >
                     <HStack gap={2} mb={1}>
-                      <Box color="fg.muted">
+                      <Box color="fg">
                         <FaCoins />
                       </Box>
                       <Text fontSize="xs" fontWeight="bold" color="fg">
@@ -274,15 +281,13 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
                   <Box
                     p={3}
-                    bg={
-                      totals.total_yield > 0 ? "bg.success.subtle" : "bg.muted"
-                    }
+                    bg={totals.total_yield > 0 ? "bg.success.subtle" : "bg"}
                     borderRadius="md"
                     borderWidth={1}
                     borderColor="border"
                   >
                     <HStack gap={2} mb={1}>
-                      <Box color="fg.muted">
+                      <Box color="fg">
                         <FaChartLine />
                       </Box>
                       <Text fontSize="xs" fontWeight="bold" color="fg">
@@ -303,7 +308,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                       ? "bg.success.subtle"
                       : totals.total_yield - totals.total_maintenance_cost < 0
                       ? "bg.error.subtle"
-                      : "bg.muted"
+                      : "bg"
                   }
                   borderRadius="md"
                   textAlign="center"
