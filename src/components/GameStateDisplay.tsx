@@ -1,3 +1,4 @@
+import { useGameStore } from "@/store/gameStore";
 import {
   Box,
   Button,
@@ -23,6 +24,7 @@ import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { PhaseTipsPanel } from "./PhaseTipsPanel";
+import { TurnOrderModal } from "./TurnOrderModal";
 import { toaster } from "./ui/toasterInstance";
 
 interface GameStateDisplayProps {
@@ -40,6 +42,7 @@ export function GameStateDisplay({
   const advancePhase = useAdvancePhase();
   const advanceRound = useAdvanceRound();
   const addPlayer = useAddPlayer();
+  const turnOrder = useGameStore((s) => s.operationsTurnOrder[round]);
 
   // Setup phase button enable + warning logic
   const { canBeginRound1, warningMessage } = useMemo(() => {
@@ -178,6 +181,19 @@ export function GameStateDisplay({
                   })()}
                 </Text>
               )}
+              {/* Operations Phase Turn Order (single-line) */}
+              {phase === "Operations" && turnOrder && turnOrder.length > 0 && (
+                <Box>
+                  <Heading size="sm" mb={1} color="fg.emphasized">
+                    Turn Order:
+                  </Heading>
+                  <Text color="fg" fontSize="sm" mb={1}>
+                    {turnOrder
+                      .map((name, idx) => `${idx + 1}. ${name}`)
+                      .join(", ")}
+                  </Text>
+                </Box>
+              )}
               {phase === "Setup" && (
                 <Box mt={3} color="fg" fontSize="sm" lineHeight={1.4}>
                   <Text mb={1} fontWeight="medium">
@@ -228,6 +244,11 @@ export function GameStateDisplay({
               />
             )}
 
+            {/* Generate Turn Order (only during Operations and when none yet) */}
+            {phase === "Operations" && players && (
+              <TurnOrderModal players={players} round={round} />
+            )}
+
             {/* Spacer to push next button to the right on desktop */}
             <Box flex={{ base: "0", md: "1" }} />
 
@@ -246,7 +267,7 @@ export function GameStateDisplay({
               <Button
                 onClick={handleAdvancePhase}
                 loading={advancePhase.isPending}
-                colorPalette="sapphireWool"
+                colorPalette="flamingoGold"
                 size="lg"
                 width={{ base: "full", md: "auto" }}
                 disabled={phase === "Setup" && !canBeginRound1}

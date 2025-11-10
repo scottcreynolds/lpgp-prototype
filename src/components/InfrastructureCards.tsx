@@ -161,7 +161,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                         playerName={player.name}
                         infrastructure={player.infrastructure}
                         trigger={
-                          <Button size="xs" colorPalette="flamingoGold">
+                          <Button size="xs" colorPalette="sapphireWool">
                             Manage Infrastructure
                           </Button>
                         }

@@ -209,7 +209,7 @@ export function CreateContractModal({
     <DialogRoot open={open} onOpenChange={handleOpenChange} size="xl">
       <DialogTrigger asChild>
         <Button
-          colorPalette="flamingoGold"
+          colorPalette="sapphireWool"
           variant="solid"
           disabled={disabled}
           size="md"
@@ -538,7 +538,7 @@ export function CreateContractModal({
               </Button>
             </DialogActionTrigger>
             <Button
-              colorPalette="flamingoGold"
+              colorPalette="sapphireWool"
               onClick={handleSubmit}
               loading={createContract.isPending}
               disabled={!partyAId || !partyBId || partyAId === partyBId}

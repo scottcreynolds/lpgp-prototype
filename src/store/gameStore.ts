@@ -25,10 +25,17 @@ interface GameStore {
   // Phase timers keyed by `${round}:${phase}`
   timers: Record<PhaseKey, PhaseTimerState>;
 
+  // Local-only: per-round Operations turn order (array of player names)
+  operationsTurnOrder: Record<number, string[]>;
+
   // Actions
   setGameState: (round: number, phase: GamePhase, version: number) => void;
   setDashboardData: (data: DashboardSummary) => void;
   reset: () => void;
+
+  // Turn order actions
+  setOperationsTurnOrder: (round: number, order: string[]) => void;
+  clearOperationsTurnOrder: (round: number) => void;
 
   // Timer actions
   ensureTimer: (round: number, phase: GamePhase) => void;
@@ -45,16 +52,26 @@ const initialState = {
   version: 0,
   dashboardData: null,
   timers: {} as Record<PhaseKey, PhaseTimerState>,
+  operationsTurnOrder: {} as Record<number, string[]>,
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   setGameState: (round, phase, version) =>
-    set({
-      currentRound: round,
-      currentPhase: phase,
-      version,
+    set((state) => {
+      // If we are not in Operations, ensure any turn order for this round is cleared
+      let updates: Partial<GameStore> = {
+        currentRound: round,
+        currentPhase: phase,
+        version,
+      };
+      if (phase !== "Operations" && state.operationsTurnOrder[round]) {
+        const rest = { ...state.operationsTurnOrder };
+        delete rest[round];
+        updates = { ...updates, operationsTurnOrder: rest };
+      }
+      return updates;
     }),
 
   setDashboardData: (data) =>
@@ -76,6 +93,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 
   reset: () => set(initialState),
+
+  // Local, per-round Operations turn order
+  setOperationsTurnOrder: (round, order) =>
+    set((state) => ({
+      operationsTurnOrder: { ...state.operationsTurnOrder, [round]: order },
+    })),
+
+  clearOperationsTurnOrder: (round) =>
+    set((state) => {
+      if (!state.operationsTurnOrder[round]) return {};
+      const rest = { ...state.operationsTurnOrder };
+      delete rest[round];
+      return { operationsTurnOrder: rest };
+    }),
 
   // Ensure a timer entry exists for a given round/phase
   ensureTimer: (round, phase) =>

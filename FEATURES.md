@@ -46,13 +46,21 @@
   - All mock data (players, infra, ledger, contracts) is scoped per game ID
   - Note: Supabase (real backend) parity to be added in a follow-up migration (add game_id, update RPCs)
 
-- ✅ **Supabase parity for multiplayer scoping**
   - Added `game_id` to game tables and indexed
   - Updated RPCs to accept `p_game_id` and filter by it (advance_phase/round, get_dashboard_summary, add_player, build/toggle infrastructure, contracts, manual_adjustment, process_round_end, reset_game)
   - Added `ensure_game(p_game_id)`
   - Frontend hooks now pass `p_game_id` and scope table queries/subscriptions by `game_id`
   - Migration file: `database/migrations/012_multigame_support.sql`
-\n+- ✅ **Player specialization card selection** - Add Player modal now presents three specialization image cards (scaled ~75%) instead of a dropdown; responsive horizontal layout stacks vertically on narrow screens for improved clarity.
+
+- ✅ **Operations Phase Turn Order (local)**
+  - Local-only generation; not persisted to backend (client picks and shares verbally)
+  - Button appears in Operations phase action row when no order exists for current round
+  - 2s animated "quantum dice" sequence with progress bar & space-themed flavor text
+  - Randomized order displayed in modal, then inline under Operations Phase heading as `1. Name, 2. Name, ...`
+  - Order auto-clears when leaving Operations phase / entering a different phase
+  - Implemented via `operationsTurnOrder` in `gameStore`, `TurnOrderModal` component, integrated in `GameStateDisplay`
+
+- ✅ **Player specialization card selection** - Add Player modal now presents three specialization image cards (scaled ~75%) instead of a dropdown; responsive horizontal layout stacks vertically on narrow screens for improved clarity.
 
 - ✅ **Helpful Tips Section**
   - Added `PhaseTipsPanel` collapsible panel under Game Status and above Player Rankings
@@ -67,12 +75,13 @@
 
 ## High Priority
 
-- turn order in each phase
+- determine a winner
 - player stats view (basic version exists in rankings, may need expansion)
 - clean up layout
 - tips (Setup tips exist, need more)
 - auto timer start
 - event cards
+- turn order persistence & cross-client visibility (backend)
 
 ## Maybe
 
@@ -81,11 +90,7 @@
 - scenario import
 - event card import
 - values editor
-- limit who can build what based on spec
 - player turns
 - assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces) (may not need)
 
 ## Bugs
-
-- panels in "infrastructure overview" should be colored in a subtle way when there is an overage/shortage. Yield panel surface should be a subtle green when positive. Net per round should be subtle red or green depending on negative/positive. use approriate chakra-ui semantic coloring to preserve contrast and light/dark mode capability
-- contracts table should be full-width of its container and responsive
