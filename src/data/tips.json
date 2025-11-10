@@ -1,38 +1,44 @@
 [
   {
+    "icon": "info",
     "id": "setup-welcome",
     "phase": "Setup",
-    "icon": "info",
-    "text": "Choose a clear player name and specialization; discuss with others to balance roles."
+    "text": "Choose a clear player name and specialization; discuss with others to balance roles. Make sure everyone is ready before starting!"
   },
   {
+    "icon": "time",
     "id": "setup-plan",
     "phase": "Setup",
-    "icon": "time",
     "text": "Use Setup time to skim starter infrastructure and imagine your first 2 rounds of builds."
   },
   {
+    "icon": "info",
+    "id": "gov-intro",
+    "phase": "Governance",
+    "text": "During the Governance phase, players can make contracts with each other to share or trade resources and EV, or discuss infrastructure plans and coordinate efforts. \nBe thinking about what you want to build, whether you have the Crew and Power capacity to manage it, and who you might want to cooperate with."
+  },
+  {
+    "icon": "alert",
     "id": "gov-rep",
     "phase": "Governance",
-    "icon": "info",
-    "text": "Highest reputation breaks ties and gets the first issue; coordinate proposals early."
+    "text": "Having the highest reputation allows you to break ties and get the first issue in front of the group, so manage your relationships wisely!"
   },
   {
+    "icon": "contract",
     "id": "gov-contracts",
     "phase": "Governance",
-    "icon": "contract",
-    "text": "Draft or adjust contracts now; per-round EV transfers occur after Operations each round."
+    "text": "Draft or adjust contracts now so they will be in effect during the Operations phase - you can't make contracts during Operations! Don't find yourself short on power or crew space for critical infrastructure!"
   },
   {
+    "icon": "build",
     "id": "ops-build",
     "phase": "Operations",
-    "icon": "build",
     "text": "Build infrastructure that synergizes with existing capacity; watch power and crew requirements."
   },
   {
+    "icon": "alert",
     "id": "ops-maintenance",
     "phase": "Operations",
-    "icon": "alert",
-    "text": "Active infrastructure costs maintenance at round end; dormancy can pause costs but also yields."
+    "text": "Active infrastructure costs maintenance at round end; dormancy can pause costs but also yields. It may be to your advantage to cycle infrastructure on and off strategically."
   }
 ]
