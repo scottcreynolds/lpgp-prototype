@@ -86,8 +86,8 @@ export function DashboardHeader() {
             </Text>
             <Button
               onClick={handleStartNewGame}
-              colorPalette="red"
-              variant="outline"
+              variant="surface"
+              colorPalette="flamingoGold"
             >
               Start New Game
             </Button>

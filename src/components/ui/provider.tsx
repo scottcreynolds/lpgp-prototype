@@ -12,7 +12,7 @@ export function Provider({
   return (
     <ChakraProvider value={ridgeSystem}>
       {/* Use next-themes to manage system/light/dark and apply chakra-theme class */}
-      <ColorModeProvider defaultTheme="system" enableSystem {...rest}>
+      <ColorModeProvider defaultTheme="light" enableSystem {...rest}>
         {children}
       </ColorModeProvider>
     </ChakraProvider>
