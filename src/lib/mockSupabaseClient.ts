@@ -823,6 +823,44 @@ async function rpcCreateContract(
     created_at: new Date().toISOString(),
   });
 
+  // Reputation bonus (+1 REP each party)
+  partyA.rep += 1;
+  partyB.rep += 1;
+  partyA.updated_at = new Date().toISOString();
+  partyB.updated_at = new Date().toISOString();
+  ledger.push({
+    id: crypto.randomUUID(),
+    player_id: partyAId,
+    player_name: partyA.name,
+    round: gameState.current_round,
+    transaction_type: "REP_GAIN",
+    amount: 1,
+    ev_change: 0,
+    rep_change: 1,
+    reason: `Reputation bonus for new contract with ${partyB.name}`,
+    processed: true,
+    infrastructure_id: null,
+    contract_id: newContract.id,
+    metadata: null,
+    created_at: new Date().toISOString(),
+  });
+  ledger.push({
+    id: crypto.randomUUID(),
+    player_id: partyBId,
+    player_name: partyB.name,
+    round: gameState.current_round,
+    transaction_type: "REP_GAIN",
+    amount: 1,
+    ev_change: 0,
+    rep_change: 1,
+    reason: `Reputation bonus for new contract with ${partyA.name}`,
+    processed: true,
+    infrastructure_id: null,
+    contract_id: newContract.id,
+    metadata: null,
+    created_at: new Date().toISOString(),
+  });
+
   // Save all updates
   localStorage.setItem(KEYS.CONTRACTS, JSON.stringify(contracts));
   localStorage.setItem(KEYS.PLAYERS, JSON.stringify(players));

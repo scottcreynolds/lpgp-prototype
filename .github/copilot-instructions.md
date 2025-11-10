@@ -6,6 +6,8 @@ These notes help AI agents work productively in this repo. Keep guidance concret
 
 - Tooling: Vite + React 19 + TypeScript, Chakra UI v3, TanStack Query 5, Zustand, Supabase (optional).
 - Package manager: pnpm. Common scripts: `pnpm dev`, `pnpm build` (tsc then vite), `pnpm lint`.
+  - this is not a workspace. do not try to run `pnpm -w build` or similar workspace commands.
+  - do not try to create new commands for linting and building just run `pnpm lint` and `pnpm build`.
 - Path alias: `@/*` resolves to `src/*` (see `tsconfig.app.json` and `vite-tsconfig-paths`). Example: `import { Provider } from "@/components/ui/provider"`.
 - Backend modes:
   - Mock mode (default): if `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are missing, app uses a localStorage-backed mock client and logs: "🎭 Using mock data...".

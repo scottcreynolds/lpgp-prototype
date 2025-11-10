@@ -1,6 +1,7 @@
 # Game Rules Summary (Draft)
 
 ## 1. Overview
+
 The Lunar Scoreboard models cooperative lunar development under shared commons constraints.  
 Players act as **Lunar Development Companies (LDCs)** that build infrastructure, trade resources, and establish territorial operations.  
 The rules combine economic simulation with behavioral cooperation tracking.
@@ -78,6 +79,7 @@ Solar arrays provide power to players' infrastructure so that they can be operat
 Extractors serve to mine and refine resources from the lunar surface for sale or trade to other players in the form of a direct EV yield per round as long as they are adequately powered and crewed. Helium-3 Extractors are more advanced than H2O extractors and have a higher cost but higher yield.
 
 = Can be operated by: Resource Extractor
+
 - Cost to Build: 20 EV
 - Per Round Maintenance: 5 EV
 - Capacity: n/a
@@ -97,12 +99,12 @@ Extractors serve to mine and refine resources from the lunar surface for sale or
 - Power Requirement: 5
 - Crew Requirement: 5
 
-
 ## 5. Turn and Round Flow
 
 A **round** represents one operational cycle (e.g., one lunar month) and has both an operations and a governance phase.
 
 ### 4.1 Sequence of Play
+
 1. **Declare Actions** — players propose builds, trades, or claims.  
 2. **Negotiate / Resolve Conflicts** — contested territory or resource conflicts are mediated.  
 3. **Execute Actions** — Supabase RPC functions update tables atomically.  
@@ -110,7 +112,9 @@ A **round** represents one operational cycle (e.g., one lunar month) and has bot
 5. **Review Results** — players debrief using the round summary dashboard.  
 
 ### 4.2 Round Closure
+
 At the end of each round:
+
 - Calculate total EV and REP deltas for each player.  
 - Display infrastructure built, territories claimed, and trades completed.  
 - Record a “snapshot” of state for research reproducibility.
@@ -122,11 +126,13 @@ At the end of each round:
 **Definition:** Numeric measure of accumulated assets, production, and trade success.  
 
 **Increases when:**  
+
 - Building infrastructure that enables further output.  
 - Completing trades that yield net gain.  
 - Sharing commons productively (if bonuses apply).
 
 **Decreases when:**  
+
 - Spending on construction.  
 - Failing cooperative commitments or sustaining losses.
 
@@ -138,10 +144,13 @@ All EV changes generate a corresponding ledger entry.
 
 **Definition:** Social capital reflecting cooperation, transparency, and adherence to agreements.  
 **Increases when:**  
+
 - Participating in cooperative actions or resource sharing.  
 - Resolving disputes amicably.  
+- Entering into a new contract with another player (+1 REP to each party on creation).
 
 **Decreases when:**  
+
 - Violating resource-sharing rules.  
 - Failing to honor negotiated outcomes.
 
@@ -177,10 +186,12 @@ Players utilizing the commons infrastructure will pay 10 EV total per round as m
 ## 10. Victory and Endgame
 
 **Win Condition:**  
+
 - First player to reach **500 EV** wins the simulation.  
 - Secondary recognition for highest REP.
 
 **Tiebreaker:**  
+
 - If multiple players exceed 500 EV in the same round, the highest combined EV + REP wins.
 
 The facilitator may also designate **collective victory** if all players achieve positive outcomes without REP violations.
@@ -202,6 +213,7 @@ The facilitator may also designate **collective victory** if all players achieve
 ## 12. Facilitator Controls
 
 Facilitators can:
+
 - Reset the simulation to seed data.  
 - Import/export CSVs from Supabase Storage.  
 - Override values for testing or demonstration.  
@@ -212,11 +224,11 @@ Facilitators can:
 ## 13. Data Export Rules
 
 At the end of a session:
+
 - Export all tables (`players`, `infrastructure`, `territories`, `events`, `ledger_entries`, `rounds`) as JSON or CSV.  
 - Maintain consistent field names for analysis pipelines.  
 - Store outputs in `supabase/storage` under `/exports/<session_id>/`.
 
 ---
-
 
 _Last updated: November 3, 2025_

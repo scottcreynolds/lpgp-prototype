@@ -18,6 +18,18 @@ This maintains feature parity between mock and real backends for round processin
 
 ---
 
+## Update — November 10, 2025
+
+Contract reputation bonus added in both SQL and mock:
+
+- On successful contract creation, each party automatically gains +1 REP.
+- Two ledger entries with `transaction_type = REP_GAIN` are added (one per party) with `amount=1`, `rep_change=1`, and `contract_id` set to the new contract.
+- The system-level `CONTRACT_CREATED` entry is kept for auditing.
+
+This is implemented in the SQL function `create_contract(...)` (multi-game version) and mirrored in `rpcCreateContract` in `src/lib/mockSupabaseClient.ts`.
+
+---
+
 ## Overview
 
 Implemented a transparent mock data layer that allows development without a Supabase backend. The system automatically uses mock data when environment variables are absent, requiring **zero code changes** in components or hooks.
