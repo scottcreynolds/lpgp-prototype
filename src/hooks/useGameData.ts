@@ -213,9 +213,9 @@ export function useAdvanceRound() {
     },
     onSuccess: async (result) => {
       // Start the next Governance timer automatically
-      if (result?.new_phase === "Governance") {
-        startTimer(result.new_round, "Governance");
-      }
+      // if (result?.new_phase === "Governance") {
+      // startTimer(result.new_round, "Governance");
+      // }
       // Refresh everything
       queryClient.invalidateQueries({ queryKey: gameKeys.all });
 

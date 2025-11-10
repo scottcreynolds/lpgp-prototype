@@ -1,4 +1,13 @@
-import { Box, Button, Flex, Heading, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import { useMemo } from "react";
 import {
   useAddPlayer,
@@ -13,6 +22,7 @@ import type {
 import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
 import { PhaseTimer } from "./PhaseTimer";
+import { PhaseTipsPanel } from "./PhaseTipsPanel";
 import { toaster } from "./ui/toasterInstance";
 
 interface GameStateDisplayProps {
@@ -129,133 +139,148 @@ export function GameStateDisplay({
       <Heading size="lg" mb={4} color="fg.emphasized">
         Game Status
       </Heading>
-      {/* Top Row: Two columns */}
-      <Flex
-        justify="space-between"
-        align="flex-start"
-        flexWrap={{ base: "wrap", md: "nowrap" }}
-        gap={4}
-        mb={4}
+      {/* Main content split: 2/3 game status meta + 1/3 tips panel */}
+      <Grid
+        templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
+        gap={6}
+        alignItems="flex-start"
       >
-        {/* Left Column: Round/Status Info */}
-        <Box flex="1" minW={{ base: "full", md: "300px" }}>
-          <Heading size="xl" mb={1} color="fg">
-            {phase === "Setup" ? (
-              <>Setup Phase</>
-            ) : (
-              <>
-                Round {round} - {phase} Phase
-              </>
-            )}
-          </Heading>
-          {/* Highest Rep label */}
-          {players && players.length > 0 && phase !== "Setup" && (
-            <Text color="fg" fontSize="sm" fontWeight="medium" mb={1}>
-              {(() => {
-                const maxRep = Math.max(...players.map((p) => p.rep));
-                const leaders = players.filter((p) => p.rep === maxRep);
-                if (leaders.length === 1) {
-                  return `Highest Rep: ${leaders[0].name} (first issue, tiebreak)`;
-                }
-                return "No High Rep Bonus Active";
-              })()}
-            </Text>
-          )}
-          {phase === "Setup" && (
-            <Box mt={3} color="fg" fontSize="sm" lineHeight={1.4}>
-              <Text mb={1} fontWeight="medium">
-                During Setup:
-              </Text>
-              <Box as="ol" pl={5} style={{ listStyle: "decimal" }}>
-                <Box as="li">Choose your player name.</Box>
-                <Box as="li">Select your specialization.</Box>
-                <Box as="li">
-                  Review starter infrastructure and plan your first two rounds.
+        <GridItem>
+          {/* Top Row: Two columns still inside left area */}
+          <Flex
+            justify="space-between"
+            align="flex-start"
+            flexWrap={{ base: "wrap", md: "nowrap" }}
+            gap={4}
+            mb={4}
+          >
+            {/* Left Column: Round/Status Info */}
+            <Box flex="1" minW={{ base: "full", md: "300px" }}>
+              <Heading size="xl" mb={1} color="fg">
+                {phase === "Setup" ? (
+                  <>Setup Phase</>
+                ) : (
+                  <>
+                    Round {round} - {phase} Phase
+                  </>
+                )}
+              </Heading>
+              {/* Highest Rep label */}
+              {players && players.length > 0 && phase !== "Setup" && (
+                <Text color="fg" fontSize="sm" fontWeight="medium" mb={1}>
+                  {(() => {
+                    const maxRep = Math.max(...players.map((p) => p.rep));
+                    const leaders = players.filter((p) => p.rep === maxRep);
+                    if (leaders.length === 1) {
+                      return `Highest Rep: ${leaders[0].name} (first issue, tiebreak)`;
+                    }
+                    return "No High Rep Bonus Active";
+                  })()}
+                </Text>
+              )}
+              {phase === "Setup" && (
+                <Box mt={3} color="fg" fontSize="sm" lineHeight={1.4}>
+                  <Text mb={1} fontWeight="medium">
+                    During Setup:
+                  </Text>
+                  <Box as="ol" pl={5} style={{ listStyle: "decimal" }}>
+                    <Box as="li">Choose your player name.</Box>
+                    <Box as="li">Select your specialization.</Box>
+                    <Box as="li">
+                      Review starter infrastructure and plan your first two
+                      rounds.
+                    </Box>
+                  </Box>
+                  <Text mt={2}>
+                    When everyone is ready, click “Begin Round 1” to enter the
+                    Governance phase.
+                  </Text>
                 </Box>
-              </Box>
-              <Text mt={2}>
-                When everyone is ready, click “Begin Round 1” to enter the
-                Governance phase.
-              </Text>
+              )}
             </Box>
-          )}
-        </Box>
 
-        {/* Right Column: Timer */}
-        <Box flexShrink={0}>
-          {phase !== "Setup" && <PhaseTimer round={round} phase={phase} />}
-        </Box>
-      </Flex>
+            {/* Right Column: Timer */}
+            <Box flexShrink={0}>
+              {phase !== "Setup" && <PhaseTimer round={round} phase={phase} />}
+            </Box>
+          </Flex>
 
-      {/* Action Row */}
-      <Stack
-        direction={{ base: "column", md: "row" }}
-        justify="flex-start"
-        align={{ base: "stretch", md: "center" }}
-        gap={3}
-      >
-        {phase === "Governance" && players && (
-          <CreateContractModal
-            players={players}
-            currentRound={round}
-            disabled={false}
-          />
-        )}
-
-        {/* Add Player Button (only during Setup) */}
-        {phase === "Setup" && (
-          <AddPlayerModal
-            onAddPlayer={handleAddPlayer}
-            isPending={addPlayer.isPending}
-          />
-        )}
-
-        {/* Spacer to push next button to the right on desktop */}
-        <Box flex={{ base: "0", md: "1" }} />
-
-        {/* Next Phase / Advance Round - always rightmost */}
-        {phase === "Operations" ? (
-          <Button
-            onClick={handleAdvanceRound}
-            loading={advanceRound.isPending}
-            colorPalette="flamingoGold"
-            size="lg"
-            width={{ base: "full", md: "auto" }}
+          {/* Action Row */}
+          <Stack
+            direction={{ base: "column", md: "row" }}
+            justify="flex-start"
+            align={{ base: "stretch", md: "center" }}
+            gap={3}
           >
-            Advance Round
-          </Button>
-        ) : (
-          <Button
-            onClick={handleAdvancePhase}
-            loading={advancePhase.isPending}
-            colorPalette="sapphireWool"
-            size="lg"
-            width={{ base: "full", md: "auto" }}
-            disabled={phase === "Setup" && !canBeginRound1}
-          >
-            {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
-          </Button>
-        )}
-      </Stack>
+            {phase === "Governance" && players && (
+              <CreateContractModal
+                players={players}
+                currentRound={round}
+                disabled={false}
+              />
+            )}
 
-      {/* Footer message area (errors / warnings / future dynamic content) */}
-      <Box
-        mt={6}
-        pt={4}
-        borderTopWidth={1}
-        borderColor="border"
-        minH="64px"
-        data-phase-messages
-        aria-live="polite"
-        color="fg"
-        fontSize="sm"
-      >
-        {warningMessage && (
-          <Text color="fg" fontSize="sm">
-            {warningMessage}
-          </Text>
-        )}
-      </Box>
+            {/* Add Player Button (only during Setup) */}
+            {phase === "Setup" && (
+              <AddPlayerModal
+                onAddPlayer={handleAddPlayer}
+                isPending={addPlayer.isPending}
+              />
+            )}
+
+            {/* Spacer to push next button to the right on desktop */}
+            <Box flex={{ base: "0", md: "1" }} />
+
+            {/* Next Phase / Advance Round - always rightmost */}
+            {phase === "Operations" ? (
+              <Button
+                onClick={handleAdvanceRound}
+                loading={advanceRound.isPending}
+                colorPalette="flamingoGold"
+                size="lg"
+                width={{ base: "full", md: "auto" }}
+              >
+                Advance Round
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAdvancePhase}
+                loading={advancePhase.isPending}
+                colorPalette="sapphireWool"
+                size="lg"
+                width={{ base: "full", md: "auto" }}
+                disabled={phase === "Setup" && !canBeginRound1}
+              >
+                {phase === "Setup" ? "Begin Round 1" : "Next Phase"}
+              </Button>
+            )}
+          </Stack>
+
+          {/* Footer message area (errors / warnings / future dynamic content) */}
+          <Box
+            mt={6}
+            pt={4}
+            borderTopWidth={1}
+            borderColor="border"
+            minH="64px"
+            data-phase-messages
+            aria-live="polite"
+            color="fg"
+            fontSize="sm"
+          >
+            {warningMessage && (
+              <Text color="fg" fontSize="sm">
+                {warningMessage}
+              </Text>
+            )}
+          </Box>
+        </GridItem>
+
+        {/* Tips Panel in right column */}
+        <GridItem display="flex" flexDirection="column" gap={4}>
+          <PhaseTipsPanel phase={phase} />
+        </GridItem>
+      </Grid>
     </Box>
   );
 }
