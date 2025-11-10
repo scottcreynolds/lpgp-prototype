@@ -180,7 +180,7 @@ export function useAdvancePhase() {
 export function useAdvanceRound() {
   const queryClient = useQueryClient();
   const version = useGameStore((state) => state.version);
-  const startTimer = useGameStore((s) => s.startTimer);
+  // const startTimer = useGameStore((s) => s.startTimer);
 
   return useMutation({
     mutationFn: async () => {

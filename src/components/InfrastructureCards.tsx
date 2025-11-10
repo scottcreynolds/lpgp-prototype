@@ -97,6 +97,9 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
           const crewShortage =
             totals.total_crew_used > totals.total_crew_capacity;
           const infrastructureCounts = getInfrastructureCounts(player);
+          const inactiveCount = player.infrastructure.filter(
+            (i) => !i.is_active
+          ).length;
 
           return (
             <Box
@@ -144,32 +147,25 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                           {player.specialization}
                         </Badge>
                       </HStack>
-                      {(() => {
-                        const inactiveCount = player.infrastructure.filter(
-                          (i) => !i.is_active
-                        ).length;
-                        return inactiveCount > 0 ? (
-                          <HStack gap={2}>
-                            <Badge
-                              size="sm"
-                              colorPalette="orange"
-                              title="Some infrastructure is inactive. Open Inventory to manage."
-                            >
-                              Inactive: {inactiveCount}
-                            </Badge>
-                            <PlayerInventoryModal
-                              playerId={player.id}
-                              playerName={player.name}
-                              infrastructure={player.infrastructure}
-                              trigger={
-                                <Button size="xs" colorPalette="orange">
-                                  Manage
-                                </Button>
-                              }
-                            />
-                          </HStack>
-                        ) : null;
-                      })()}
+                      {inactiveCount > 0 && (
+                        <Badge
+                          size="sm"
+                          colorPalette="orange"
+                          title="Some infrastructure is inactive. Open Inventory to manage."
+                        >
+                          Inactive: {inactiveCount}
+                        </Badge>
+                      )}
+                      <PlayerInventoryModal
+                        playerId={player.id}
+                        playerName={player.name}
+                        infrastructure={player.infrastructure}
+                        trigger={
+                          <Button size="xs" colorPalette="flamingoGold">
+                            Manage Infrastructure
+                          </Button>
+                        }
+                      />
                     </HStack>
                   </Box>
                   <EditPlayerModal

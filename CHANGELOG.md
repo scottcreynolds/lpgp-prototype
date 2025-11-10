@@ -6,6 +6,25 @@ The format is based on Keep a Changelog and this project currently follows date-
 
 ## 2025-11-05 – Setup Phase & Round Start Workflow
 
+## 2025-11-10 – Conditional Auto-Activation for Extractors
+
+### Changed
+
+- Updated `build_infrastructure` logic (migration `024_auto_activate_extractors.sql`) so newly built non-capacity infrastructure (e.g., H2O Extractor, Helium-3 Extractor) auto-activates immediately only if both crew and power requirements are currently satisfied. Solar Arrays and Habitats still always auto-activate on build.
+
+### Backend/Database
+
+- Added migration `024_auto_activate_extractors.sql` overriding `build_infrastructure` with capacity checks using `get_available_power` / `get_available_crew` before activation.
+
+### Mock Client
+
+- Mirrored activation logic in `rpcBuildInfrastructure` inside `src/lib/mockSupabaseClient.ts` to keep local development behavior consistent.
+
+### Impact
+
+- Prevents extractors from starting dormant when adequate capacity exists, reducing manual activation steps.
+- Extractors still build dormant when insufficient crew or power remain, preserving balancing rules.
+
 ### Added
 
 - New pre-first-round Setup phase (no timer).

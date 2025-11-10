@@ -455,9 +455,42 @@ async function rpcBuildInfrastructure(
   players[builderIndex].ev -= infraDef.cost;
   players[builderIndex].updated_at = new Date().toISOString();
 
-  // Determine auto-activation only for Solar Array and Habitat
-  const autoActivate =
-    infrastructureType === "Solar Array" || infrastructureType === "Habitat";
+  // Determine auto-activation logic:
+  // Solar Array & Habitat always auto-activate (they provide capacity / habitation)
+  // Other infrastructure auto-activates only if crew/power requirements are satisfied.
+  let autoActivate = false;
+  if (
+    infrastructureType === "Solar Array" ||
+    infrastructureType === "Habitat"
+  ) {
+    autoActivate = true;
+  } else {
+    // Compute current available capacities for owner BEFORE activating new infra.
+    const ownerActiveInfra = playerInfra.filter(
+      (pi: PlayerInfrastructure) => pi.player_id === ownerId && pi.is_active
+    ) as PlayerInfrastructure[];
+    let powerCap = 0;
+    let powerUsed = 0;
+    let crewCap = 0;
+    let crewUsed = 0;
+    for (const pi of ownerActiveInfra) {
+      const def = infrastructureDefinitions.find(
+        (d) => d.id === pi.infrastructure_id
+      );
+      if (!def) continue;
+      if (def.capacity && def.type.includes("Solar")) powerCap += def.capacity;
+      if (def.capacity && def.type.includes("Habitat")) crewCap += def.capacity;
+      if (def.power_requirement) powerUsed += def.power_requirement;
+      if (def.crew_requirement) crewUsed += def.crew_requirement;
+    }
+    const availablePower = powerCap - powerUsed;
+    const availableCrew = crewCap - crewUsed;
+    const powerReq = infraDef.power_requirement ?? 0;
+    const crewReq = infraDef.crew_requirement ?? 0;
+    if (availablePower >= powerReq && availableCrew >= crewReq) {
+      autoActivate = true;
+    }
+  }
 
   // Create new infrastructure entry
   const newInfra = {

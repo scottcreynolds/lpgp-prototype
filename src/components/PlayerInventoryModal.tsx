@@ -76,11 +76,9 @@ export function PlayerInventoryModal({
   return (
     <DialogRoot open={open} onOpenChange={(e) => setOpen(e.open)} size="xl">
       <DialogTrigger asChild>
-        {trigger ? (
-          <>{trigger}</>
-        ) : (
-          <Button colorPalette="purple" variant="outline" size="sm">
-            Inventory ({infrastructure.length})
+        {trigger ?? (
+          <Button colorPalette="flamingoGold" variant="outline" size="sm">
+            Infrastructure ({infrastructure.length})
           </Button>
         )}
       </DialogTrigger>

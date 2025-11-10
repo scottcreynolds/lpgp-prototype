@@ -75,6 +75,50 @@ export function BuildInfrastructureModal({
     (i: { type: string }) => i.type === infrastructureType
   );
 
+  // Resolve owner (could differ from builder)
+  const owner = useMemo(
+    () => players.find((p) => p.id === ownerId),
+    [players, ownerId]
+  );
+
+  // Compute auto-activation prediction mirroring backend logic
+  const activationPrediction = useMemo(() => {
+    if (!selectedInfrastructure || !owner) return null;
+    const type = selectedInfrastructure.type;
+    const powerReq = selectedInfrastructure.power_requirement || 0;
+    const crewReq = selectedInfrastructure.crew_requirement || 0;
+    // Capacity providers always auto-activate
+    const isAlways = type === "Solar Array" || type === "Habitat";
+    if (isAlways) {
+      return {
+        willAutoActivate: true,
+        reason: "Capacity provider auto-activates",
+        missing: [] as string[],
+      };
+    }
+    const availPower = owner.totals.available_power;
+    const availCrew = owner.totals.available_crew;
+    const hasPower = powerReq === 0 || availPower >= powerReq;
+    const hasCrew = crewReq === 0 || availCrew >= crewReq;
+    const willAuto = hasPower && hasCrew;
+    const missing: string[] = [];
+    if (!hasPower && powerReq > 0) {
+      missing.push(
+        `power ${availPower}/${powerReq} (needs ${powerReq - availPower} more)`
+      );
+    }
+    if (!hasCrew && crewReq > 0) {
+      missing.push(
+        `crew ${availCrew}/${crewReq} (needs ${crewReq - availCrew} more)`
+      );
+    }
+    return {
+      willAutoActivate: willAuto,
+      reason: willAuto ? "Requirements satisfied" : "Insufficient capacity",
+      missing,
+    };
+  }, [selectedInfrastructure, owner]);
+
   const canAfford = selectedInfrastructure
     ? builderEv >= selectedInfrastructure.cost
     : true;
@@ -340,6 +384,45 @@ export function BuildInfrastructureModal({
                           </HStack>
                         )}
                       </VStack>
+
+                      {activationPrediction && (
+                        <Box mt={3} p={2} borderWidth={1} borderRadius="md" borderColor="border">
+                          <HStack justify="space-between" align="start">
+                            <VStack gap={1} align="start" flex={1}>
+                              <Text fontSize="xs" fontWeight="bold" color="fg.emphasized">
+                                Activation on Build
+                              </Text>
+                              {activationPrediction.willAutoActivate ? (
+                                <Text fontSize="xs" color="fg">
+                                  Will <strong>auto-activate</strong>: {activationPrediction.reason}
+                                </Text>
+                              ) : (
+                                <Text fontSize="xs" color="fg">
+                                  Will start <strong>dormant</strong>: {activationPrediction.reason}
+                                </Text>
+                              )}
+                              {activationPrediction.missing.length > 0 && (
+                                <Text fontSize="xs" color="fg.muted">
+                                  Missing: {activationPrediction.missing.join(", ")}
+                                </Text>
+                              )}
+                            </VStack>
+                            <Badge
+                              colorPalette={
+                                activationPrediction.willAutoActivate
+                                  ? "green"
+                                  : "gray"
+                              }
+                              variant="subtle"
+                              size="sm"
+                            >
+                              {activationPrediction.willAutoActivate
+                                ? "Auto"
+                                : "Dormant"}
+                            </Badge>
+                          </HStack>
+                        </Box>
+                      )}
 
                       {!canAfford && (
                         <Badge colorPalette="red" mt={2} width="full">

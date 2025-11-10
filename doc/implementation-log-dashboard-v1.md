@@ -103,6 +103,10 @@ Dashboard (main)
 - Yield per round
 - Net income calculation (yield - maintenance)
 
+### UX Updates (Nov 10, 2025)
+
+- Player card header now always shows a "Manage" button that opens the player's Inventory modal. Previously, the button only appeared when inactive infrastructure existed. The inactive badge still appears when relevant.
+
 ---
 
 ## Technical Decisions
