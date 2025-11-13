@@ -19,6 +19,7 @@ import { GameStateDisplay } from "./GameStateDisplay";
 import { InfrastructureCards } from "./InfrastructureCards";
 import { JoinGamePrompt } from "./JoinGamePrompt";
 import { LedgerDisplay } from "./LedgerDisplay";
+import { NarrativePanel } from "./NarrativePanel";
 import { PlayerRankings } from "./PlayerRankings";
 
 export function Dashboard() {
@@ -168,6 +169,14 @@ export function Dashboard() {
               </Text>
             </VStack>
           </Box>
+        )}
+
+        {/* Narrative panel for active phases */}
+        {!gameEnded && (
+          <NarrativePanel
+            phase={data.game_state.phase}
+            round={data.game_state.round}
+          />
         )}
       </Container>
 

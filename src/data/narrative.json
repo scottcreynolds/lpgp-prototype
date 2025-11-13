@@ -1,0 +1,23 @@
+[
+  {
+    "id": "setup-welcome",
+    "image": "./moon.jpg",
+    "phase": "Setup",
+    "text": "The year is 2110. Life on the Moon is no longer new; it’s the next frontier of expansion for humanity. Early colonies have grown into thriving settlements, and powerful factions now compete to shape the Moon’s future. How will you change life on the Moon at the dawn of the 22nd century?\n\nYour company has staked its claim among the craters, ready to navigate the intricacies of needing to cooperate with other Lunar establishments to thrive and survive while also competing to maximize profits.",
+    "title": "Welcome to the Moon"
+  },
+  {
+    "id": "round1-governance-intro",
+    "phase": "Governance",
+    "round": 1,
+    "text": "Your first formal governance meeting convenes as the initial setup phase concludes. The session opens with tense silence—each corporation sizing up the others, calculating alliances and threats.\n\nThis is where reputations are built or shattered. Proposals will be made, deals will be struck, and the political landscape of the Belt will begin to take shape.\n\nRemember: Today's ally might be tomorrow's adversary. Choose your words—and your votes—carefully.",
+    "title": "First Governance Session"
+  },
+  {
+    "id": "round1-operations-begin",
+    "phase": "Operations",
+    "round": 1,
+    "text": "The talking is over. Now comes the real work.\n\nYour crews power up extractors, surveyors chart new claims, and engineers bring dormant infrastructure online. Every decision matters: which assets to activate, where to allocate precious power and personnel, when to extend an offer of cooperation.\n\nThe competition is fierce, but the Belt is vast. Make your moves count.",
+    "title": "Operations Commence"
+  }
+]

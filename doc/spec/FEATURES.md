@@ -77,15 +77,24 @@
   - Icons rendered via react-icons with Chakra's `Icon` wrapper; data is in `src/data/tips.json`
   - Lightweight runtime validation and typed access via `getTipsForPhase()`
 
+- ✅ **Narrative Panel**
+  - Phase and round-based narrative content displayed above game sections
+  - Collapsible panel that auto-expands when new narrative appears
+  - Supports optional images and multi-paragraph text (line breaks via `\n`)
+  - Content defined in `src/data/narrative.json` with TypeScript types
+  - Priority matching: exact phase+round > phase-only
+  - Sample narratives for Setup, Round 1 Governance, and Round 1 Operations
+
 ## Up Next
 
-<!-- Helpful Tips Section implemented; moved to Completed ✅ -->
+<!-- Narrative Panel implemented; moved to Completed ✅ -->
 
 ## High Priority
 
 - Update color ramps
-- Narrative box above the game state panel
+- persistent actions row in top instead of in panels
 - additional tips (Setup tips exist, need more)
+- additional narrative content for more phases/rounds
 - context-specific tooltips
 - break contract flow with rep penalty
 - move manual adjustment control
@@ -98,6 +107,8 @@
 - editable infrastructure values
 - editable win condition
 - editable rep per contract/turn off system
+- add tips to modals like build infrastrucuture/create contracts
+- add texxt to manual adjustment
 
 ## Maybe
 
