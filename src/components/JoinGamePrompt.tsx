@@ -53,8 +53,8 @@ export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
   const handleObserve = () => {
     setSession({ observer: true });
     toaster.create({
-      title: "Observer mode",
-      description: "You're viewing as an observer",
+      title: "Non-player mode",
+      description: "You're viewing as an observer/facilitator.",
       type: "info",
       duration: 2500,
     });
@@ -119,7 +119,7 @@ export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
             </DialogBody>
             <DialogFooter>
               <Button variant="outline" onClick={handleObserve}>
-                Observe Only
+                Facilitate/Observe
               </Button>
               <Button
                 colorPalette="green"

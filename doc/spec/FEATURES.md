@@ -83,13 +83,27 @@
 
 ## High Priority
 
-- tips (Setup tips exist, need more)
-- auto timer start
-- event cards
+- Update color ramps
+- Narrative box above the game state panel
+- additional tips (Setup tips exist, need more)
+- context-specific tooltips
+- break contract flow with rep penalty
+- move manual adjustment control
+- assign user to player when they create it
+- rename observer mode to facilitator/observer mode
+- events and event cards
+- icons on infrastructure
+- pop up infrastructure reference table
+- pop up tokens/icons reference guide
 - turn order persistence & cross-client visibility (backend)
+- editable infrastructure values
+- editable win condition
+- editable rep per contract/turn off system
 
 ## Maybe
 
+- contract templates "build on behalf, lease power or habitat, etc"
+- next player button for moving through operations?
 - turn planner
 - skill tree
 - scenario import
@@ -97,5 +111,3 @@
 - values editor
 - player turns
 - assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces) (may not need)
-
-## Bugs
