@@ -4,11 +4,13 @@ import {
   Box,
   Collapsible,
   Heading,
+  HStack,
   Image,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
+import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 interface NarrativePanelProps {
   phase: GamePhase;
@@ -53,9 +55,14 @@ export function NarrativePanel({ phase, round }: NarrativePanelProps) {
           _hover={{ bg: "bg.muted" }}
           transition="background 0.2s"
         >
-          <Heading size="lg" color="fg.emphasized" textAlign="left">
-            {narrative.title}
-          </Heading>
+          <HStack justify="space-between" align="center">
+            <Heading size="lg" color="fg.emphasized" textAlign="left">
+              {narrative.title}
+            </Heading>
+            <Box fontSize="2xl" color="fg.emphasized">
+              {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+            </Box>
+          </HStack>
         </Collapsible.Trigger>
 
         <Collapsible.Content>
