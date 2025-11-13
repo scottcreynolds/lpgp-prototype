@@ -6,9 +6,12 @@ import {
   Flex,
   Heading,
   HStack,
+  Icon,
   Input,
   Text,
+  VStack,
 } from "@chakra-ui/react";
+import { LuMoon } from "react-icons/lu";
 import { useEndGame } from "../hooks/useGameData";
 import { createNewGameAndNavigate, getShareUrl } from "../lib/gameSession";
 import { toaster } from "./ui/toasterInstance";
@@ -72,10 +75,28 @@ export function DashboardHeader() {
   return (
     <Box bg="bg" borderBottomWidth={1} borderColor="border" py={4}>
       <Container maxW="container.xl">
-        <Flex justify="space-between" align="center" gap={4}>
-          <Heading size="lg">Lunar Policy Gaming Platform</Heading>
-          <HStack gap={2} flexWrap="wrap" align="center">
-            <HStack gap={2}>
+        <VStack gap={3} align="stretch">
+          {/* Top Row: Icon + Title + Start New Game */}
+          <Flex justify="space-between" align="center">
+            <HStack gap={3}>
+              <Icon fontSize="3xl" color="moonGrey.500">
+                <LuMoon />
+              </Icon>
+              <Heading size="2xl">Lunar Policy Gaming Platform</Heading>
+            </HStack>
+            <Button
+              onClick={handleStartNewGame}
+              variant="solid"
+              colorPalette="flamingoGold"
+              size="lg"
+            >
+              Start New Game
+            </Button>
+          </Flex>
+
+          {/* Second Row: Share Link + End Game */}
+          <Flex justify="space-between" align="center" gap={4}>
+            <HStack gap={2} flex={1}>
               <Input
                 readOnly
                 value={getShareUrl()}
@@ -85,17 +106,10 @@ export function DashboardHeader() {
               <Button size="sm" variant="outline" onClick={handleCopyLink}>
                 Copy Link
               </Button>
+              <Text display={{ base: "none", md: "block" }} color="fg.muted">
+                Share this link for others to join
+              </Text>
             </HStack>
-            <Text display={{ base: "none", md: "block" }} color="fg">
-              Share this link for others to join
-            </Text>
-            <Button
-              onClick={handleStartNewGame}
-              variant="solid"
-              colorPalette="flamingoGold"
-            >
-              Start New Game
-            </Button>
             {!gameEnded && (
               <Button
                 variant="outline"
@@ -116,8 +130,8 @@ export function DashboardHeader() {
                 End Game
               </Button>
             )}
-          </HStack>
-        </Flex>
+          </Flex>
+        </VStack>
       </Container>
     </Box>
   );

@@ -90,7 +90,6 @@
 - break contract flow with rep penalty
 - move manual adjustment control
 - assign user to player when they create it
-- rename observer mode to facilitator/observer mode
 - events and event cards
 - icons on infrastructure
 - pop up infrastructure reference table
