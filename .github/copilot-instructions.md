@@ -28,6 +28,7 @@ These notes help AI agents work productively in this repo. Keep guidance concret
 - Query keys: use the factory in `useGameData.ts` (`gameKeys.all/dashboard/state`). Add new keys alongside existing ones.
 - Optimistic locking: advancing phase requires the `version` from store (`useGameStore`) passed to `advance_phase`. If a version mismatch occurs, surface the error to the user.
 - Types are source-of-truth in `src/lib/database.types.ts` and mirror Supabase schema + RPC return shapes. Update these when changing schema.
+- Always try to run new migrations against both mock and real Supabase to ensure parity. Use the Supabase MCP server as necessary.
 
 ## Mock vs real backend parity
 
@@ -65,5 +66,13 @@ These notes help AI agents work productively in this repo. Keep guidance concret
 - When adding schema or RPCs, keep mock and SQL in sync to preserve dev experience without a backend.
 - If real-time updates seem stale, ensure subscriptions include all affected tables and that you invalidate the correct query keys.
 - Use `pnpm` for any new scripts or deps. Prefer coding small utilities locally; ask before adding new dependencies.
+- Alwayse use semantic, theme-based colors from Chakra UI; avoid hardcoding color values.
 
 Key references: `README.md`, `CLAUDE.md`, `src/hooks/useGameData.ts`, `src/lib/{supabase.ts,mockSupabaseClient.ts,database.types.ts,mockData.ts}`, `src/store/gameStore.ts`, `database/migrations/*`.
+
+## MCP
+
+- The Supabase MCP (Managed Cloud Postgres) is used as the real backend for this project.
+- When searching the web, use the time mcp server with current date knowledge to find up-to-date information.
+- use the context7 MCP server for general knowledge and coding help. Especially to reference up-to-date documentation for React, TypeScript, Supabase, and other relevant technologies.
+- use the Chakra-UI MCP server for help with Chakra-UI specific questions and when generating or editing front-end code.
