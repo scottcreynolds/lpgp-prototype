@@ -140,6 +140,18 @@ export function useDashboardData() {
           queryClient.invalidateQueries({ queryKey: gameKeys.dashboard() });
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "contracts",
+          filter: gameId ? `game_id=eq.${gameId}` : undefined,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: gameKeys.contracts() });
+        }
+      )
       .subscribe();
 
     return () => {
