@@ -1,3 +1,4 @@
+import { gameSettings } from "@/config/gameSettings";
 import { useGameStore } from "@/store/gameStore";
 import {
   Badge,
@@ -13,6 +14,8 @@ import {
 import { useState } from "react";
 import { useContracts, useEndContract } from "../hooks/useGameData";
 import type { Contract, DashboardPlayer } from "../lib/database.types";
+import { BreakContractModal } from "./BreakContractModal";
+import { EndContractModal } from "./EndContractModal";
 import { toaster } from "./ui/toasterInstance";
 
 interface ContractsListViewProps {
@@ -22,30 +25,111 @@ interface ContractsListViewProps {
 
 export function ContractsListView({ players }: ContractsListViewProps) {
   const [filterPlayerId, setFilterPlayerId] = useState<string>("all");
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(
+    null
+  );
+  const [breakModalOpen, setBreakModalOpen] = useState(false);
+  const [endModalOpen, setEndModalOpen] = useState(false);
+
   const { data: contracts, isLoading } = useContracts(
     filterPlayerId === "all" ? undefined : filterPlayerId
   );
   const endContract = useEndContract();
   const gameEnded = useGameStore((s) => s.gameEnded);
 
-  const handleEndContract = async (contractId: string, isBroken: boolean) => {
-    const reason = isBroken
-      ? "Contract broken by mutual agreement"
-      : "Contract ended naturally";
+  const handleBreakContract = async (breakerId: string) => {
+    if (!selectedContract) return;
+
+    const { repPenaltyBreaker, repPenaltyVictim } = gameSettings.contracts;
+
+    // Find player names for toast
+    const breaker = players.find((p) => p.id === breakerId);
+    const victim = players.find(
+      (p) =>
+        p.id ===
+        (breakerId === selectedContract.party_a_id
+          ? selectedContract.party_b_id
+          : selectedContract.party_a_id)
+    );
 
     try {
       await endContract.mutateAsync({
-        contractId,
-        reason,
-        isBroken,
+        contractId: selectedContract.id,
+        reason: "Contract broken",
+        isBroken: true,
+        breakerId,
       });
 
+      // Build REP change message
+      const repChanges: string[] = [];
+      if (breaker && repPenaltyBreaker > 0) {
+        repChanges.push(`${breaker.name} (breaker): -${repPenaltyBreaker} REP`);
+      }
+      if (victim && repPenaltyVictim > 0) {
+        repChanges.push(`${victim.name} (victim): -${repPenaltyVictim} REP`);
+      }
+
       toaster.create({
-        title: isBroken ? "Contract Broken" : "Contract Ended",
-        description: `Contract ${isBroken ? "broken" : "ended"} successfully`,
+        title: "Contract Broken",
+        description:
+          repChanges.length > 0
+            ? repChanges.join(", ")
+            : "Contract broken successfully",
         type: "info",
-        duration: 3000,
+        duration: 5000,
       });
+
+      setBreakModalOpen(false);
+      setSelectedContract(null);
+    } catch (error) {
+      toaster.create({
+        title: "Failed to Break Contract",
+        description:
+          error instanceof Error ? error.message : "Failed to break contract",
+        type: "error",
+        duration: 5000,
+      });
+    }
+  };
+
+  const handleEndContractSuccess = async () => {
+    if (!selectedContract) return;
+
+    const { repBonusOnCompletion } = gameSettings.contracts;
+
+    // Find party names for toast
+    const partyA = players.find((p) => p.id === selectedContract.party_a_id);
+    const partyB = players.find((p) => p.id === selectedContract.party_b_id);
+
+    try {
+      await endContract.mutateAsync({
+        contractId: selectedContract.id,
+        reason: "Contract ended by mutual agreement",
+        isBroken: false,
+        breakerId: null,
+      });
+
+      // Build REP change message
+      const repChanges: string[] = [];
+      if (repBonusOnCompletion > 0) {
+        if (partyA)
+          repChanges.push(`${partyA.name}: +${repBonusOnCompletion} REP`);
+        if (partyB)
+          repChanges.push(`${partyB.name}: +${repBonusOnCompletion} REP`);
+      }
+
+      toaster.create({
+        title: "Contract Ended",
+        description:
+          repChanges.length > 0
+            ? repChanges.join(", ")
+            : "Contract ended successfully",
+        type: "success",
+        duration: 5000,
+      });
+
+      setEndModalOpen(false);
+      setSelectedContract(null);
     } catch (error) {
       toaster.create({
         title: "Failed to End Contract",
@@ -94,9 +178,9 @@ export function ContractsListView({ players }: ContractsListViewProps) {
       (c) => c.status === "active"
     ) || [];
   const inactiveContracts =
-    (contracts as Contract[] | undefined)?.filter(
-      (c) => c.status !== "active"
-    ) || [];
+    (contracts as Contract[] | undefined)
+      ?.filter((c) => c.status !== "active")
+      .sort((a, b) => (b.ended_in_round || 0) - (a.ended_in_round || 0)) || [];
 
   return (
     <Box
@@ -291,9 +375,10 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                                 size="xs"
                                 variant="outline"
                                 colorPalette="gray"
-                                onClick={() =>
-                                  handleEndContract(contract.id, false)
-                                }
+                                onClick={() => {
+                                  setSelectedContract(contract);
+                                  setEndModalOpen(true);
+                                }}
                                 loading={endContract.isPending}
                                 disabled={gameEnded}
                               >
@@ -303,9 +388,10 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                                 size="xs"
                                 variant="outline"
                                 colorPalette="red"
-                                onClick={() =>
-                                  handleEndContract(contract.id, true)
-                                }
+                                onClick={() => {
+                                  setSelectedContract(contract);
+                                  setBreakModalOpen(true);
+                                }}
                                 loading={endContract.isPending}
                                 disabled={gameEnded}
                               >
@@ -393,6 +479,34 @@ export function ContractsListView({ players }: ContractsListViewProps) {
             </Box>
           )}
         </VStack>
+      )}
+
+      {/* Modals */}
+      {selectedContract && (
+        <>
+          <BreakContractModal
+            open={breakModalOpen}
+            onClose={() => {
+              setBreakModalOpen(false);
+              setSelectedContract(null);
+            }}
+            contract={selectedContract}
+            allPlayers={players}
+            onConfirm={handleBreakContract}
+            isPending={endContract.isPending}
+          />
+          <EndContractModal
+            open={endModalOpen}
+            onClose={() => {
+              setEndModalOpen(false);
+              setSelectedContract(null);
+            }}
+            contract={selectedContract}
+            allPlayers={players}
+            onConfirm={handleEndContractSuccess}
+            isPending={endContract.isPending}
+          />
+        </>
       )}
     </Box>
   );

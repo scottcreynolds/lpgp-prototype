@@ -21,8 +21,13 @@ import {
   FaTint,
   FaUsers,
 } from "react-icons/fa";
-import { useEditPlayer } from "../hooks/useGameData";
-import type { DashboardPlayer, Specialization } from "../lib/database.types";
+import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+import { useContracts, useEditPlayer } from "../hooks/useGameData";
+import type {
+  Contract,
+  DashboardPlayer,
+  Specialization,
+} from "../lib/database.types";
 import { EditPlayerModal } from "./EditPlayerModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
 import SpecializationIcon from "./SpecializationIcon";
@@ -34,6 +39,7 @@ interface InfrastructureCardsProps {
 
 export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   const editPlayer = useEditPlayer();
+  const { data: allContracts } = useContracts();
 
   const getInfrastructureIcon = (type: string) => {
     if (type.includes("Habitat")) return <FaHome />;
@@ -50,6 +56,85 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
       counts[baseType] = (counts[baseType] || 0) + 1;
     });
     return counts;
+  };
+
+  const getContractCapacityDetails = (playerId: string) => {
+    const activeContracts =
+      allContracts?.filter((c: Contract) => c.status === "active") || [];
+    const powerIn: Array<{ amount: number; from: string }> = [];
+    const powerOut: Array<{ amount: number; to: string }> = [];
+    const crewIn: Array<{ amount: number; from: string }> = [];
+    const crewOut: Array<{ amount: number; to: string }> = [];
+
+    activeContracts.forEach((contract: Contract) => {
+      if (contract.party_a_id === playerId) {
+        // Player is Party A
+        if (contract.power_from_b_to_a > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_b_id)?.name ||
+            "Unknown";
+          powerIn.push({
+            amount: contract.power_from_b_to_a,
+            from: partnerName,
+          });
+        }
+        if (contract.power_from_a_to_b > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_b_id)?.name ||
+            "Unknown";
+          powerOut.push({
+            amount: contract.power_from_a_to_b,
+            to: partnerName,
+          });
+        }
+        if (contract.crew_from_b_to_a > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_b_id)?.name ||
+            "Unknown";
+          crewIn.push({ amount: contract.crew_from_b_to_a, from: partnerName });
+        }
+        if (contract.crew_from_a_to_b > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_b_id)?.name ||
+            "Unknown";
+          crewOut.push({ amount: contract.crew_from_a_to_b, to: partnerName });
+        }
+      } else if (contract.party_b_id === playerId) {
+        // Player is Party B
+        if (contract.power_from_a_to_b > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_a_id)?.name ||
+            "Unknown";
+          powerIn.push({
+            amount: contract.power_from_a_to_b,
+            from: partnerName,
+          });
+        }
+        if (contract.power_from_b_to_a > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_a_id)?.name ||
+            "Unknown";
+          powerOut.push({
+            amount: contract.power_from_b_to_a,
+            to: partnerName,
+          });
+        }
+        if (contract.crew_from_a_to_b > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_a_id)?.name ||
+            "Unknown";
+          crewIn.push({ amount: contract.crew_from_a_to_b, from: partnerName });
+        }
+        if (contract.crew_from_b_to_a > 0) {
+          const partnerName =
+            players.find((p) => p.id === contract.party_a_id)?.name ||
+            "Unknown";
+          crewOut.push({ amount: contract.crew_from_b_to_a, to: partnerName });
+        }
+      }
+    });
+
+    return { powerIn, powerOut, crewIn, crewOut };
   };
 
   const handleEditPlayer = async (
@@ -93,10 +178,11 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
         {players.map((player) => {
           const { totals } = player;
           const powerShortage =
-            totals.total_power_used > totals.total_power_capacity;
+            totals.total_power_used > totals.net_power_capacity;
           const crewShortage =
-            totals.total_crew_used > totals.total_crew_capacity;
+            totals.total_crew_used > totals.net_crew_capacity;
           const infrastructureCounts = getInfrastructureCounts(player);
+          const contractCapacity = getContractCapacityDetails(player.id);
           const inactiveCount = player.infrastructure.filter(
             (i) => !i.is_active
           ).length;
@@ -217,12 +303,37 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                       </Text>
                     </HStack>
                     <Text fontSize="lg" fontWeight="bold" color="fg">
-                      {totals.total_power_used}/{totals.total_power_capacity}
+                      {totals.total_power_used}/{totals.net_power_capacity}
                     </Text>
                     {powerShortage && (
                       <Badge size="sm" colorPalette="red">
                         SHORTAGE
                       </Badge>
+                    )}
+                    {(contractCapacity.powerIn.length > 0 ||
+                      contractCapacity.powerOut.length > 0) && (
+                      <VStack gap={1} mt={2} align="stretch">
+                        {contractCapacity.powerIn.map((p, idx) => (
+                          <HStack key={`power-in-${idx}`} gap={1} fontSize="xs">
+                            <FiArrowDown color="green" />
+                            <Text color="fg.muted">
+                              +{p.amount} from {p.from}
+                            </Text>
+                          </HStack>
+                        ))}
+                        {contractCapacity.powerOut.map((p, idx) => (
+                          <HStack
+                            key={`power-out-${idx}`}
+                            gap={1}
+                            fontSize="xs"
+                          >
+                            <FiArrowUp color="orange" />
+                            <Text color="fg.muted">
+                              -{p.amount} to {p.to}
+                            </Text>
+                          </HStack>
+                        ))}
+                      </VStack>
                     )}
                   </Box>
 
@@ -243,12 +354,33 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                       </Text>
                     </HStack>
                     <Text fontSize="lg" fontWeight="bold" color="fg">
-                      {totals.total_crew_used}/{totals.total_crew_capacity}
+                      {totals.total_crew_used}/{totals.net_crew_capacity}
                     </Text>
                     {crewShortage && (
                       <Badge size="sm" colorPalette="red">
                         SHORTAGE
                       </Badge>
+                    )}
+                    {(contractCapacity.crewIn.length > 0 ||
+                      contractCapacity.crewOut.length > 0) && (
+                      <VStack gap={1} mt={2} align="stretch">
+                        {contractCapacity.crewIn.map((c, idx) => (
+                          <HStack key={`crew-in-${idx}`} gap={1} fontSize="xs">
+                            <FiArrowDown color="green" />
+                            <Text color="fg.muted">
+                              +{c.amount} from {c.from}
+                            </Text>
+                          </HStack>
+                        ))}
+                        {contractCapacity.crewOut.map((c, idx) => (
+                          <HStack key={`crew-out-${idx}`} gap={1} fontSize="xs">
+                            <FiArrowUp color="orange" />
+                            <Text color="fg.muted">
+                              -{c.amount} to {c.to}
+                            </Text>
+                          </HStack>
+                        ))}
+                      </VStack>
                     )}
                   </Box>
                 </SimpleGrid>

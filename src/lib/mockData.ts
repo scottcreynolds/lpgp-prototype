@@ -303,6 +303,8 @@ export function buildDashboardSummary(
             total_power_capacity - total_power_used + contractPowerAdjustment,
           available_crew:
             total_crew_capacity - total_crew_used + contractCrewAdjustment,
+          net_power_capacity: total_power_capacity + contractPowerAdjustment,
+          net_crew_capacity: total_crew_capacity + contractCrewAdjustment,
         };
 
         return {

@@ -163,10 +163,8 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       {player.totals.available_power}
                     </Text>
                     <Text fontSize="xs" color="fg">
-                      (
-                      {player.totals.total_power_capacity -
-                        player.totals.total_power_used}{" "}
-                      / {player.totals.total_power_capacity})
+                      ({player.totals.total_power_used} /{" "}
+                      {player.totals.net_power_capacity})
                     </Text>
                   </VStack>
                 </Table.Cell>
@@ -176,10 +174,8 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       {player.totals.available_crew}
                     </Text>
                     <Text fontSize="xs" color="fg">
-                      (
-                      {player.totals.total_crew_capacity -
-                        player.totals.total_crew_used}{" "}
-                      / {player.totals.total_crew_capacity})
+                      ({player.totals.total_crew_used} /{" "}
+                      {player.totals.net_crew_capacity})
                     </Text>
                   </VStack>
                 </Table.Cell>

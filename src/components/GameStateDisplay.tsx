@@ -194,7 +194,7 @@ export function GameStateDisplay({
               )}
               {/* Highest Rep label */}
               {players && players.length > 0 && phase !== "Setup" && (
-                <Text color="fg" fontSize="sm" fontWeight="medium" mb={1}>
+                <Text color="fg" fontSize="sm" fontWeight="bold" mb={1}>
                   {(() => {
                     const maxRep = Math.max(...players.map((p) => p.rep));
                     const leaders = players.filter((p) => p.rep === maxRep);

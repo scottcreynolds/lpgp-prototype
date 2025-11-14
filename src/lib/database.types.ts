@@ -531,6 +531,8 @@ export interface PlayerTotals {
   infrastructure_count: number;
   available_power: number;
   available_crew: number;
+  net_power_capacity: number;
+  net_crew_capacity: number;
 }
 
 export interface DashboardPlayer extends Player {

@@ -658,7 +658,8 @@ async function rpcCreateContract(
   powerFromBToA: number,
   crewFromAToB: number,
   crewFromBToA: number,
-  durationRounds: number | null
+  durationRounds: number | null,
+  repBonusCreate: number = 1
 ) {
   initializeStorage();
   const players = getPlayers();
@@ -823,43 +824,45 @@ async function rpcCreateContract(
     created_at: new Date().toISOString(),
   });
 
-  // Reputation bonus (+1 REP each party)
-  partyA.rep += 1;
-  partyB.rep += 1;
-  partyA.updated_at = new Date().toISOString();
-  partyB.updated_at = new Date().toISOString();
-  ledger.push({
-    id: crypto.randomUUID(),
-    player_id: partyAId,
-    player_name: partyA.name,
-    round: gameState.current_round,
-    transaction_type: "REP_GAIN",
-    amount: 1,
-    ev_change: 0,
-    rep_change: 1,
-    reason: `Reputation bonus for new contract with ${partyB.name}`,
-    processed: true,
-    infrastructure_id: null,
-    contract_id: newContract.id,
-    metadata: null,
-    created_at: new Date().toISOString(),
-  });
-  ledger.push({
-    id: crypto.randomUUID(),
-    player_id: partyBId,
-    player_name: partyB.name,
-    round: gameState.current_round,
-    transaction_type: "REP_GAIN",
-    amount: 1,
-    ev_change: 0,
-    rep_change: 1,
-    reason: `Reputation bonus for new contract with ${partyA.name}`,
-    processed: true,
-    infrastructure_id: null,
-    contract_id: newContract.id,
-    metadata: null,
-    created_at: new Date().toISOString(),
-  });
+  // Reputation bonus (conditional on repBonusCreate > 0)
+  if (repBonusCreate > 0) {
+    partyA.rep += repBonusCreate;
+    partyB.rep += repBonusCreate;
+    partyA.updated_at = new Date().toISOString();
+    partyB.updated_at = new Date().toISOString();
+    ledger.push({
+      id: crypto.randomUUID(),
+      player_id: partyAId,
+      player_name: partyA.name,
+      round: gameState.current_round,
+      transaction_type: "REP_GAIN",
+      amount: repBonusCreate,
+      ev_change: 0,
+      rep_change: repBonusCreate,
+      reason: `Reputation bonus for new contract with ${partyB.name}`,
+      processed: true,
+      infrastructure_id: null,
+      contract_id: newContract.id,
+      metadata: null,
+      created_at: new Date().toISOString(),
+    });
+    ledger.push({
+      id: crypto.randomUUID(),
+      player_id: partyBId,
+      player_name: partyB.name,
+      round: gameState.current_round,
+      transaction_type: "REP_GAIN",
+      amount: repBonusCreate,
+      ev_change: 0,
+      rep_change: repBonusCreate,
+      reason: `Reputation bonus for new contract with ${partyA.name}`,
+      processed: true,
+      infrastructure_id: null,
+      contract_id: newContract.id,
+      metadata: null,
+      created_at: new Date().toISOString(),
+    });
+  }
 
   // Save all updates
   localStorage.setItem(KEYS.CONTRACTS, JSON.stringify(contracts));
@@ -886,7 +889,11 @@ async function rpcCreateContract(
 async function rpcEndContract(
   contractId: string,
   isBroken: boolean,
-  reason: string | null
+  reason: string | null,
+  breakerId: string | null = null,
+  repPenaltyBreaker: number = 5,
+  repPenaltyVictim: number = 0,
+  repBonusCompletion: number = 2
 ) {
   initializeStorage();
   const gid = getCurrentGameId();
@@ -927,51 +934,105 @@ async function rpcEndContract(
   const partyA = players.find((p: Player) => p.id === contract.party_a_id);
   const partyB = players.find((p: Player) => p.id === contract.party_b_id);
 
-  // Apply reputation penalty if broken
-  if (isBroken && partyA && partyB) {
-    const repPenalty = 5; // Fixed penalty for breaking contract
-    partyA.rep -= repPenalty;
-    partyB.rep -= repPenalty;
-    partyA.updated_at = new Date().toISOString();
-    partyB.updated_at = new Date().toISOString();
+  if (isBroken && partyA && partyB && breakerId) {
+    // Identify breaker and victim
+    const breaker = breakerId === partyA.id ? partyA : partyB;
+    const victim = breakerId === partyA.id ? partyB : partyA;
 
-    // Create ledger entries for reputation penalty
-    ledger.push({
-      id: crypto.randomUUID(),
-      player_id: partyA.id,
-      player_name: partyA.name,
-      round: gameState.current_round,
-      transaction_type: "CONTRACT_BROKEN",
-      amount: 0,
-      ev_change: 0,
-      rep_change: -repPenalty,
-      reason: `Reputation penalty for breaking contract with ${partyB.name}`,
-      processed: true,
-      infrastructure_id: null,
-      contract_id: contractId,
-      metadata: null,
-      created_at: new Date().toISOString(),
-    });
-    ledger.push({
-      id: crypto.randomUUID(),
-      player_id: partyB.id,
-      player_name: partyB.name,
-      round: gameState.current_round,
-      transaction_type: "CONTRACT_BROKEN",
-      amount: 0,
-      ev_change: 0,
-      rep_change: -repPenalty,
-      reason: `Reputation penalty for breaking contract with ${partyA.name}`,
-      processed: true,
-      infrastructure_id: null,
-      contract_id: contractId,
-      metadata: null,
-      created_at: new Date().toISOString(),
-    });
+    // Apply penalty to breaker (conditional)
+    if (repPenaltyBreaker > 0) {
+      breaker.rep -= repPenaltyBreaker;
+      breaker.updated_at = new Date().toISOString();
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: breaker.id,
+        player_name: breaker.name,
+        round: gameState.current_round,
+        transaction_type: "CONTRACT_BROKEN",
+        amount: 0,
+        ev_change: 0,
+        rep_change: -repPenaltyBreaker,
+        reason: `Reputation penalty for breaking contract with ${victim.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: contractId,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    // Apply penalty to victim (conditional, typically 0)
+    if (repPenaltyVictim > 0) {
+      victim.rep -= repPenaltyVictim;
+      victim.updated_at = new Date().toISOString();
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: victim.id,
+        player_name: victim.name,
+        round: gameState.current_round,
+        transaction_type: "CONTRACT_BROKEN",
+        amount: 0,
+        ev_change: 0,
+        rep_change: -repPenaltyVictim,
+        reason: `Contract broken by ${breaker.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: contractId,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
 
     const gid2 = getCurrentGameId();
     const KEYS2 = getKeys(gid2!);
     localStorage.setItem(KEYS2.PLAYERS, JSON.stringify(players));
+  } else if (!isBroken && partyA && partyB) {
+    // Contract ended successfully - award completion bonus (conditional)
+    if (repBonusCompletion > 0) {
+      const completionReason = reason || "Mutual agreement";
+
+      partyA.rep += repBonusCompletion;
+      partyB.rep += repBonusCompletion;
+      partyA.updated_at = new Date().toISOString();
+      partyB.updated_at = new Date().toISOString();
+
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyA.id,
+        player_name: partyA.name,
+        round: gameState.current_round,
+        transaction_type: "REP_GAIN",
+        amount: repBonusCompletion,
+        ev_change: 0,
+        rep_change: repBonusCompletion,
+        reason: `Contract completion bonus with ${partyB.name} (${completionReason})`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: contractId,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyB.id,
+        player_name: partyB.name,
+        round: gameState.current_round,
+        transaction_type: "REP_GAIN",
+        amount: repBonusCompletion,
+        ev_change: 0,
+        rep_change: repBonusCompletion,
+        reason: `Contract completion bonus with ${partyA.name} (${completionReason})`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: contractId,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+
+      const gid2 = getCurrentGameId();
+      const KEYS2 = getKeys(gid2!);
+      localStorage.setItem(KEYS2.PLAYERS, JSON.stringify(players));
+    }
   }
 
   // Create ledger entry for contract ending
@@ -1019,7 +1080,10 @@ async function rpcEndContract(
   };
 }
 
-async function rpcAdvanceRound(currentVersion: number) {
+async function rpcAdvanceRound(
+  currentVersion: number,
+  repBonusPerRound: number = 1
+) {
   initializeStorage();
   const gameState = getGameState();
   const players: Player[] = getPlayers();
@@ -1307,6 +1371,56 @@ async function rpcAdvanceRound(currentVersion: number) {
         ev_change: c.ev_from_b_to_a,
         rep_change: 0,
         reason: `Round ${round} contract payment: ${partyB.name} → ${partyA.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  // 2b) Per-round contract upkeep bonus (conditional)
+  if (repBonusPerRound > 0) {
+    const allActiveContracts = contracts.filter(
+      (c: Contract) => c.status === "active"
+    );
+    for (const c of allActiveContracts) {
+      const partyA = players.find((p) => p.id === c.party_a_id);
+      const partyB = players.find((p) => p.id === c.party_b_id);
+      if (!partyA || !partyB) continue;
+
+      partyA.rep += repBonusPerRound;
+      partyB.rep += repBonusPerRound;
+      partyA.updated_at = new Date().toISOString();
+      partyB.updated_at = new Date().toISOString();
+
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyA.id,
+        player_name: partyA.name,
+        round,
+        transaction_type: "REP_GAIN",
+        amount: repBonusPerRound,
+        ev_change: 0,
+        rep_change: repBonusPerRound,
+        reason: `Contract upkeep bonus with ${partyB.name}`,
+        processed: true,
+        infrastructure_id: null,
+        contract_id: c.id,
+        metadata: null,
+        created_at: new Date().toISOString(),
+      });
+      ledger.push({
+        id: crypto.randomUUID(),
+        player_id: partyB.id,
+        player_name: partyB.name,
+        round,
+        transaction_type: "REP_GAIN",
+        amount: repBonusPerRound,
+        ev_change: 0,
+        rep_change: repBonusPerRound,
+        reason: `Contract upkeep bonus with ${partyA.name}`,
         processed: true,
         infrastructure_id: null,
         contract_id: c.id,
@@ -1765,7 +1879,10 @@ export const mockSupabaseClient = {
       case "advance_phase":
         return rpcAdvancePhase(params?.current_version as number);
       case "advance_round":
-        return rpcAdvanceRound(params?.current_version as number);
+        return rpcAdvanceRound(
+          params?.current_version as number,
+          params?.rep_bonus_per_round as number
+        );
       case "reset_game":
         return rpcResetGame();
       case "add_player":
@@ -1804,13 +1921,18 @@ export const mockSupabaseClient = {
           params?.p_power_from_b_to_a as number,
           params?.p_crew_from_a_to_b as number,
           params?.p_crew_from_b_to_a as number,
-          params?.p_duration_rounds as number | null
+          params?.p_duration_rounds as number | null,
+          params?.p_rep_bonus_create as number
         );
       case "end_contract":
         return rpcEndContract(
           params?.p_contract_id as string,
           params?.p_is_broken as boolean,
-          params?.p_reason as string | null
+          params?.p_reason as string | null,
+          params?.p_breaker_id as string | null,
+          params?.p_rep_penalty_breaker as number,
+          params?.p_rep_penalty_victim as number,
+          params?.p_rep_bonus_completion as number
         );
       case "toggle_infrastructure_status":
         return rpcToggleInfrastructureStatus(

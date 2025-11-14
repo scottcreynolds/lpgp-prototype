@@ -211,9 +211,12 @@ export function useAdvanceRound() {
 
   return useMutation({
     mutationFn: async () => {
+      const { repBonusPerRound } = gameSettings.contracts;
+
       const { data, error } = await supabase.rpc("advance_round", {
         p_game_id: getCurrentGameId(),
         current_version: version,
+        rep_bonus_per_round: repBonusPerRound,
       });
 
       if (error) {
@@ -659,6 +662,8 @@ export function useCreateContract() {
       crewFromBToA?: number;
       durationRounds?: number | null;
     }) => {
+      const { repBonusOnCreate } = gameSettings.contracts;
+
       const { data, error } = await supabase.rpc("create_contract", {
         p_game_id: getCurrentGameId(),
         p_party_a_id: partyAId,
@@ -671,6 +676,7 @@ export function useCreateContract() {
         p_crew_from_a_to_b: crewFromAToB,
         p_crew_from_b_to_a: crewFromBToA,
         p_duration_rounds: durationRounds,
+        p_rep_bonus_create: repBonusOnCreate,
       });
 
       if (error) {
@@ -708,16 +714,25 @@ export function useEndContract() {
       contractId,
       isBroken = false,
       reason = null,
+      breakerId = null,
     }: {
       contractId: string;
       isBroken?: boolean;
       reason?: string | null;
+      breakerId?: string | null;
     }) => {
+      const { repPenaltyBreaker, repPenaltyVictim, repBonusOnCompletion } =
+        gameSettings.contracts;
+
       const { data, error } = await supabase.rpc("end_contract", {
         p_game_id: getCurrentGameId(),
         p_contract_id: contractId,
         p_is_broken: isBroken,
         p_reason: reason,
+        p_breaker_id: breakerId,
+        p_rep_penalty_breaker: repPenaltyBreaker,
+        p_rep_penalty_victim: repPenaltyVictim,
+        p_rep_bonus_completion: repBonusOnCompletion,
       });
 
       if (error) {
