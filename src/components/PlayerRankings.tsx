@@ -65,15 +65,8 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
   };
 
   return (
-    <Box
-      bg="bg.panel"
-      p={6}
-      borderRadius="lg"
-      borderWidth={1}
-      borderColor="border.emphasized"
-      shadow="sm"
-    >
-      <Heading size="lg" mb={4} color="fg.emphasized">
+    <Box bg="bg.panel" p={6} borderRadius="lg" borderWidth={1} shadow="sm">
+      <Heading size="lg" mb={4}>
         Player Rankings
       </Heading>
 
@@ -81,10 +74,10 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
         <Table.Root
           size="lg"
           variant="outline"
-          striped
-          colorPalette="sapphireWool"
+          interactive
+          colorPalette="softOchre"
         >
-          <Table.Header>
+          <Table.Header bg="bg">
             <Table.Row>
               <Table.ColumnHeader fontWeight="bold">Rank</Table.ColumnHeader>
               <Table.ColumnHeader fontWeight="bold">Player</Table.ColumnHeader>

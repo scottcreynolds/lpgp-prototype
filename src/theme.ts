@@ -12,72 +12,67 @@ const config = defineConfig({
       colors: {
         // Text dark mode and buttons
         softOchre: {
-          50: { value: "#697963" },
-          100: { value: "#89977C" },
-          200: { value: "#ABB596" },
-          300: { value: "#CFD3AF" },
+          50: { value: "#10a11114c" },
+          100: { value: "#10610a128" },
+          200: { value: "#101101106" },
+          300: { value: "#f8f6e6" },
           400: { value: "#f0ecc9" },
-          500: { value: "#F3E9D0" },
-          600: { value: "#F5E7D6" },
-          700: { value: "#F7E6DD" },
-          800: { value: "#F9E8E5" },
-          900: { value: "#FBECEC" },
-          950: { value: "#FDF3F6" },
+          500: { value: "#e8e3b7" },
+          600: { value: "#ded9a9" },
+          700: { value: "#d4ce9c" },
+          800: { value: "#c8c291" },
+          900: { value: "#bab587" },
         },
         // secondary
         sapphireWool: {
-          50: { value: "#000849" },
-          100: { value: "#001F5A" },
-          200: { value: "#003C6A" },
-          300: { value: "#025F7A" },
+          50: { value: "#2ffcff" },
+          100: { value: "#07fbff" },
+          200: { value: "#01dadd" },
+          300: { value: "#06adb0" },
           400: { value: "#058789" },
-          500: { value: "#249B86" },
-          600: { value: "#44AC87" },
-          700: { value: "#66BC8D" },
-          800: { value: "#88CC99" },
-          900: { value: "#AADBAC" },
-          950: { value: "#CEEACC" },
+          500: { value: "#086e70" },
+          600: { value: "#095557" },
+          700: { value: "#093e3f" },
+          800: { value: "#082929" },
+          900: { value: "#051414" },
         },
         // light mode text, body text
         subduedCrystal: {
-          50: { value: "#242916" },
-          100: { value: "#31331C" },
-          200: { value: "#3D3922" },
-          300: { value: "#473C28" },
+          50: { value: "#c2895d" },
+          100: { value: "#ac754b" },
+          200: { value: "#8a6345" },
+          300: { value: "#6a513d" },
           400: { value: "#503d2e" },
-          500: { value: "#685149" },
-          600: { value: "#806765" },
-          700: { value: "#978183" },
-          800: { value: "#AE9CA2" },
-          900: { value: "#C6B8BF" },
-          950: { value: "#DDD5DA" },
+          500: { value: "#3f3329" },
+          600: { value: "#2e2722" },
+          700: { value: "#1f1c1a" },
+          800: { value: "#111110" },
+          900: { value: "#050505" },
         },
         // accent options and headings
         flamingoGold: {
-          50: { value: "#657107" },
-          100: { value: "#8B7E0A" },
-          200: { value: "#A5760F" },
-          300: { value: "#BD6414" },
+          50: { value: "#fdaf92" },
+          100: { value: "#f79470" },
+          200: { value: "#f07a50" },
+          300: { value: "#e66232" },
           400: { value: "#d54b1a" },
-          500: { value: "#DD4336" },
-          600: { value: "#E55363" },
-          700: { value: "#EB7095" },
-          800: { value: "#F18EBE" },
-          900: { value: "#F6AEDE" },
-          950: { value: "#FACEF4" },
+          500: { value: "#ba481e" },
+          600: { value: "#a04321" },
+          700: { value: "#873d22" },
+          800: { value: "#703621" },
+          900: { value: "#5a2f20" },
         },
         boldTangerine: {
-          50: { value: "#437811" },
-          100: { value: "#6E9418" },
-          200: { value: "#A2AF1F" },
-          300: { value: "#C9B626" },
+          50: { value: "#fde5b6" },
+          100: { value: "#f8d693" },
+          200: { value: "#f1c772" },
+          300: { value: "#e8b654" },
           400: { value: "#e3a72f" },
-          500: { value: "#E99648" },
-          600: { value: "#EF8C62" },
-          700: { value: "#F48A7D" },
-          800: { value: "#F898A0" },
-          900: { value: "#FBB5C7" },
-          950: { value: "#FDD2E5" },
+          500: { value: "#d69b26" },
+          600: { value: "#bb8b29" },
+          700: { value: "#a27a2b" },
+          800: { value: "#8a6a2b" },
+          900: { value: "#735b2b" },
         },
         // Primary accent — warm retro gold
         ridgeGold: {
@@ -145,19 +140,19 @@ const config = defineConfig({
         // Base application surfaces
         bg: {
           value: {
-            _light: "{colors.softOchre.400}",
+            _light: "{colors.softOchre.solid}",
             _dark: "{colors.voidNavy.900}",
           },
         },
         "bg.subtle": {
           value: {
-            _light: "{colors.softOchre.100}",
+            _light: "{colors.softOchre.subtle}",
             _dark: "{colors.voidNavy.800}",
           },
         },
         "bg.muted": {
           value: {
-            _light: "{colors.softOchre.200}",
+            _light: "{colors.subduedCrystal.muted}",
             _dark: "{colors.voidNavy.700}",
           },
         },
@@ -175,7 +170,7 @@ const config = defineConfig({
         },
         "bg.panel": {
           value: {
-            _light: "{colors.duneSand.300}",
+            _light: "{colors.boldTangerine.subtle}",
             _dark: "{colors.voidNavy.800}",
           },
         },
@@ -183,25 +178,25 @@ const config = defineConfig({
         // Text colors — tuned for AA contrast on the bg tokens above
         fg: {
           value: {
-            _light: "{colors.subduedCrystal.400}",
+            _light: "{colors.subduedCrystal.solid}",
             _dark: "{colors.softOchre.500}",
           },
         },
         "fg.muted": {
           value: {
-            _light: "{colors.subduedCrystal.800}",
-            _dark: "{colors.softOchre.300}",
+            _light: "{colors.flamingoGold.contrast}",
+            _dark: "{colors.softOchre.muted}",
           },
         },
         "fg.subtle": {
           value: {
-            _light: "{colors.subduedCrystal.700}",
+            _light: "{colors.subduedCrystal.solid}",
             _dark: "{colors.softOchre.400}",
           },
         },
         "fg.inverted": {
           value: {
-            _light: "{colors.subduedCrystal.50}",
+            _light: "{colors.boldTangerine.contrast}",
             _dark: "{colors.sapphireWool.700}",
           },
         },
@@ -209,25 +204,25 @@ const config = defineConfig({
         // Borders
         border: {
           value: {
-            _light: "{colors.flamingoGold.400}",
+            _light: "{colors.subduedCrystal.400}",
             _dark: "{colors.voidNavy.700}",
           },
         },
         "border.muted": {
           value: {
-            _light: "{colors.flamingoGold.300}",
+            _light: "{colors.subduedCrystal.300}",
             _dark: "{colors.voidNavy.800}",
           },
         },
         "border.subtle": {
           value: {
-            _light: "{colors.sapphireWool.200}",
+            _light: "{colors.subduedCrystal.200}",
             _dark: "{colors.voidNavy.700}",
           },
         },
         "border.emphasized": {
           value: {
-            _light: "{colors.sapphireWool.200}",
+            _light: "{colors.subduedCrystal .200}",
             _dark: "{colors.duneSand.400}",
           },
         },
@@ -238,63 +233,75 @@ const config = defineConfig({
           },
         },
         flamingoGold: {
-          solid: { value: "{colors.flamingoGold.500}" },
-          contrast: { value: "{colors.duneSand.300}" },
+          solid: { value: "{colors.flamingoGold.400}" },
+          contrast: { value: "{colors.boldTangerine.50}" },
           fg: {
             value: {
-              _light: "{colors.softOchre.400}",
-              _dark: "{colors.flamingoGold.400}",
+              _light: "{colors.subduedCrystal.solid}",
+              _dark: "{colors.subduedCrystal.solid}",
             },
           },
-          muted: { value: "{colors.flamingoGold.400}" },
-          subtle: { value: "{colors.flamingoGold.700}" },
+          muted: { value: "{colors.flamingoGold.100}" },
+          subtle: { value: "{colors.flamingoGold.200}" },
           emphasized: { value: "{colors.flamingoGold.300}" },
-          focusRing: { value: "{colors.flamingoGold.300}" },
+          focusRing: { value: "{colors.flamingoGold.600}" },
         },
-        // Primary (gold) semantic mapping for colorPalette="ridgeGold"
-        // ridgeGold: {
-        //   solid: { value: "{colors.ridgeGold.600}" },
-        //   contrast: { value: "{colors.duneSand.50}" },
-        //   fg: {
-        //     value: {
-        //       _light: "{colors.ridgeGold.800}",
-        //       _dark: "{colors.ridgeGold.200}",
-        //     },
-        //   },
-        //   muted: { value: "{colors.ridgeGold.100}" },
-        //   subtle: { value: "{colors.ridgeGold.200}" },
-        //   emphasized: { value: "{colors.ridgeGold.300}" },
-        //   focusRing: { value: "{colors.ridgeGold.500}" },
-        // },
         sapphireWool: {
           solid: { value: "{colors.sapphireWool.400}" },
-          contrast: { value: "{colors.duneSand.300}" },
+          contrast: { value: "{colors.sapphireWool.50}" },
           fg: {
             value: {
-              _light: "{colors.sapphireWool.500}",
-              _dark: "{colors.sapphireWool.500}",
+              _light: "{colors.sapphireWool.800}",
+              _dark: "{colors.sapphireWool.300}",
             },
           },
-          muted: { value: "{colors.sapphireWool.200}" },
-          subtle: { value: "{colors.sapphireWool.700}" },
-          emphasized: { value: "{colors.sapphireWool.400}" },
-          focusRing: { value: "{colors.sapphireWool.500}" },
+          muted: { value: "{colors.sapphireWool.100}" },
+          subtle: { value: "{colors.sapphireWool.200}" },
+          emphasized: { value: "{colors.sapphireWool.300}" },
+          focusRing: { value: "{colors.sapphireWool.600}" },
         },
-        // Secondary (teal) mapping for colorPalette="driftTeal"
-        // driftTeal: {
-        //   solid: { value: "{colors.driftTeal.600}" },
-        //   contrast: { value: "{colors.duneSand.50}" },
-        //   fg: {
-        //     value: {
-        //       _light: "{colors.driftTeal.800}",
-        //       _dark: "{colors.driftTeal.200}",
-        //     },
-        //   },
-        //   muted: { value: "{colors.driftTeal.100}" },
-        //   subtle: { value: "{colors.driftTeal.200}" },
-        //   emphasized: { value: "{colors.driftTeal.300}" },
-        //   focusRing: { value: "{colors.driftTeal.500}" },
-        // },
+        boldTangerine: {
+          solid: { value: "{colors.boldTangerine.400}" },
+          contrast: { value: "{colors.boldTangerine.50}" },
+          fg: {
+            value: {
+              _light: "{colors.boldTangerine.800}",
+              _dark: "{colors.boldTangerine.300}",
+            },
+          },
+          muted: { value: "{colors.boldTangerine.100}" },
+          subtle: { value: "{colors.boldTangerine.200}" },
+          emphasized: { value: "{colors.boldTangerine.300}" },
+          focusRing: { value: "{colors.boldTangerine.600}" },
+        },
+        subduedCrystal: {
+          solid: { value: "{colors.subduedCrystal.400}" },
+          contrast: { value: "{colors.subduedCrystal.50}" },
+          fg: {
+            value: {
+              _light: "{colors.subduedCrystal.800}",
+              _dark: "{colors.subduedCrystal.300}",
+            },
+          },
+          muted: { value: "{colors.subduedCrystal.100}" },
+          subtle: { value: "{colors.subduedCrystal.200}" },
+          emphasized: { value: "{colors.subduedCrystal.300}" },
+          focusRing: { value: "{colors.subduedCrystal.600}" },
+        },
+        softOchre: {
+          solid: { value: "{colors.softOchre.400}" },
+          contrast: { value: "{colors.softOchre.50}" },
+          fg: {
+            value: {
+              _light: "{colors.subduedCrystal.solid}",
+              _dark: "{colors.softOchre.300}",
+            },
+          },
+          muted: { value: "{colors.softOchre.200}" },
+          subtle: { value: "{colors.softOchre.700}" },
+          emphasized: { value: "{colors.softOchre.400}" },
+          focusRing: { value: "{colors.softOchre.500}" },
+        },
       },
     },
   },

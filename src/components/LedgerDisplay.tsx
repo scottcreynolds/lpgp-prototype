@@ -73,7 +73,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
   if (isLoading) {
     return (
       <Box
-        bg="bg"
+        bg="bg.panel"
         p={6}
         borderRadius="lg"
         borderWidth={1}
@@ -90,7 +90,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
 
   return (
     <Box
-      bg="bg"
+      bg="bg.panel"
       p={6}
       borderRadius="lg"
       borderWidth={1}
@@ -158,9 +158,15 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
         </Box>
       ) : (
         <Table.ScrollArea maxH="500px">
-          <Table.Root size="sm" variant="outline">
-            <Table.Header>
-              <Table.Row bg="bg">
+          <Table.Root
+            interactive
+            colorPalette="softOchre"
+            size="sm"
+            variant="outline"
+            bg="bg"
+          >
+            <Table.Header bg="bg">
+              <Table.Row>
                 <Table.ColumnHeader fontWeight="bold" color="fg">
                   Round
                 </Table.ColumnHeader>
@@ -195,7 +201,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                 </Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
-            <Table.Body>
+            <Table.Body bg="boldTangerine.contrast">
               {ledgerEntries.map((entry: LedgerEntry) => (
                 <Table.Row key={entry.id}>
                   <Table.Cell>

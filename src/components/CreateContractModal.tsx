@@ -294,7 +294,9 @@ export function CreateContractModal({
                   <VStack gap={2} align="stretch">
                     <HStack gap={2}>
                       <Field.Root flex={1}>
-                        <Field.Label>From A to B</Field.Label>
+                        <Field.Label>
+                          From {partyA?.name || "A"} to {partyB?.name || "B"}
+                        </Field.Label>
                         <Input
                           type="text"
                           value={evFromAToB}
@@ -303,7 +305,9 @@ export function CreateContractModal({
                         />
                       </Field.Root>
                       <Field.Root flex={1}>
-                        <Field.Label>From B to A</Field.Label>
+                        <Field.Label>
+                          From {partyB?.name || "B"} to {partyA?.name || "A"}
+                        </Field.Label>
                         <Input
                           type="text"
                           value={evFromBToA}
@@ -342,7 +346,9 @@ export function CreateContractModal({
                   </Heading>
                   <HStack gap={2}>
                     <Field.Root flex={1}>
-                      <Field.Label>From A to B</Field.Label>
+                      <Field.Label>
+                        From {partyA?.name || "A"} to {partyB?.name || "B"}
+                      </Field.Label>
                       <Input
                         type="text"
                         value={powerFromAToB}
@@ -351,7 +357,9 @@ export function CreateContractModal({
                       />
                     </Field.Root>
                     <Field.Root flex={1}>
-                      <Field.Label>From B to A</Field.Label>
+                      <Field.Label>
+                        From {partyB?.name || "B"} to {partyA?.name || "A"}
+                      </Field.Label>
                       <Input
                         type="text"
                         value={powerFromBToA}
@@ -369,7 +377,9 @@ export function CreateContractModal({
                   </Heading>
                   <HStack gap={2}>
                     <Field.Root flex={1}>
-                      <Field.Label>From A to B</Field.Label>
+                      <Field.Label>
+                        From {partyA?.name || "A"} to {partyB?.name || "B"}
+                      </Field.Label>
                       <Input
                         type="text"
                         value={crewFromAToB}
@@ -378,7 +388,9 @@ export function CreateContractModal({
                       />
                     </Field.Root>
                     <Field.Root flex={1}>
-                      <Field.Label>From B to A</Field.Label>
+                      <Field.Label>
+                        From {partyB?.name || "B"} to {partyA?.name || "A"}
+                      </Field.Label>
                       <Input
                         type="text"
                         value={crewFromBToA}
@@ -533,12 +545,12 @@ export function CreateContractModal({
 
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button colorPalette="sapphireWool" variant="outline">
+              <Button colorPalette="subduedCrystal" variant="outline">
                 Cancel
               </Button>
             </DialogActionTrigger>
             <Button
-              colorPalette="sapphireWool"
+              colorPalette="flamingoGold"
               onClick={handleSubmit}
               loading={createContract.isPending}
               disabled={!partyAId || !partyBId || partyAId === partyBId}

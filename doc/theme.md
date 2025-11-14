@@ -4,31 +4,79 @@ This document explains the custom Chakra UI v3 system theme used in the project.
 
 ## Palette Overview
 
-Four custom color palettes (scales 50–950) provide the retro sci‑fi vibe:
+Nine custom color palettes (scales 50–950) provide the retro sci‑fi vibe:
 
-| Name | Purpose | Example Hex (500) |
-|------|---------|------------------|
-| `ridgeGold` | Primary accent (buttons, highlights) | `#D7AD3D` |
-| `driftTeal` | Secondary accent (interactive, focus) | `#2EA8A5` |
-| `voidNavy` | Dark surfaces & backgrounds | `#486E9F` |
-| `duneSand` | Light surfaces & backgrounds | `#CBA55C` |
+| Name | Purpose | Example Hex (400/500) |
+|------|---------|----------------------|
+| `softOchre` | Text in dark mode, button accents | `#f0ecc9` (400) |
+| `sapphireWool` | Secondary accent, interactive elements | `#058789` (400) |
+| `subduedCrystal` | Light mode text, body text | `#503d2e` (400) |
+| `flamingoGold` | Accent, headings, borders | `#d54b1a` (400) |
+| `boldTangerine` | Warm accent, panels | `#e3a72f` (400) |
+| `ridgeGold` | Primary warm gold accent | `#D7AD3D` (500) |
+| `driftTeal` | Cool teal accent | `#2EA8A5` (500) |
+| `voidNavy` | Dark backgrounds | `#486E9F` (500) |
+| `duneSand` | Light backgrounds, panels | `#CBA55C` (500) |
 
-Each palette has shades 50–950. Adjust any shade by editing `src/theme.ts`.
+Each palette has shades 50–900 (some include 950). Adjust any shade by editing `src/theme.ts`.
 
 ## Semantic Tokens
 
 Instead of hardcoding color values in components, we rely on semantic tokens that automatically respond to light/dark mode:
 
-- `bg`, `bg.subtle`, `bg.panel`, etc.
-- `fg`, `fg.muted`, `fg.subtle`, `fg.inverted`
-- `border`, `border.subtle`, `border.emphasized`
-- Accent semantic groups: `ridgeGold.*` and `driftTeal.*` (`solid`, `contrast`, `fg`, `muted`, `subtle`, `emphasized`, `focusRing`).
+### Background Tokens
 
-Use them via Chakra props: `bg="bg.panel"`, `color="fg.muted"`, `borderColor="border"`, `colorPalette="ridgeGold"`.
+- `bg` - Main application background
+- `bg.subtle` - Subtle background variation
+- `bg.muted` - Muted background
+- `bg.emphasized` - Emphasized background (inverted)
+- `bg.inverted` - Inverted background
+- `bg.panel` - Panel/card backgrounds
+
+### Foreground (Text) Tokens
+
+- `fg` - Primary text color
+- `fg.muted` - Muted/secondary text
+- `fg.subtle` - Subtle text
+- `fg.inverted` - Inverted text (for emphasized backgrounds)
+
+### Border Tokens
+
+- `border` - Default border color
+- `border.muted` - Muted border
+- `border.subtle` - Subtle border
+- `border.emphasized` - Emphasized border
+- `border.inverted` - Inverted border
+
+### Color Palette Semantic Groups
+
+Each of these palettes has semantic tokens (`solid`, `contrast`, `fg`, `muted`, `subtle`, `emphasized`, `focusRing`):
+
+- `flamingoGold.*` - Warm orange-gold accent
+- `sapphireWool.*` - Cool teal-cyan accent
+- `boldTangerine.*` - Warm yellow-orange accent
+- `subduedCrystal.*` - Earthy brown tones
+- `softOchre.*` - Soft cream-yellow tones
+
+Use them via Chakra props: `bg="bg.panel"`, `color="fg.muted"`, `borderColor="border"`, `colorPalette="flamingoGold"`.
 
 ## Light & Dark Mode
 
 Mode switching uses `next-themes` with a system default. The color mode toggle is in `DashboardHeader` using `<ColorModeButton />`.
+
+### Light Mode Colors
+
+- Background: `softOchre.400`
+- Text: `subduedCrystal.400`
+- Borders: `flamingoGold.400`
+- Panels: `boldTangerine.200`
+
+### Dark Mode Colors
+
+- Background: `voidNavy.900`
+- Text: `softOchre.500`
+- Borders: `voidNavy.700`
+- Panels: `voidNavy.800`
 
 ## Editing the Theme
 
@@ -62,9 +110,22 @@ Foreground (`fg`, `fg.muted`) values were chosen to meet WCAG AA contrast agains
 | Heading text | `fg` |
 | Secondary text | `fg.muted` |
 | Border | `border` |
-| Primary button | `colorPalette="ridgeGold"` |
-| Secondary button | `colorPalette="driftTeal"` |
+| Primary button | `colorPalette="flamingoGold"` |
+| Secondary button | `colorPalette="sapphireWool"` |
+| Warm accent | `colorPalette="boldTangerine"` |
 | Emphasis background | `bg.emphasized` |
+
+## Typography
+
+Headings use the **Orbitron** font family for a retro sci-fi aesthetic.
+
+## Theme Preview
+
+View all color palettes and semantic tokens in action at `/dev-harness` using the `<ThemePreview />` component, which displays:
+
+- All semantic color palettes with their variants
+- Background combination swatches showing how bg, fg, and border tokens work together
+- Button variants for each color palette
 
 ## Future Ideas
 

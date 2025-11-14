@@ -103,16 +103,22 @@ export function DashboardHeader() {
                 size="sm"
                 width={{ base: "220px", md: "360px" }}
               />
-              <Button size="sm" variant="outline" onClick={handleCopyLink}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleCopyLink}
+                colorPalette="subduedCrystal"
+              >
                 Copy Link
               </Button>
-              <Text display={{ base: "none", md: "block" }} color="fg.muted">
+              <Text display={{ base: "none", md: "block" }} color="fg">
                 Share this link for others to join
               </Text>
             </HStack>
             {!gameEnded && (
               <Button
                 variant="outline"
+                colorPalette="subduedCrystal"
                 size="sm"
                 loading={endGame.isPending}
                 onClick={async () => {

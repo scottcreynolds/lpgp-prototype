@@ -87,7 +87,12 @@ export function EditPlayerModal({
   return (
     <DialogRoot open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <IconButton variant="ghost" size="sm" aria-label="Edit player">
+        <IconButton
+          color="subduedCrystal.solid"
+          variant="ghost"
+          size="md"
+          aria-label="Edit player"
+        >
           <FaEdit />
         </IconButton>
       </DialogTrigger>
@@ -154,10 +159,12 @@ export function EditPlayerModal({
 
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" colorPalette="flamingoGold">
+                Cancel
+              </Button>
             </DialogActionTrigger>
             <Button
-              colorPalette="blue"
+              colorPalette="flamingoGold"
               onClick={handleSubmit}
               loading={isPending}
               disabled={!companyName?.trim()}

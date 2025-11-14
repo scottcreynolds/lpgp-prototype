@@ -233,8 +233,13 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                 Active Contracts ({activeContracts.length})
               </Heading>
               <Table.ScrollArea maxH="400px">
-                <Table.Root size="md" variant="outline" width="full">
-                  <Table.Header>
+                <Table.Root
+                  size="lg"
+                  variant="outline"
+                  interactive
+                  colorPalette="softOchre"
+                >
+                  <Table.Header bg="bg">
                     <Table.Row>
                       <Table.ColumnHeader fontWeight="bold">
                         Parties
@@ -373,8 +378,8 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                             <VStack gap={1}>
                               <Button
                                 size="xs"
-                                variant="outline"
-                                colorPalette="gray"
+                                variant="surface"
+                                colorPalette="green"
                                 onClick={() => {
                                   setSelectedContract(contract);
                                   setEndModalOpen(true);
@@ -386,7 +391,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
                               </Button>
                               <Button
                                 size="xs"
-                                variant="outline"
+                                variant="surface"
                                 colorPalette="red"
                                 onClick={() => {
                                   setSelectedContract(contract);

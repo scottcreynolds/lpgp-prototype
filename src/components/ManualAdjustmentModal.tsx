@@ -114,8 +114,8 @@ export function ManualAdjustmentModal({
     <DialogRoot open={open} onOpenChange={handleOpenChange} size="lg">
       <DialogTrigger asChild>
         <Button
-          colorPalette="flamingoGold"
-          variant="plain"
+          colorPalette="subduedCrystal"
+          variant="outline"
           size="sm"
           disabled={disabled}
         >

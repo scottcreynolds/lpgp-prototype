@@ -228,7 +228,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
           return (
             <Box
               key={player.id}
-              bg="bg"
+              bg="boldTangerine.contrast"
               p={5}
               borderRadius="lg"
               borderWidth={2}
@@ -285,7 +285,11 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                         playerName={player.name}
                         infrastructure={player.infrastructure}
                         trigger={
-                          <Button size="xs" colorPalette="sapphireWool">
+                          <Button
+                            size="xs"
+                            colorPalette="flamingoGold"
+                            variant="outline"
+                          >
                             Manage Infrastructure
                           </Button>
                         }
@@ -318,7 +322,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                     {Object.entries(infrastructureCounts).map(
                       ([type, count]) => (
                         <HStack key={type} gap={2}>
-                          <Box color="fg" fontSize="sm">
+                          <Box color="fg" fontSize="sm" bg="bg.panel">
                             {getInfrastructureIcon(type)}
                           </Box>
                           <Text fontSize="sm" color="fg">
@@ -482,7 +486,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                       ? "bg.success.subtle"
                       : totalNetEV < 0
                       ? "bg.error.subtle"
-                      : "bg"
+                      : "boldTangerine.contrast"
                   }
                   borderRadius="md"
                 >
