@@ -114,12 +114,12 @@ export function ManualAdjustmentModal({
     <DialogRoot open={open} onOpenChange={handleOpenChange} size="lg">
       <DialogTrigger asChild>
         <Button
-          colorPalette="orange"
-          variant="outline"
+          colorPalette="flamingoGold"
+          variant="plain"
           size="sm"
           disabled={disabled}
         >
-          Adjust
+          Manual Adjustment
         </Button>
       </DialogTrigger>
 

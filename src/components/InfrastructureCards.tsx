@@ -28,6 +28,8 @@ import type {
   DashboardPlayer,
   Specialization,
 } from "../lib/database.types";
+import { useGameStore } from "../store/gameStore";
+import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
 import { EditPlayerModal } from "./EditPlayerModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
 import SpecializationIcon from "./SpecializationIcon";
@@ -40,6 +42,7 @@ interface InfrastructureCardsProps {
 export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   const editPlayer = useEditPlayer();
   const { data: allContracts } = useContracts();
+  const currentPhase = useGameStore((state) => state.currentPhase);
 
   const getInfrastructureIcon = (type: string) => {
     if (type.includes("Habitat")) return <FaHome />;
@@ -137,6 +140,36 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
     return { powerIn, powerOut, crewIn, crewOut };
   };
 
+  const getContractEV = (playerId: string) => {
+    const activeContracts =
+      allContracts?.filter((c: Contract) => c.status === "active") || [];
+    let netEV = 0;
+
+    activeContracts.forEach((contract: Contract) => {
+      if (contract.party_a_id === playerId) {
+        // Player is Party A
+        const evFromB = contract.ev_from_b_to_a;
+        const evToB = contract.ev_from_a_to_b;
+        const evChange = evFromB - evToB;
+
+        if (contract.ev_is_per_round) {
+          netEV += evChange;
+        }
+      } else if (contract.party_b_id === playerId) {
+        // Player is Party B
+        const evFromA = contract.ev_from_a_to_b;
+        const evToA = contract.ev_from_b_to_a;
+        const evChange = evFromA - evToA;
+
+        if (contract.ev_is_per_round) {
+          netEV += evChange;
+        }
+      }
+    });
+
+    return netEV;
+  };
+
   const handleEditPlayer = async (
     playerId: string,
     name: string,
@@ -183,6 +216,10 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
             totals.total_crew_used > totals.net_crew_capacity;
           const infrastructureCounts = getInfrastructureCounts(player);
           const contractCapacity = getContractCapacityDetails(player.id);
+          const contractEV = getContractEV(player.id);
+          const infrastructureNetEV =
+            totals.total_yield - totals.total_maintenance_cost;
+          const totalNetEV = infrastructureNetEV + contractEV;
           const inactiveCount = player.infrastructure.filter(
             (i) => !i.is_active
           ).length;
@@ -251,6 +288,13 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                             Manage Infrastructure
                           </Button>
                         }
+                      />
+                      <BuildInfrastructureModal
+                        builderId={player.id}
+                        builderName={player.name}
+                        builderEv={player.ev}
+                        players={players}
+                        disabled={currentPhase !== "Operations"}
                       />
                     </HStack>
                   </Box>
@@ -430,26 +474,52 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
                 {/* Net Income */}
                 <Box
-                  p={2}
+                  p={3}
                   bg={
-                    totals.total_yield - totals.total_maintenance_cost > 0
+                    totalNetEV > 0
                       ? "bg.success.subtle"
-                      : totals.total_yield - totals.total_maintenance_cost < 0
+                      : totalNetEV < 0
                       ? "bg.error.subtle"
                       : "bg"
                   }
                   borderRadius="md"
-                  textAlign="center"
                 >
-                  <Text fontSize="xs" color="fg" mb={1} fontWeight="bold">
-                    Net Per Round
+                  <Text
+                    fontSize="xs"
+                    color="fg"
+                    mb={2}
+                    fontWeight="bold"
+                    textAlign="center"
+                  >
+                    Net EV Per Round
                   </Text>
-                  <Text fontSize="xl" fontWeight="bold" color="fg">
-                    {totals.total_yield - totals.total_maintenance_cost > 0
-                      ? "+"
-                      : ""}
-                    {totals.total_yield - totals.total_maintenance_cost} EV
+                  <Text
+                    fontSize="xl"
+                    fontWeight="bold"
+                    color="fg"
+                    textAlign="center"
+                  >
+                    {totalNetEV > 0 ? "+" : ""}
+                    {totalNetEV} EV
                   </Text>
+                  <VStack gap={1} mt={2} align="stretch">
+                    <HStack justify="space-between" fontSize="xs">
+                      <Text color="fg.muted">Infrastructure:</Text>
+                      <Text color="fg" fontWeight="medium">
+                        {infrastructureNetEV > 0 ? "+" : ""}
+                        {infrastructureNetEV} EV
+                      </Text>
+                    </HStack>
+                    {contractEV !== 0 && (
+                      <HStack justify="space-between" fontSize="xs">
+                        <Text color="fg.muted">Contracts:</Text>
+                        <Text color="fg" fontWeight="medium">
+                          {contractEV > 0 ? "+" : ""}
+                          {contractEV} EV
+                        </Text>
+                      </HStack>
+                    )}
+                  </VStack>
                 </Box>
               </VStack>
             </Box>

@@ -194,8 +194,8 @@ export function BuildInfrastructureModal({
     >
       <DialogTrigger asChild>
         <Button
-          colorPalette="blue"
-          variant="outline"
+          colorPalette="sapphireWool"
+          variant="solid"
           size="sm"
           disabled={disabled || gameEnded}
         >
