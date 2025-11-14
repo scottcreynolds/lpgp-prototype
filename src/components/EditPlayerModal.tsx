@@ -32,6 +32,7 @@ interface EditPlayerModalProps {
     specialization: Specialization
   ) => Promise<void>;
   isPending?: boolean;
+  currentRound?: number;
 }
 
 const specializations: Specialization[] = [
@@ -55,6 +56,7 @@ export function EditPlayerModal({
   currentSpecialization,
   onEditPlayer,
   isPending,
+  currentRound = 0,
 }: EditPlayerModalProps) {
   const [open, setOpen] = useState(false);
   const [companyName, setCompanyName] = useState(currentName || "");
@@ -124,6 +126,7 @@ export function EditPlayerModal({
                     onChange={(e) =>
                       setSpecialization(e.target.value as Specialization)
                     }
+                    disabled={currentRound > 0}
                   >
                     {specializations.map((spec) => (
                       <option key={spec} value={spec}>
@@ -136,6 +139,11 @@ export function EditPlayerModal({
                 <Text fontSize="sm" color="fg" mt={2} fontWeight="medium">
                   {specializationDescriptions[specialization]}
                 </Text>
+                {currentRound > 0 && (
+                  <Text fontSize="xs" color="fg.muted" mt={1}>
+                    Specialization cannot be changed after setup phase
+                  </Text>
+                )}
               </Field.Root>
             </VStack>
           </DialogBody>

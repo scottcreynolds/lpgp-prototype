@@ -7,7 +7,6 @@ import {
   HStack,
   Image,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
@@ -66,21 +65,28 @@ export function NarrativePanel({ phase, round }: NarrativePanelProps) {
         </Collapsible.Trigger>
 
         <Collapsible.Content>
-          <VStack align="stretch" gap={4} px={6} pb={6}>
+          <HStack align="stretch" gap={4} px={6} pb={6}>
             {narrative.image && (
-              <Image
-                src={narrative.image}
-                alt=""
-                borderRadius="md"
-                objectFit="cover"
-                objectPosition="top"
-                maxH="20vh"
-              />
+              <Box flex={narrative.text ? "0 0 50%" : "1"}>
+                <Image
+                  src={narrative.image}
+                  alt=""
+                  borderRadius="md"
+                  objectFit="contain"
+                  objectPosition="top"
+                  maxH="30vh"
+                  width="100%"
+                />
+              </Box>
             )}
-            <Text color="fg" whiteSpace="pre-wrap">
-              {narrative.text}
-            </Text>
-          </VStack>
+            {narrative.text && (
+              <Box flex="1">
+                <Text color="fg" whiteSpace="pre-wrap">
+                  {narrative.text}
+                </Text>
+              </Box>
+            )}
+          </HStack>
         </Collapsible.Content>
       </Box>
     </Collapsible.Root>

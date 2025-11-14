@@ -42,6 +42,7 @@ interface InfrastructureCardsProps {
 export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   const editPlayer = useEditPlayer();
   const { data: allContracts } = useContracts();
+  const currentRound = useGameStore((state) => state.currentRound);
   const currentPhase = useGameStore((state) => state.currentPhase);
 
   const getInfrastructureIcon = (type: string) => {
@@ -304,6 +305,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                     currentSpecialization={player.specialization}
                     onEditPlayer={handleEditPlayer}
                     isPending={editPlayer.isPending}
+                    currentRound={currentRound}
                   />
                 </Flex>
 

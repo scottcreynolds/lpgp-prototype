@@ -24,6 +24,7 @@ interface PlayerRankingsProps {
 export function PlayerRankings({ players }: PlayerRankingsProps) {
   const editPlayer = useEditPlayer();
   const currentPhase = useGameStore((state) => state.currentPhase);
+  const currentRound = useGameStore((state) => state.currentRound);
   const gameEnded = useGameStore((s) => s.gameEnded);
   // Removed self-labeling of player ("You") per updated requirement.
 
@@ -187,6 +188,7 @@ export function PlayerRankings({ players }: PlayerRankingsProps) {
                       currentSpecialization={player.specialization}
                       onEditPlayer={handleEditPlayer}
                       isPending={editPlayer.isPending}
+                      currentRound={currentRound}
                     />
                     <BuildInfrastructureModal
                       builderId={player.id}

@@ -52,6 +52,7 @@ export function getNarrativeForPhase(
   round: number
 ): NarrativeContent | null {
   const narratives = getAllNarratives();
+  console.dir(narratives);
 
   // First, try to find an exact phase + round match
   const exactMatch = narratives.find(
