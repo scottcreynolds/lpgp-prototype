@@ -119,28 +119,32 @@ export function EditPlayerModal({
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>Specialization</Field.Label>
-                <NativeSelect.Root>
-                  <NativeSelect.Field
-                    value={specialization}
-                    onChange={(e) =>
-                      setSpecialization(e.target.value as Specialization)
-                    }
-                    disabled={currentRound > 0}
-                  >
-                    {specializations.map((spec) => (
-                      <option key={spec} value={spec}>
-                        {spec}
-                      </option>
-                    ))}
-                  </NativeSelect.Field>
-                  <NativeSelect.Indicator />
-                </NativeSelect.Root>
-                <Text fontSize="sm" color="fg" mt={2} fontWeight="medium">
-                  {specializationDescriptions[specialization]}
-                </Text>
+                {currentRound === 0 && (
+                  <>
+                    <Field.Label>Specialization</Field.Label>
+                    <NativeSelect.Root>
+                      <NativeSelect.Field
+                        value={specialization}
+                        onChange={(e) =>
+                          setSpecialization(e.target.value as Specialization)
+                        }
+                      >
+                        {specializations.map((spec) => (
+                          <option key={spec} value={spec}>
+                            {spec}
+                          </option>
+                        ))}
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                    <Text fontSize="sm" color="fg" mt={2} fontWeight="medium">
+                      {specializationDescriptions[specialization]}
+                    </Text>
+                  </>
+                )}
+
                 {currentRound > 0 && (
-                  <Text fontSize="xs" color="fg.muted" mt={1}>
+                  <Text fontSize="xs" color="fg.subtle" mt={1}>
                     Specialization cannot be changed after setup phase
                   </Text>
                 )}
