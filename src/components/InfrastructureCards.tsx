@@ -11,6 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import type { ReactElement } from "react";
 import {
   FaAtom,
   FaBolt,
@@ -31,6 +32,7 @@ import type {
 import { useGameStore } from "../store/gameStore";
 import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
 import { EditPlayerModal } from "./EditPlayerModal";
+import { PlayerInfoModal } from "./PlayerInfoModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
 import SpecializationIcon from "./SpecializationIcon";
 import { toaster } from "./ui/toasterInstance";
@@ -195,6 +197,99 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
     }
   };
 
+  const renderCapacityPanel = (
+    label: string,
+    icon: ReactElement,
+    used: number,
+    capacity: number,
+    incoming: Array<{ amount: number; from: string }>,
+    outgoing: Array<{ amount: number; to: string }>
+  ) => {
+    const available = capacity - used;
+    const hasShortage = available < 0;
+    const hasSurplus = available > 0;
+    const bgColor = hasShortage
+      ? "bg.error.subtle"
+      : hasSurplus
+      ? "bg.success.subtle"
+      : "bg";
+    const statusBadge = hasShortage
+      ? { label: "SHORTAGE", palette: "red" as const }
+      : hasSurplus
+      ? { label: "SURPLUS", palette: "green" as const }
+      : undefined;
+    const availableColor = hasShortage
+      ? "red.500"
+      : hasSurplus
+      ? "green.500"
+      : "fg";
+
+    return (
+      <Box
+        key={label}
+        p={3}
+        bg={bgColor}
+        borderRadius="md"
+        borderWidth={1}
+        borderColor="border"
+      >
+        <HStack gap={2} mb={2} align="center">
+          <Box color="fg">{icon}</Box>
+          <Text fontSize="xs" fontWeight="bold" color="fg">
+            {label}
+          </Text>
+          {statusBadge && (
+            <Badge size="sm" colorPalette={statusBadge.palette}>
+              {statusBadge.label}
+            </Badge>
+          )}
+        </HStack>
+
+        <VStack align="stretch" gap={1} mb={2}>
+          <Text fontSize="sm" color="fg">
+            Total Capacity:{" "}
+            <Box as="span" fontWeight="semibold">
+              {capacity}
+            </Box>
+          </Text>
+          <Text fontSize="sm" color="fg">
+            In Use:{" "}
+            <Box as="span" fontWeight="semibold">
+              {used}
+            </Box>
+          </Text>
+          <Text fontSize="sm" color={availableColor}>
+            Available:{" "}
+            <Box as="span" fontWeight="semibold">
+              {available}
+            </Box>
+          </Text>
+        </VStack>
+
+        {(incoming.length > 0 || outgoing.length > 0) && (
+          <VStack gap={1} align="stretch">
+            {incoming.map((item, idx) => (
+              <HStack key={`${label}-in-${idx}`} gap={1} fontSize="xs">
+                <FiArrowDown color="green" />
+                <Text color="fg.muted">
+                  +{item.amount} from {item.from}
+                </Text>
+              </HStack>
+            ))}
+            {outgoing.map((item, idx) => (
+              <HStack key={`${label}-out-${idx}`} gap={1} fontSize="xs">
+                <FiArrowUp color="orange" />
+                <Text color="fg.muted">
+                  -{item.amount} to {item.to}
+                </Text>
+              </HStack>
+            ))}
+          </VStack>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box
       bg="bg.panel"
@@ -211,10 +306,6 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
       <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
         {players.map((player) => {
           const { totals } = player;
-          const powerShortage =
-            totals.total_power_used > totals.net_power_capacity;
-          const crewShortage =
-            totals.total_crew_used > totals.net_crew_capacity;
           const infrastructureCounts = getInfrastructureCounts(player);
           const contractCapacity = getContractCapacityDetails(player.id);
           const contractEV = getContractEV(player.id);
@@ -254,10 +345,16 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   position="relative"
                 >
                   <Box>
-                    <Text fontWeight="bold" fontSize="lg" color="fg">
-                      {player.name}
-                    </Text>
                     <HStack gap={2} align="center">
+                      <Text fontWeight="bold" fontSize="lg" color="fg">
+                        {player.name}
+                      </Text>
+                      <PlayerInfoModal
+                        playerName={player.name}
+                        specialization={player.specialization}
+                      />
+                    </HStack>
+                    <HStack gap={2} align="center" mt={1}>
                       <HStack gap={1} align="center">
                         <SpecializationIcon
                           specialization={player.specialization}
@@ -280,6 +377,8 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                           Inactive: {inactiveCount}
                         </Badge>
                       )}
+                    </HStack>
+                    <HStack gap={2} mt={3}>
                       <PlayerInventoryModal
                         playerId={player.id}
                         playerName={player.name}
@@ -336,103 +435,22 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
 
                 {/* Capacity Stats */}
                 <SimpleGrid columns={2} gap={3}>
-                  {/* Power */}
-                  <Box
-                    p={3}
-                    bg={powerShortage ? "bg.error.subtle" : "bg"}
-                    borderRadius="md"
-                    borderWidth={1}
-                    borderColor="border"
-                  >
-                    <HStack gap={2} mb={1}>
-                      <Box color={powerShortage ? "fg" : "fg"}>
-                        <FaBolt />
-                      </Box>
-                      <Text fontSize="xs" fontWeight="bold" color="fg">
-                        Power
-                      </Text>
-                    </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="fg">
-                      {totals.total_power_used}/{totals.net_power_capacity}
-                    </Text>
-                    {powerShortage && (
-                      <Badge size="sm" colorPalette="red">
-                        SHORTAGE
-                      </Badge>
-                    )}
-                    {(contractCapacity.powerIn.length > 0 ||
-                      contractCapacity.powerOut.length > 0) && (
-                      <VStack gap={1} mt={2} align="stretch">
-                        {contractCapacity.powerIn.map((p, idx) => (
-                          <HStack key={`power-in-${idx}`} gap={1} fontSize="xs">
-                            <FiArrowDown color="green" />
-                            <Text color="fg.muted">
-                              +{p.amount} from {p.from}
-                            </Text>
-                          </HStack>
-                        ))}
-                        {contractCapacity.powerOut.map((p, idx) => (
-                          <HStack
-                            key={`power-out-${idx}`}
-                            gap={1}
-                            fontSize="xs"
-                          >
-                            <FiArrowUp color="orange" />
-                            <Text color="fg.muted">
-                              -{p.amount} to {p.to}
-                            </Text>
-                          </HStack>
-                        ))}
-                      </VStack>
-                    )}
-                  </Box>
-
-                  {/* Crew */}
-                  <Box
-                    p={3}
-                    bg={crewShortage ? "bg.error.subtle" : "bg"}
-                    borderRadius="md"
-                    borderWidth={1}
-                    borderColor="border"
-                  >
-                    <HStack gap={2} mb={1}>
-                      <Box color={crewShortage ? "fg" : "fg"}>
-                        <FaUsers />
-                      </Box>
-                      <Text fontSize="xs" fontWeight="bold" color="fg">
-                        Crew
-                      </Text>
-                    </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="fg">
-                      {totals.total_crew_used}/{totals.net_crew_capacity}
-                    </Text>
-                    {crewShortage && (
-                      <Badge size="sm" colorPalette="red">
-                        SHORTAGE
-                      </Badge>
-                    )}
-                    {(contractCapacity.crewIn.length > 0 ||
-                      contractCapacity.crewOut.length > 0) && (
-                      <VStack gap={1} mt={2} align="stretch">
-                        {contractCapacity.crewIn.map((c, idx) => (
-                          <HStack key={`crew-in-${idx}`} gap={1} fontSize="xs">
-                            <FiArrowDown color="green" />
-                            <Text color="fg.muted">
-                              +{c.amount} from {c.from}
-                            </Text>
-                          </HStack>
-                        ))}
-                        {contractCapacity.crewOut.map((c, idx) => (
-                          <HStack key={`crew-out-${idx}`} gap={1} fontSize="xs">
-                            <FiArrowUp color="orange" />
-                            <Text color="fg.muted">
-                              -{c.amount} to {c.to}
-                            </Text>
-                          </HStack>
-                        ))}
-                      </VStack>
-                    )}
-                  </Box>
+                  {renderCapacityPanel(
+                    "Power",
+                    <FaBolt />,
+                    totals.total_power_used,
+                    totals.net_power_capacity,
+                    contractCapacity.powerIn,
+                    contractCapacity.powerOut
+                  )}
+                  {renderCapacityPanel(
+                    "Crew",
+                    <FaUsers />,
+                    totals.total_crew_used,
+                    totals.net_crew_capacity,
+                    contractCapacity.crewIn,
+                    contractCapacity.crewOut
+                  )}
                 </SimpleGrid>
 
                 {/* Financial Stats */}

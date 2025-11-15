@@ -1,6 +1,4 @@
-import infrastructureProviderImg from "@/assets/player-cards/infrastructure-provider.png";
-import operationsManagerImg from "@/assets/player-cards/operations-manager.png";
-import resourceExtractorImg from "@/assets/player-cards/resource-extractor.png";
+import { SPECIALIZATION_IMAGES } from "@/data/specializationAssets";
 import {
   SPECIALIZATION_DETAILS,
   SPECIALIZATION_ORDER,
@@ -70,13 +68,6 @@ export function AddPlayerModal({
     } else {
       setOpen(false);
     }
-  };
-
-  // Specialization images
-  const specializationImages: Record<Specialization, string> = {
-    "Resource Extractor": resourceExtractorImg,
-    "Infrastructure Provider": infrastructureProviderImg,
-    "Operations Manager": operationsManagerImg,
   };
 
   const handleOpenChange = (e: { open: boolean }) => {
@@ -219,7 +210,7 @@ export function AddPlayerModal({
                             />
                           </Box>
                           <Image
-                            src={specializationImages[spec]}
+                            src={SPECIALIZATION_IMAGES[spec]}
                             alt={`${spec} card`}
                             objectFit="contain"
                             width="220px"
