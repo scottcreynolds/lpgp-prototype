@@ -1,6 +1,10 @@
 import infrastructureProviderImg from "@/assets/player-cards/infrastructure-provider.png";
 import operationsManagerImg from "@/assets/player-cards/operations-manager.png";
 import resourceExtractorImg from "@/assets/player-cards/resource-extractor.png";
+import {
+  SPECIALIZATION_DETAILS,
+  SPECIALIZATION_ORDER,
+} from "@/data/specializations";
 import { getSpecializationColor } from "@/lib/specialization";
 import {
   Box,
@@ -35,34 +39,6 @@ interface AddPlayerModalProps {
   onExternalClose?: () => void; // callback when controlled modal requests close
   hideTrigger?: boolean; // hide built-in trigger button
 }
-
-const specializations: Specialization[] = [
-  "Resource Extractor",
-  "Infrastructure Provider",
-  "Operations Manager",
-];
-
-// Specialization metadata (title + description) for the dynamic info panel
-const specializationMeta: Record<
-  Specialization,
-  { title: string; description: string }
-> = {
-  "Resource Extractor": {
-    title: "Resource Extractor",
-    description:
-      "You excel at mining and acquiring lunar resources. Use raw materials to build infrastructure, trade, or sell for EV.",
-  },
-  "Infrastructure Provider": {
-    title: "Infrastructure Provider",
-    description:
-      "You construct and maintain power and support systems. Other players rely on your ability to keep operations running.",
-  },
-  "Operations Manager": {
-    title: "Operations Management",
-    description:
-      "You coordinate logistics and habitation. You keep crews healthy, housed, and connected, enabling steady growth.",
-  },
-};
 
 export function AddPlayerModal({
   onAddPlayer,
@@ -126,12 +102,13 @@ export function AddPlayerModal({
         <DialogContent
           css={{
             position: "fixed",
-            top: "50%",
+            top: "40%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             maxHeight: "90vh",
             overflow: "auto",
-            width: "min(95vw, 760px)",
+            width: "100%",
+            maxWidth: "90vw",
           }}
         >
           <DialogHeader>
@@ -141,7 +118,9 @@ export function AddPlayerModal({
           <DialogBody>
             <VStack gap={4} align="stretch">
               <Field.Root>
-                <Field.Label>Company Name</Field.Label>
+                <Field.Label>
+                  Company Name (Choose a unique name for your company)
+                </Field.Label>
                 <Input
                   placeholder="Enter company name"
                   value={companyName}
@@ -151,109 +130,186 @@ export function AddPlayerModal({
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>Select Specialization</Field.Label>
+                <Field.Label>
+                  Select Specialization (Choose a card to see the playstyle)
+                </Field.Label>
                 <Flex
-                  role="radiogroup"
+                  mt={1}
                   direction={{ base: "column", md: "row" }}
-                  gap={4}
-                  wrap="wrap"
-                  mt={2}
+                  gap={{ base: 3, md: 0 }}
                   alignItems="flex-start"
                 >
-                  {specializations.map((spec) => {
-                    const selected = specialization === spec;
-                    const colorKey = getSpecializationColor(spec);
-                    return (
-                      <Box
-                        key={spec}
-                        role="radio"
-                        aria-checked={selected}
-                        aria-label={spec}
-                        tabIndex={0}
-                        onClick={() => setSpecialization(spec)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setSpecialization(spec);
-                          }
-                        }}
-                        cursor="pointer"
-                        position="relative"
-                        borderWidth={selected ? "3px" : "1px"}
-                        borderColor={selected ? `${colorKey}.600` : "gray.300"}
-                        borderRadius="lg"
-                        p={3}
-                        w={{ base: "100%", md: "240px" }}
-                        flexShrink={0}
-                        transition="transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, filter 0.15s ease, background-color 0.15s ease"
-                        _hover={{
-                          borderColor: selected
-                            ? `${colorKey}.700`
-                            : `${colorKey}.500`,
-                          transform: "translateY(-2px)",
-                          boxShadow: selected ? "lg" : "md",
-                        }}
-                        _focusVisible={{
-                          outline: "none",
-                          boxShadow: `0 0 0 3px var(--chakra-colors-${colorKey}-200)`,
-                        }}
-                        boxShadow={selected ? "none" : "none"}
-                        bg={selected ? `${colorKey}.50` : "gray.50"}
-                        filter={
-                          selected ? "none" : "grayscale(0.4) brightness(0.95)"
-                        }
-                        opacity={selected ? 1 : 0.85}
-                        _active={{ transform: "scale(0.98)" }}
-                      >
-                        {/* Icon badge */}
+                  <Flex
+                    flex="1"
+                    role="radiogroup"
+                    direction="row"
+                    gap={3}
+                    wrap={{ base: "wrap", md: "nowrap" }}
+                    alignItems="flex-start"
+                    overflowX="auto"
+                    pr={1}
+                  >
+                    {SPECIALIZATION_ORDER.map((spec) => {
+                      const selected = specialization === spec;
+                      const colorKey = getSpecializationColor(spec);
+                      return (
                         <Box
-                          position="absolute"
-                          top={3}
-                          left={3}
-                          bg={selected ? `${colorKey}.600` : `${colorKey}.400`}
-                          color="white"
-                          borderRadius="full"
-                          p={2}
-                          boxShadow="sm"
+                          key={spec}
+                          role="radio"
+                          aria-checked={selected}
+                          aria-label={spec}
+                          tabIndex={0}
+                          onClick={() => setSpecialization(spec)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setSpecialization(spec);
+                            }
+                          }}
+                          cursor="pointer"
+                          position="relative"
+                          borderWidth={selected ? "3px" : "1px"}
+                          borderColor={
+                            selected ? `${colorKey}.600` : "gray.300"
+                          }
+                          borderRadius="sm"
+                          p={0}
+                          flexShrink={0}
+                          transition="transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, filter 0.15s ease, background-color 0.15s ease"
+                          _hover={{
+                            borderColor: selected
+                              ? `${colorKey}.700`
+                              : `${colorKey}.500`,
+                            transform: "translateY(-2px)",
+                            boxShadow: selected ? "lg" : "md",
+                          }}
+                          _focusVisible={{
+                            outline: "none",
+                            boxShadow: `0 0 0 3px var(--chakra-colors-${colorKey}-200)`,
+                          }}
+                          bg={selected ? `${colorKey}.50` : "gray.50"}
+                          filter={
+                            selected
+                              ? "none"
+                              : "grayscale(0.4) brightness(0.95)"
+                          }
+                          opacity={selected ? 1 : 0.85}
+                          _active={{ transform: "scale(0.98)" }}
+                          display="inline-flex"
+                          justifyContent="center"
+                          alignItems="center"
+                          lineHeight={0}
                         >
-                          <SpecializationIcon
-                            specialization={spec}
-                            size={4}
+                          <Box
+                            position="absolute"
+                            top={3}
+                            left={3}
+                            bg={
+                              selected ? `${colorKey}.600` : `${colorKey}.400`
+                            }
                             color="white"
+                            borderRadius="full"
+                            p={2}
+                            boxShadow="sm"
+                          >
+                            <SpecializationIcon
+                              specialization={spec}
+                              size={2}
+                              color="white"
+                            />
+                          </Box>
+                          <Image
+                            src={specializationImages[spec]}
+                            alt={`${spec} card`}
+                            objectFit="contain"
+                            width="220px"
+                            height="auto"
+                            display="block"
+                            style={{
+                              transition:
+                                "filter 0.2s ease, transform 0.2s ease",
+                              transform: selected
+                                ? "scale(1.02)"
+                                : "scale(1.0)",
+                            }}
                           />
                         </Box>
-                        <Image
-                          src={specializationImages[spec]}
-                          alt={`${spec} card`}
-                          objectFit="contain"
-                          width="100%"
-                          height="auto"
-                          display="block"
-                          style={{
-                            transition: "filter 0.2s ease, transform 0.2s ease",
-                            transform: selected ? "scale(1.02)" : "scale(1.0)",
-                          }}
-                        />
+                      );
+                    })}
+                  </Flex>
+                  <Box
+                    flexBasis={{ md: "320px" }}
+                    flexGrow={1}
+                    p={1}
+                    borderWidth="1px"
+                    borderColor="gray.200"
+                    borderRadius="md"
+                    bg="bg"
+                    w={{ base: "100%", md: "auto" }}
+                    maxW="35vw"
+                  >
+                    <Heading size="sm" mb={2} color="fg.emphasized">
+                      {SPECIALIZATION_DETAILS[specialization].title}
+                    </Heading>
+                    <Text fontSize="sm" color="fg" lineHeight="1.4">
+                      {SPECIALIZATION_DETAILS[specialization].description}
+                    </Text>
+                    <Box mt={4}>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="semibold"
+                        color="fg"
+                        textTransform="uppercase"
+                        letterSpacing="wide"
+                      >
+                        Equipment
+                      </Text>
+                      <Box
+                        as="ul"
+                        mt={2}
+                        pl={4}
+                        color="fg"
+                        lineHeight="1.4"
+                        listStyleType="disc"
+                      >
+                        {SPECIALIZATION_DETAILS[specialization].equipment.map(
+                          (item) => (
+                            <Text as="li" key={item} fontSize="sm">
+                              {item}
+                            </Text>
+                          )
+                        )}
                       </Box>
-                    );
-                  })}
+                    </Box>
+                    <Box mt={4}>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="semibold"
+                        color="fg"
+                        textTransform="uppercase"
+                        letterSpacing="wide"
+                      >
+                        Strategies &amp; alliances
+                      </Text>
+                      <Box
+                        as="ul"
+                        mt={2}
+                        pl={4}
+                        color="fg"
+                        lineHeight="1.4"
+                        listStyleType="disc"
+                      >
+                        {SPECIALIZATION_DETAILS[specialization].strategy.map(
+                          (item) => (
+                            <Text as="li" key={item} fontSize="sm">
+                              {item}
+                            </Text>
+                          )
+                        )}
+                      </Box>
+                    </Box>
+                  </Box>
                 </Flex>
-                {/* Dynamic metadata panel */}
-                <Box
-                  mt={4}
-                  p={4}
-                  borderWidth="1px"
-                  borderColor="gray.200"
-                  borderRadius="md"
-                  bg="bg"
-                >
-                  <Heading size="sm" mb={2} color="fg.emphasized">
-                    {specializationMeta[specialization].title}
-                  </Heading>
-                  <Text fontSize="sm" color="fg" lineHeight="1.3">
-                    {specializationMeta[specialization].description}
-                  </Text>
-                </Box>
               </Field.Root>
             </VStack>
           </DialogBody>
