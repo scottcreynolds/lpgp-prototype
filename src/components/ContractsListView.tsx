@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useContracts, useEndContract } from "../hooks/useGameData";
 import type { Contract, DashboardPlayer } from "../lib/database.types";
 import { BreakContractModal } from "./BreakContractModal";
+import { CreateContractModal } from "./CreateContractModal";
 import { EndContractModal } from "./EndContractModal";
 import { toaster } from "./ui/toasterInstance";
 
@@ -23,7 +24,10 @@ interface ContractsListViewProps {
   currentRound: number;
 }
 
-export function ContractsListView({ players }: ContractsListViewProps) {
+export function ContractsListView({
+  players,
+  currentRound,
+}: ContractsListViewProps) {
   const [filterPlayerId, setFilterPlayerId] = useState<string>("all");
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
     null
@@ -36,6 +40,7 @@ export function ContractsListView({ players }: ContractsListViewProps) {
   );
   const endContract = useEndContract();
   const gameEnded = useGameStore((s) => s.gameEnded);
+  const currentPhase = useGameStore((s) => s.currentPhase);
 
   const handleBreakContract = async (breakerId: string) => {
     if (!selectedContract) return;
@@ -182,6 +187,8 @@ export function ContractsListView({ players }: ContractsListViewProps) {
       ?.filter((c) => c.status !== "active")
       .sort((a, b) => (b.ended_in_round || 0) - (a.ended_in_round || 0)) || [];
 
+  const contractCreationDisabled = gameEnded || currentPhase !== "Governance";
+
   return (
     <Box
       bg="bg.panel"
@@ -192,10 +199,17 @@ export function ContractsListView({ players }: ContractsListViewProps) {
       shadow="sm"
       width="full"
     >
-      <HStack justify="space-between" mb={4}>
-        <Heading size="lg" color="fg.emphasized">
-          Contracts
-        </Heading>
+      <HStack justify="space-between" mb={4} align="flex-end">
+        <HStack gap={3} align="center">
+          <Heading size="lg" color="fg.emphasized">
+            Contracts
+          </Heading>
+          <CreateContractModal
+            players={players}
+            currentRound={currentRound}
+            disabled={contractCreationDisabled}
+          />
+        </HStack>
 
         <NativeSelect.Root width="250px">
           <NativeSelect.Field
