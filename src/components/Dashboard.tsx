@@ -8,9 +8,18 @@ import {
   HStack,
   Spinner,
   Table,
+  Tabs,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useState } from "react";
+import {
+  LuDatabase,
+  LuGauge,
+  LuListOrdered,
+  LuNotebookText,
+  LuUser,
+} from "react-icons/lu";
 import { useDashboardData } from "../hooks/useGameData";
 import { ContractsListView } from "./ContractsListView";
 import { DashboardHeader } from "./DashboardHeader";
@@ -27,6 +36,7 @@ export function Dashboard() {
   const gameEnded = useGameStore((s) => s.gameEnded);
   const victoryType = useGameStore((s) => s.victoryType);
   const winnerIds = useGameStore((s) => s.winnerIds);
+  const [activeTab, setActiveTab] = useState("control");
 
   if (isLoading) {
     return (
@@ -185,43 +195,79 @@ export function Dashboard() {
           {/* Join prompt for players/observers */}
           <JoinGamePrompt phase={data.game_state.phase} />
 
-          {/* Game Status Section */}
-          <Box>
-            <GameStateDisplay
-              round={data.game_state.round}
-              phase={data.game_state.phase}
-              version={data.game_state.version}
-              players={data.players}
-            />
-          </Box>
+          <Tabs.Root
+            variant="outline"
+            defaultValue="control"
+            colorPalette="subduedCrystal"
+            value={activeTab}
+            onValueChange={(details) => setActiveTab(details.value)}
+          >
+            <Tabs.List gap={2} flexWrap="wrap">
+              <Tabs.Trigger value="control">
+                <LuGauge />
+                Game Control
+              </Tabs.Trigger>
+              <Tabs.Trigger value="player">
+                <LuUser /> Player Info
+              </Tabs.Trigger>
+              <Tabs.Trigger value="contracts">
+                <LuNotebookText /> Contracts
+              </Tabs.Trigger>
+              <Tabs.Trigger value="leaderboard">
+                <LuListOrdered /> Leaderboard
+              </Tabs.Trigger>
+              <Tabs.Trigger value="ledger">
+                <LuDatabase /> Ledger
+              </Tabs.Trigger>
+              <Tabs.Trigger value="dev">Dev</Tabs.Trigger>
+              <Tabs.Indicator color="flamingoGold.solid" outline="2px solid" />
+            </Tabs.List>
 
-          {/* Player Rankings Section */}
-          <Box>
-            <PlayerRankings players={data.players} />
-          </Box>
+            <Tabs.Content value="control" px={0} pt={4}>
+              <Box>
+                <GameStateDisplay
+                  round={data.game_state.round}
+                  phase={data.game_state.phase}
+                  version={data.game_state.version}
+                  players={data.players}
+                />
+              </Box>
+            </Tabs.Content>
 
-          {/* Contracts Section */}
-          <Box>
-            <ContractsListView
-              players={data.players}
-              currentRound={data.game_state.round}
-            />
-          </Box>
+            <Tabs.Content value="player" px={0} pt={4}>
+              <Box>
+                <InfrastructureCards players={data.players} />
+              </Box>
+            </Tabs.Content>
 
-          {/* Infrastructure Section */}
-          <Box>
-            <InfrastructureCards players={data.players} />
-          </Box>
+            <Tabs.Content value="contracts" px={0} pt={4}>
+              <Box>
+                <ContractsListView
+                  players={data.players}
+                  currentRound={data.game_state.round}
+                />
+              </Box>
+            </Tabs.Content>
 
-          {/* Ledger Section */}
-          <Box>
-            <LedgerDisplay
-              players={data.players}
-              currentRound={data.game_state.round}
-            />
-          </Box>
-          {/* Developer tools appear at the bottom of the page */}
-          <DeveloperPanel />
+            <Tabs.Content value="leaderboard" px={0} pt={4}>
+              <Box>
+                <PlayerRankings players={data.players} />
+              </Box>
+            </Tabs.Content>
+
+            <Tabs.Content value="ledger" px={0} pt={4}>
+              <Box>
+                <LedgerDisplay
+                  players={data.players}
+                  currentRound={data.game_state.round}
+                />
+              </Box>
+            </Tabs.Content>
+
+            <Tabs.Content value="dev" px={0} pt={4}>
+              <DeveloperPanel />
+            </Tabs.Content>
+          </Tabs.Root>
         </VStack>
       </Container>
     </Box>

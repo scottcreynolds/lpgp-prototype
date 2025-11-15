@@ -279,7 +279,7 @@ const config = defineConfig({
           contrast: { value: "{colors.subduedCrystal.50}" },
           fg: {
             value: {
-              _light: "{colors.subduedCrystal.800}",
+              _light: "{colors.softOchre.solid}",
               _dark: "{colors.subduedCrystal.300}",
             },
           },
