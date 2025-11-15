@@ -1,0 +1,17 @@
+{
+  "Setup": {
+    "description": "The game begins in the Setup Phase. Players join the game and select their specializations.\n\nDuring this phase, the foundation for the lunar colony is established.",
+    "action": "Add players to the game by selecting their names and specializations.\n\nOnce all players have joined, advance to the Governance Phase.",
+    "strategies": "Choose specializations that complement each other for a balanced team.\n\nConsider the roles: Engineer for infrastructure, Scientist for research, Politician for governance."
+  },
+  "Governance": {
+    "description": "In the Governance Phase, players make decisions about colony policies and resource allocation.\n\nThis phase focuses on strategic planning and voting on key initiatives.",
+    "action": "Discuss and vote on contracts and infrastructure projects.\n\nAllocate resources based on colony priorities.",
+    "strategies": "Build alliances with other players to pass favorable policies.\n\nFocus on long-term colony sustainability over short-term gains."
+  },
+  "Operations": {
+    "description": "The Operations Phase is where players execute their plans and manage daily colony activities.\n\nInfrastructure is built, resources are harvested, and progress is made.",
+    "action": "Build and activate infrastructure.\n\nManage contracts and monitor colony metrics.",
+    "strategies": "Prioritize high-yield infrastructure for resource generation.\n\nBalance power and crew capacity to maximize efficiency."
+  }
+}

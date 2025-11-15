@@ -6,10 +6,13 @@ import {
   Grid,
   GridItem,
   Heading,
+  HStack,
+  Icon,
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { LuInfo } from "react-icons/lu";
 import {
   useAddPlayer,
   useAdvancePhase,
@@ -22,6 +25,7 @@ import type {
 } from "../lib/database.types";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
+import { PhaseSummaryModal } from "./PhaseSummaryModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { PhaseTipsPanel } from "./PhaseTipsPanel";
 import { TurnOrderModal } from "./TurnOrderModal";
@@ -46,6 +50,8 @@ export function GameStateDisplay({
   const gameEnded = useGameStore((s) => s.gameEnded);
   const victoryType = useGameStore((s) => s.victoryType);
   const winnerIds = useGameStore((s) => s.winnerIds);
+
+  const [phaseSummaryOpen, setPhaseSummaryOpen] = useState(false);
 
   // Setup phase button enable + warning logic
   const { canBeginRound1, warningMessage } = useMemo(() => {
@@ -176,11 +182,29 @@ export function GameStateDisplay({
                     })()}
                   </>
                 ) : phase === "Setup" ? (
-                  <>Setup Phase</>
+                  <HStack align="center" gap={2}>
+                    <Text>Setup Phase</Text>
+                    <Icon
+                      as={LuInfo}
+                      cursor="pointer"
+                      onClick={() => setPhaseSummaryOpen(true)}
+                      fontSize="lg"
+                      color="fg"
+                    />
+                  </HStack>
                 ) : (
-                  <>
-                    Round {round} - {phase} Phase
-                  </>
+                  <HStack align="center" gap={2}>
+                    <Text>
+                      Round {round} - {phase} Phase
+                    </Text>
+                    <Icon
+                      as={LuInfo}
+                      cursor="pointer"
+                      onClick={() => setPhaseSummaryOpen(true)}
+                      fontSize="lg"
+                      color="fg"
+                    />
+                  </HStack>
                 )}
               </Heading>
               {gameEnded && players && winnerIds.length > 0 && (
@@ -228,11 +252,18 @@ export function GameStateDisplay({
                       Choose one player to act as game facilitator to advance
                       game state and keep time.
                     </Box>
-                    <Box as="li">Choose your player name.</Box>
-                    <Box as="li">Select your specialization.</Box>
                     <Box as="li">
-                      Review starter infrastructure and plan your first two
-                      rounds.
+                      Place the initial resource tokens on the board.
+                    </Box>
+                    <Box as="li">
+                      Choose your player name and specialization with the ADD
+                      PLAYER button.
+                    </Box>
+                    <Box as="li">
+                      Place your starter infrastructure on the board.
+                    </Box>
+                    <Box as="li">
+                      Review your player card and start planning your strategy.
                     </Box>
                   </Box>
                   <Text mt={2}>
@@ -317,7 +348,8 @@ export function GameStateDisplay({
             minH="64px"
             data-phase-messages
             aria-live="polite"
-            color="fg"
+            // color="fg"
+            bg="boldTangerine.contrast"
             fontSize="sm"
           >
             {warningMessage && (
@@ -333,6 +365,12 @@ export function GameStateDisplay({
           <PhaseTipsPanel phase={phase} />
         </GridItem>
       </Grid>
+
+      <PhaseSummaryModal
+        phase={phase}
+        open={phaseSummaryOpen}
+        onOpenChange={setPhaseSummaryOpen}
+      />
     </Box>
   );
 }
