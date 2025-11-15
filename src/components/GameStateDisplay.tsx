@@ -371,12 +371,12 @@ export function GameStateDisplay({
         </GridItem>
 
         {/* Tips Panel in right column */}
-        <GridItem display="flex" flexDirection="column" gap={4}>
-          <Box>
-            <Heading size="sm" mb={2}>
+        <GridItem display="flex" flexDirection="column" gap={1}>
+          <Box colorPalette="softOchre">
+            <Heading size="sm" mb={1}>
               Help Topics
             </Heading>
-            <Flex wrap="wrap" gap={3}>
+            <Flex wrap="wrap" gap={0}>
               <Button
                 variant="ghost"
                 onClick={() => {
