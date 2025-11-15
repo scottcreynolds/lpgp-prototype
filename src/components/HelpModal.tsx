@@ -1,4 +1,4 @@
-import { Dialog, Text, Heading } from "@chakra-ui/react";
+import { Dialog, Heading, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 interface HelpModalProps {
