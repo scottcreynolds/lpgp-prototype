@@ -12,13 +12,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useMemo, useState } from "react";
-import {
-  LuBuilding,
-  LuClock,
-  LuDollarSign,
-  LuFileText,
-  LuInfo,
-} from "react-icons/lu";
+import { LuInfo } from "react-icons/lu";
 import {
   useAddPlayer,
   useAdvancePhase,
@@ -31,7 +25,6 @@ import type {
 } from "../lib/database.types";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
-import { HelpModal } from "./HelpModal";
 import { PhaseSummaryModal } from "./PhaseSummaryModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { PhaseTipsPanel } from "./PhaseTipsPanel";
@@ -59,9 +52,6 @@ export function GameStateDisplay({
   const winnerIds = useGameStore((s) => s.winnerIds);
 
   const [phaseSummaryOpen, setPhaseSummaryOpen] = useState(false);
-
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [helpTopic, setHelpTopic] = useState<string | null>(null);
 
   // Setup phase button enable + warning logic
   const { canBeginRound1, warningMessage } = useMemo(() => {
@@ -370,59 +360,8 @@ export function GameStateDisplay({
           </Box>
         </GridItem>
 
-        {/* Tips Panel in right column */}
+        {/* Tips Panel in right column (Help topics moved to Dashboard) */}
         <GridItem display="flex" flexDirection="column" gap={1}>
-          <Box colorPalette="softOchre">
-            <Heading size="sm" mb={1}>
-              Help Topics
-            </Heading>
-            <Flex wrap="wrap" gap={0}>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setHelpTopic("currency");
-                  setHelpOpen(true);
-                }}
-                size="sm"
-              >
-                <Icon as={LuDollarSign} mr={1} />
-                Currency
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setHelpTopic("infrastructure");
-                  setHelpOpen(true);
-                }}
-                size="sm"
-              >
-                <Icon as={LuBuilding} mr={1} />
-                Infrastructure
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setHelpTopic("contracts");
-                  setHelpOpen(true);
-                }}
-                size="sm"
-              >
-                <Icon as={LuFileText} mr={1} />
-                Contracts
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setHelpTopic("roundStructure");
-                  setHelpOpen(true);
-                }}
-                size="sm"
-              >
-                <Icon as={LuClock} mr={1} />
-                Round Structure
-              </Button>
-            </Flex>
-          </Box>
           <PhaseTipsPanel phase={phase} />
         </GridItem>
       </Grid>
@@ -432,7 +371,6 @@ export function GameStateDisplay({
         open={phaseSummaryOpen}
         onOpenChange={setPhaseSummaryOpen}
       />
-      <HelpModal topic={helpTopic} open={helpOpen} onOpenChange={setHelpOpen} />
     </Box>
   );
 }

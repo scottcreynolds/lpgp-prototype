@@ -3,9 +3,12 @@ import {
   Alert,
   Badge,
   Box,
+  Button,
   Container,
+  Flex,
   Heading,
   HStack,
+  Icon,
   Spinner,
   Table,
   Tabs,
@@ -14,7 +17,11 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import {
+  LuBuilding,
+  LuClock,
   LuDatabase,
+  LuDollarSign,
+  LuFileText,
   LuGauge,
   LuListOrdered,
   LuNotebookText,
@@ -25,6 +32,7 @@ import { ContractsListView } from "./ContractsListView";
 import { DashboardHeader } from "./DashboardHeader";
 import DeveloperPanel from "./DeveloperPanel";
 import { GameStateDisplay } from "./GameStateDisplay";
+import { HelpModal } from "./HelpModal";
 import { InfrastructureCards } from "./InfrastructureCards";
 import { JoinGamePrompt } from "./JoinGamePrompt";
 import { LedgerDisplay } from "./LedgerDisplay";
@@ -37,6 +45,8 @@ export function Dashboard() {
   const victoryType = useGameStore((s) => s.victoryType);
   const winnerIds = useGameStore((s) => s.winnerIds);
   const [activeTab, setActiveTab] = useState("control");
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpTopic, setHelpTopic] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -180,6 +190,74 @@ export function Dashboard() {
             </VStack>
           </Box>
         )}
+
+        {/* Help topics row (moved from GameStateDisplay) */}
+        <Box mb={4}>
+          <Box p={4} borderRadius="md" borderWidth={1} borderColor="border">
+            <Flex wrap="wrap" gap={5} align="center">
+              <Text mb={1} color="boldTangerine.contrast">
+                Help Topics
+              </Text>
+              <Button
+                variant="ghost"
+                colorPalette="softOchre"
+                color="flamingoGold.contrast"
+                onClick={() => {
+                  setHelpTopic("currency");
+                  setHelpOpen(true);
+                }}
+                size="sm"
+              >
+                <Icon as={LuDollarSign} mr={1} />
+                Currency
+              </Button>
+              <Button
+                variant="ghost"
+                colorPalette="softOchre"
+                color="flamingoGold.contrast"
+                onClick={() => {
+                  setHelpTopic("infrastructure");
+                  setHelpOpen(true);
+                }}
+                size="sm"
+              >
+                <Icon as={LuBuilding} mr={1} />
+                Infrastructure
+              </Button>
+              <Button
+                variant="ghost"
+                colorPalette="softOchre"
+                color="flamingoGold.contrast"
+                onClick={() => {
+                  setHelpTopic("contracts");
+                  setHelpOpen(true);
+                }}
+                size="sm"
+              >
+                <Icon as={LuFileText} mr={1} />
+                Contracts
+              </Button>
+              <Button
+                variant="ghost"
+                colorPalette="softOchre"
+                color="flamingoGold.contrast"
+                onClick={() => {
+                  setHelpTopic("roundStructure");
+                  setHelpOpen(true);
+                }}
+                size="sm"
+              >
+                <Icon as={LuClock} mr={1} />
+                Gameplay
+              </Button>
+            </Flex>
+          </Box>
+          <HelpModal
+            topic={helpTopic}
+            open={helpOpen}
+            onOpenChange={setHelpOpen}
+          />
+        </Box>
 
         {/* Narrative panel for active phases */}
         {!gameEnded && (

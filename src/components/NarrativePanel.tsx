@@ -51,12 +51,16 @@ export function NarrativePanel({ phase, round }: NarrativePanelProps) {
           width="100%"
           p={6}
           cursor="pointer"
-          _hover={{ bg: "bg.muted" }}
+          _hover={{ bg: "bg" }}
           transition="background 0.2s"
         >
           <HStack justify="space-between" align="center">
+            <Box fontSize="2xl" color="fg.emphasized">
+              {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+            </Box>
             <Heading size="lg" color="fg.emphasized" textAlign="left">
-              {narrative.title}
+              {narrative.title}{" "}
+              {isOpen ? "(click to collapse)" : "... (click to expand)"}
             </Heading>
             <Box fontSize="2xl" color="fg.emphasized">
               {isOpen ? <FiChevronUp /> : <FiChevronDown />}
