@@ -16,8 +16,10 @@ import {
   Heading,
   HStack,
   Input,
+  List,
   NativeSelect,
   Portal,
+  RadioGroup,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -36,6 +38,7 @@ export function CreateContractModal({
   players,
   disabled,
 }: CreateContractModalProps) {
+  type ValueDetails = string | { value?: string | null };
   const [open, setOpen] = useState(false);
   const createContract = useCreateContract();
 
@@ -223,11 +226,11 @@ export function CreateContractModal({
         <DialogContent
           css={{
             position: "fixed",
-            top: "50%",
+            top: "40%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             maxHeight: "90vh",
-            overflow: "auto",
+            overflow: "scroll",
           }}
         >
           <DialogHeader>
@@ -318,19 +321,29 @@ export function CreateContractModal({
                     </HStack>
                     <Field.Root>
                       <Field.Label>Payment Type</Field.Label>
-                      <NativeSelect.Root>
-                        <NativeSelect.Field
-                          value={evIsPerRound ? "per-round" : "one-time"}
-                          onChange={(e) =>
-                            setEvIsPerRound(e.target.value === "per-round")
-                          }
-                        >
-                          <option value="one-time">One-time Payment</option>
-                          <option value="per-round">Per-round Payment</option>
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                      </NativeSelect.Root>
-                      <Text fontSize="xs" color="fg" mt={1}>
+
+                      <RadioGroup.Root colorPalette="sapphireWool">
+                        <HStack gap={4} mt={2}>
+                          <RadioGroup.Item key="one-time" value="one-time">
+                            <RadioGroup.ItemHiddenInput />
+
+                            <RadioGroup.ItemText>
+                              One-time Payment
+                            </RadioGroup.ItemText>
+                            <RadioGroup.ItemIndicator />
+                          </RadioGroup.Item>
+
+                          <RadioGroup.Item key="per-round" value="per-round">
+                            <RadioGroup.ItemHiddenInput />
+
+                            <RadioGroup.ItemText>
+                              Per-round Payment
+                            </RadioGroup.ItemText>
+                            <RadioGroup.ItemIndicator />
+                          </RadioGroup.Item>
+                        </HStack>
+                      </RadioGroup.Root>
+                      <Text fontSize="xs" color="fg" mt={2}>
                         {evIsPerRound
                           ? "Payment occurs each round while contract is active"
                           : "Payment occurs only when contract is created"}
@@ -416,130 +429,155 @@ export function CreateContractModal({
                 </Field.Root>
               </VStack>
 
-              {/* Right side: Preview */}
-              {partyA && partyB && (
-                <VStack gap={3} align="stretch" width="300px">
-                  <Heading size="sm" color="fg.emphasized">
-                    Preview
+              {/* Right side: Preview + Example Contracts (always visible) */}
+              <VStack gap={3} align="stretch" width="320px" flexShrink={0}>
+                <Heading size="sm" color="fg.emphasized">
+                  Preview
+                </Heading>
+
+                {/* Party A Net Flows */}
+                <Box
+                  p={3}
+                  bg="bg"
+                  borderRadius="md"
+                  borderWidth={1}
+                  borderColor="border"
+                >
+                  <Heading size="xs" mb={2} color="fg.emphasized">
+                    {partyA?.name || "Party A"} receives:
                   </Heading>
+                  <VStack gap={1} align="stretch">
+                    {(evAToB > 0 || evBToA > 0) && (
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg">
+                          EV:
+                        </Text>
+                        <Badge
+                          colorPalette={netEvA >= 0 ? "green" : "red"}
+                          size="sm"
+                        >
+                          {netEvA >= 0 ? "+" : ""}
+                          {netEvA}
+                          {evIsPerRound ? " /round" : " one-time"}
+                        </Badge>
+                      </HStack>
+                    )}
+                    {(powerAToB > 0 || powerBToA > 0) && (
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg">
+                          Power:
+                        </Text>
+                        <Badge
+                          colorPalette={netPowerA >= 0 ? "green" : "red"}
+                          size="sm"
+                        >
+                          {netPowerA >= 0 ? "+" : ""}
+                          {netPowerA}
+                        </Badge>
+                      </HStack>
+                    )}
+                    {(crewAToB > 0 || crewBToA > 0) && (
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg">
+                          Crew:
+                        </Text>
+                        <Badge
+                          colorPalette={netCrewA >= 0 ? "green" : "red"}
+                          size="sm"
+                        >
+                          {netCrewA >= 0 ? "+" : ""}
+                          {netCrewA}
+                        </Badge>
+                      </HStack>
+                    )}
+                  </VStack>
+                </Box>
 
-                  {/* Party A Net Flows */}
-                  <Box
-                    p={3}
-                    bg="bg"
-                    borderRadius="md"
-                    borderWidth={1}
-                    borderColor="border"
-                  >
-                    <Heading size="xs" mb={2} color="fg.emphasized">
-                      {partyA.name} receives:
-                    </Heading>
-                    <VStack gap={1} align="stretch">
-                      {(evAToB > 0 || evBToA > 0) && (
-                        <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg">
-                            EV:
-                          </Text>
-                          <Badge
-                            colorPalette={netEvA >= 0 ? "green" : "red"}
-                            size="sm"
-                          >
-                            {netEvA >= 0 ? "+" : ""}
-                            {netEvA}
-                            {evIsPerRound ? " /round" : " one-time"}
-                          </Badge>
-                        </HStack>
-                      )}
-                      {(powerAToB > 0 || powerBToA > 0) && (
-                        <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg">
-                            Power:
-                          </Text>
-                          <Badge
-                            colorPalette={netPowerA >= 0 ? "green" : "red"}
-                            size="sm"
-                          >
-                            {netPowerA >= 0 ? "+" : ""}
-                            {netPowerA}
-                          </Badge>
-                        </HStack>
-                      )}
-                      {(crewAToB > 0 || crewBToA > 0) && (
-                        <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg">
-                            Crew:
-                          </Text>
-                          <Badge
-                            colorPalette={netCrewA >= 0 ? "green" : "red"}
-                            size="sm"
-                          >
-                            {netCrewA >= 0 ? "+" : ""}
-                            {netCrewA}
-                          </Badge>
-                        </HStack>
-                      )}
-                    </VStack>
-                  </Box>
+                {/* Party B Net Flows */}
+                <Box
+                  p={3}
+                  bg="bg"
+                  borderRadius="md"
+                  borderWidth={1}
+                  borderColor="border"
+                >
+                  <Heading size="xs" mb={2} color="fg.emphasized">
+                    {partyB?.name || "Party B"} receives:
+                  </Heading>
+                  <VStack gap={1} align="stretch">
+                    {(evAToB > 0 || evBToA > 0) && (
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg">
+                          EV:
+                        </Text>
+                        <Badge
+                          colorPalette={netEvB >= 0 ? "green" : "red"}
+                          size="sm"
+                        >
+                          {netEvB >= 0 ? "+" : ""}
+                          {netEvB}
+                          {evIsPerRound ? " /round" : " one-time"}
+                        </Badge>
+                      </HStack>
+                    )}
+                    {(powerAToB > 0 || powerBToA > 0) && (
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg">
+                          Power:
+                        </Text>
+                        <Badge
+                          colorPalette={netPowerB >= 0 ? "green" : "red"}
+                          size="sm"
+                        >
+                          {netPowerB >= 0 ? "+" : ""}
+                          {netPowerB}
+                        </Badge>
+                      </HStack>
+                    )}
+                    {(crewAToB > 0 || crewBToA > 0) && (
+                      <HStack justify="space-between">
+                        <Text fontSize="sm" color="fg">
+                          Crew:
+                        </Text>
+                        <Badge
+                          colorPalette={netCrewB >= 0 ? "green" : "red"}
+                          size="sm"
+                        >
+                          {netCrewB >= 0 ? "+" : ""}
+                          {netCrewB}
+                        </Badge>
+                      </HStack>
+                    )}
+                  </VStack>
+                </Box>
 
-                  {/* Party B Net Flows */}
-                  <Box
-                    p={3}
-                    bg="bg"
-                    borderRadius="md"
-                    borderWidth={1}
-                    borderColor="border"
-                  >
-                    <Heading size="xs" mb={2} color="fg.emphasized">
-                      {partyB.name} receives:
-                    </Heading>
-                    <VStack gap={1} align="stretch">
-                      {(evAToB > 0 || evBToA > 0) && (
-                        <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg">
-                            EV:
-                          </Text>
-                          <Badge
-                            colorPalette={netEvB >= 0 ? "green" : "red"}
-                            size="sm"
-                          >
-                            {netEvB >= 0 ? "+" : ""}
-                            {netEvB}
-                            {evIsPerRound ? " /round" : " one-time"}
-                          </Badge>
-                        </HStack>
-                      )}
-                      {(powerAToB > 0 || powerBToA > 0) && (
-                        <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg">
-                            Power:
-                          </Text>
-                          <Badge
-                            colorPalette={netPowerB >= 0 ? "green" : "red"}
-                            size="sm"
-                          >
-                            {netPowerB >= 0 ? "+" : ""}
-                            {netPowerB}
-                          </Badge>
-                        </HStack>
-                      )}
-                      {(crewAToB > 0 || crewBToA > 0) && (
-                        <HStack justify="space-between">
-                          <Text fontSize="sm" color="fg">
-                            Crew:
-                          </Text>
-                          <Badge
-                            colorPalette={netCrewB >= 0 ? "green" : "red"}
-                            size="sm"
-                          >
-                            {netCrewB >= 0 ? "+" : ""}
-                            {netCrewB}
-                          </Badge>
-                        </HStack>
-                      )}
-                    </VStack>
-                  </Box>
-                </VStack>
-              )}
+                {/* Example Contracts / Help Text */}
+                <Box p={2}>
+                  <Heading size="sm" mb={2} color="fg.emphasized">
+                    Example Contracts
+                  </Heading>
+                  <Text fontSize="xs" color="fg" mt={1}>
+                    Here are some examples of things you could do with
+                    contracts. players.
+                  </Text>
+                  <List.Root fontSize="xs" mt={2}>
+                    <List.Item>
+                      Trade 10 EV per-round for Power or Crew Capacity.
+                    </List.Item>
+                    <List.Item>
+                      Trade Crew Capacity for Power Capacity for the next 3
+                      rounds.
+                    </List.Item>
+                    <List.Item>
+                      Exchange one-time EV to have another player build you some
+                      infrastructure that you can't build.
+                    </List.Item>
+                    <List.Item>
+                      Exchange one-time EV and ongoing Crew Capacity for Power.
+                    </List.Item>
+                  </List.Root>
+                </Box>
+              </VStack>
             </HStack>
           </DialogBody>
 
