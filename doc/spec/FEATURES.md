@@ -91,12 +91,9 @@
 
 ## High Priority
 
-- Update color ramps
 - persistent actions row in top instead of in panels
 - additional tips (Setup tips exist, need more)
-- additional narrative content for more phases/rounds
 - context-specific tooltips
-- break contract flow with rep penalty
 - move manual adjustment control
 - assign user to player when they create it
 - events and event cards
