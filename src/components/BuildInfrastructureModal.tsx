@@ -175,9 +175,13 @@ export function BuildInfrastructureModal({
     }
   };
 
-  const handleOpenChange = (details: { open: boolean }) => {
-    setOpen(details.open);
-    if (!details.open) {
+  const handleOpenChange = (details: boolean | { open: boolean }) => {
+    // Radix/Chakra can pass either an object like { open: boolean }
+    // or sometimes a raw boolean. Handle both safely to avoid runtime
+    // errors that can leave the backdrop/scroll lock in place.
+    const isOpen = typeof details === "boolean" ? details : details.open;
+    setOpen(isOpen);
+    if (!isOpen) {
       // Reset form when modal closes
       setOwnerId(builderId);
       setInfrastructureType("");

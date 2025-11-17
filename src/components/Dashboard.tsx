@@ -286,7 +286,7 @@ export function Dashboard() {
                 Game Control
               </Tabs.Trigger>
               <Tabs.Trigger value="player">
-                <LuUser /> Player Info
+                <LuUser /> Player Controls
               </Tabs.Trigger>
               <Tabs.Trigger value="contracts">
                 <LuNotebookText /> Contracts
