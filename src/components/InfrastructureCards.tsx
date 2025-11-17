@@ -12,6 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import type { ReactElement } from "react";
+import { useState } from "react";
 import {
   FaAtom,
   FaBolt,
@@ -32,6 +33,7 @@ import type {
 import { useGameStore } from "../store/gameStore";
 import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
 import { EditPlayerModal } from "./EditPlayerModal";
+import { HelpModal } from "./HelpModal";
 import { PlayerInfoModal } from "./PlayerInfoModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
 import SpecializationIcon from "./SpecializationIcon";
@@ -42,6 +44,7 @@ interface InfrastructureCardsProps {
 }
 
 export function InfrastructureCards({ players }: InfrastructureCardsProps) {
+  const [helpOpen, setHelpOpen] = useState(false);
   const editPlayer = useEditPlayer();
   const { data: allContracts } = useContracts();
   const currentRound = useGameStore((state) => state.currentRound);
@@ -299,9 +302,24 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
       borderColor="border.emphasized"
       shadow="sm"
     >
-      <Heading size="lg" mb={4} color="fg">
-        Infrastructure Overview
-      </Heading>
+      <Flex justify="space-between" align="center" mb={4}>
+        <Heading size="lg" color="fg">
+          Infrastructure Overview
+        </Heading>
+        <Button
+          size="sm"
+          variant="outline"
+          colorPalette="sapphireWool"
+          onClick={() => setHelpOpen(true)}
+        >
+          Infrastructure Values
+        </Button>
+      </Flex>
+      <HelpModal
+        topic={"infrastructure-table"}
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+      />
 
       <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
         {players.map((player) => {

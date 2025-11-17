@@ -38,6 +38,7 @@ import { JoinGamePrompt } from "./JoinGamePrompt";
 import { LedgerDisplay } from "./LedgerDisplay";
 import { NarrativePanel } from "./NarrativePanel";
 import { PlayerRankings } from "./PlayerRankings";
+import { Tooltip } from "./ui/tooltip";
 
 export function Dashboard() {
   const { data, isLoading, error } = useDashboardData();
@@ -222,7 +223,20 @@ export function Dashboard() {
                 size="sm"
               >
                 <Icon as={LuBuilding} mr={1} />
-                Infrastructure
+                Infrastructure Descriptions
+              </Button>
+              <Button
+                variant="ghost"
+                colorPalette="softOchre"
+                color="flamingoGold.contrast"
+                onClick={() => {
+                  setHelpTopic("infrastructure-table");
+                  setHelpOpen(true);
+                }}
+                size="sm"
+              >
+                <Icon as={LuBuilding} mr={1} />
+                Infrastructure Values
               </Button>
               <Button
                 variant="ghost"
@@ -282,22 +296,74 @@ export function Dashboard() {
           >
             <Tabs.List gap={2} flexWrap="wrap">
               <Tabs.Trigger value="control">
-                <LuGauge />
-                Game Control
+                <Tooltip
+                  content="Shows current round, phase, and game status"
+                  showArrow
+                  positioning={{ placement: "top" }}
+                >
+                  <HStack>
+                    <LuGauge />
+                    <span>Game Status</span>
+                  </HStack>
+                </Tooltip>
               </Tabs.Trigger>
               <Tabs.Trigger value="player">
-                <LuUser /> Player Controls
+                <Tooltip
+                  content="Player dashboards, infrastructure, and management"
+                  showArrow
+                  positioning={{ placement: "top" }}
+                >
+                  <HStack>
+                    <LuUser />
+                    <span>Player Dashboard</span>
+                  </HStack>
+                </Tooltip>
               </Tabs.Trigger>
               <Tabs.Trigger value="contracts">
-                <LuNotebookText /> Contracts
+                <Tooltip
+                  content="View, create, and manage contracts between players"
+                  showArrow
+                  positioning={{ placement: "top" }}
+                >
+                  <HStack>
+                    <LuNotebookText />
+                    <span>Contracts</span>
+                  </HStack>
+                </Tooltip>
               </Tabs.Trigger>
               <Tabs.Trigger value="leaderboard">
-                <LuListOrdered /> Leaderboard
+                <Tooltip
+                  content="Player rankings and standings"
+                  showArrow
+                  positioning={{ placement: "top" }}
+                >
+                  <HStack>
+                    <LuListOrdered />
+                    <span>Leaderboard</span>
+                  </HStack>
+                </Tooltip>
               </Tabs.Trigger>
               <Tabs.Trigger value="ledger">
-                <LuDatabase /> Ledger
+                <Tooltip
+                  content="Recent ledger transactions and entries"
+                  showArrow
+                  positioning={{ placement: "top" }}
+                >
+                  <HStack>
+                    <LuDatabase />
+                    <span>Ledger</span>
+                  </HStack>
+                </Tooltip>
               </Tabs.Trigger>
-              <Tabs.Trigger value="dev">Dev</Tabs.Trigger>
+              <Tabs.Trigger value="dev">
+                <Tooltip
+                  content="Developer tools and debug utilities"
+                  showArrow
+                  positioning={{ placement: "top" }}
+                >
+                  <span>Dev</span>
+                </Tooltip>
+              </Tabs.Trigger>
               <Tabs.Indicator color="flamingoGold.solid" outline="2px solid" />
             </Tabs.List>
 

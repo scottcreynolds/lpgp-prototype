@@ -1,5 +1,7 @@
-import { Dialog, Heading, Text } from "@chakra-ui/react";
+import { Box, Dialog, Heading, Spinner, Table, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { useInfrastructureDefinitions } from "../hooks/useGameData";
+import type { Database } from "../lib/database.types";
 
 interface HelpModalProps {
   topic: string | null;
@@ -11,7 +13,8 @@ export function HelpModal({ topic, open, onOpenChange }: HelpModalProps) {
   const [content, setContent] = useState<string>("");
 
   useEffect(() => {
-    if (topic) {
+    // Only attempt to load a JSON help file for text-based topics.
+    if (topic && topic !== "infrastructure-table") {
       // Load the JSON file for the topic
       import(`../data/${topic}.json`)
         .then((data) => {
@@ -44,9 +47,16 @@ export function HelpModal({ topic, open, onOpenChange }: HelpModalProps) {
     };
   }, [open]);
 
-  const handleOpenChange = (e: { open: boolean }) => onOpenChange(e.open);
+  const handleOpenChange = (e: boolean | { open: boolean }) => {
+    const isOpen = typeof e === "boolean" ? e : e.open;
+    onOpenChange(isOpen);
+  };
 
   const paragraphs = content.split("\n\n");
+
+  // If requested, fetch infrastructure definitions and render a table
+  const { data: infraDefs, isLoading: infraLoading } =
+    useInfrastructureDefinitions();
 
   // Parse inline markdown for **bold** and *italic* (simple, non-nested)
   const parseInline = (text: string): React.ReactNode[] => {
@@ -88,7 +98,7 @@ export function HelpModal({ topic, open, onOpenChange }: HelpModalProps) {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange} size="xl">
       <Dialog.Backdrop />
       <Dialog.Content
         css={{
@@ -98,40 +108,122 @@ export function HelpModal({ topic, open, onOpenChange }: HelpModalProps) {
           top: "40%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "85vw",
+          // Use a responsive max width so the dialog is wide on desktop
+          // but still constrained on small screens.
+          width: "min(95vw, 1100px)",
+          maxWidth: "1100px",
           maxHeight: "90vh",
           overflow: "visible",
         }}
       >
         <Dialog.Title>
-          {topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : "Help"}
+          {topic === "infrastructure-table"
+            ? "Buildable Infrastructure"
+            : topic
+            ? topic.charAt(0).toUpperCase() + topic.slice(1)
+            : "Help"}
         </Dialog.Title>
         {/* Keep the dialog body scrollable so long help content is readable */}
         <Dialog.Body
           style={{ maxHeight: "calc(90vh - 4rem)", overflowY: "auto" }}
         >
-          {paragraphs.map((para, idx) => {
-            if (para.startsWith("### ")) {
-              return (
-                <Heading key={idx} as="h3" size="sm" mb={3}>
-                  {parseInline(para.slice(4))}
-                </Heading>
-              );
-            }
-            if (para.startsWith("## ")) {
-              return (
-                <Heading key={idx} as="h2" size="md" mb={4}>
-                  {parseInline(para.slice(3))}
-                </Heading>
-              );
-            } else {
-              return (
-                <Text key={idx} mb={4}>
-                  {parseInline(para)}
-                </Text>
-              );
-            }
-          })}
+          {topic === "infrastructure-table" ? (
+            <Box>
+              {infraLoading ? (
+                <Spinner />
+              ) : (
+                // Filter out commons (type starts with "Commons - ") and show only player-buildable infra
+                <Table.Root
+                  interactive
+                  size="sm"
+                  variant="outline"
+                  width="full"
+                >
+                  <Table.Header bg="bg.subtle">
+                    <Table.Row>
+                      <Table.ColumnHeader>Type</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">
+                        Cost
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">
+                        Maintenance
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">
+                        Yield
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">
+                        Capacity
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">
+                        Power Req
+                      </Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">
+                        Crew Req
+                      </Table.ColumnHeader>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body colorPalette="flamingoGold">
+                    {(
+                      (infraDefs ||
+                        []) as Database["public"]["Tables"]["infrastructure_definitions"]["Row"][]
+                    )
+                      .filter(
+                        (d) =>
+                          d.player_buildable && !d.type.startsWith("Commons - ")
+                      )
+                      .map((d) => (
+                        <Table.Row key={d.id}>
+                          <Table.Cell>
+                            <strong>{d.type}</strong>
+                          </Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {d.cost ?? "—"}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {d.maintenance_cost ?? "—"}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {d.yield ?? "—"}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {d.capacity ?? "—"}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {d.power_requirement ?? "—"}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {d.crew_requirement ?? "—"}
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                  </Table.Body>
+                </Table.Root>
+              )}
+            </Box>
+          ) : (
+            paragraphs.map((para, idx) => {
+              if (para.startsWith("### ")) {
+                return (
+                  <Heading key={idx} as="h3" size="sm" mb={3}>
+                    {parseInline(para.slice(4))}
+                  </Heading>
+                );
+              }
+              if (para.startsWith("## ")) {
+                return (
+                  <Heading key={idx} as="h2" size="md" mb={4}>
+                    {parseInline(para.slice(3))}
+                  </Heading>
+                );
+              } else {
+                return (
+                  <Text key={idx} mb={4}>
+                    {parseInline(para)}
+                  </Text>
+                );
+              }
+            })
+          )}
         </Dialog.Body>
       </Dialog.Content>
     </Dialog.Root>
