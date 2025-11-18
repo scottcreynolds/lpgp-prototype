@@ -15,7 +15,13 @@ import {
 } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { FaGamepad, FaSearch, FaSync, FaTrash } from "react-icons/fa";
+import {
+  FaExternalLinkAlt,
+  FaGamepad,
+  FaSearch,
+  FaSync,
+  FaTrash,
+} from "react-icons/fa";
 
 function formatDateTime(ts?: string) {
   if (!ts) return "—";
@@ -179,24 +185,45 @@ export default function GamesAdminButton({
                       </HStack>
                     </Table.Cell>
                     <Table.Cell textAlign="right">
-                      <IconButton
-                        aria-label="Delete game"
-                        colorPalette="red"
-                        variant="ghost"
-                        size="xs"
-                        disabled={
-                          currentGameId === g.game_id ||
-                          deleteMutation.isPending
-                        }
-                        onClick={() => setConfirmId(g.game_id)}
-                        title={
-                          currentGameId === g.game_id
-                            ? "Cannot delete the current game"
-                            : "Delete game"
-                        }
-                      >
-                        <FaTrash />
-                      </IconButton>
+                      <HStack justify="end" gap={1}>
+                        <IconButton
+                          aria-label={`Open game ${g.game_id}`}
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => {
+                            try {
+                              const u = new URL(window.location.href);
+                              u.searchParams.set("game", g.game_id);
+                              window.open(u.toString(), "_blank");
+                            } catch (e) {
+                              // fallback
+                              window.open(`/?game=${g.game_id}`, "_blank");
+                            }
+                          }}
+                          title="Open game in new tab"
+                        >
+                          <FaExternalLinkAlt />
+                        </IconButton>
+
+                        <IconButton
+                          aria-label="Delete game"
+                          colorPalette="red"
+                          variant="ghost"
+                          size="xs"
+                          disabled={
+                            currentGameId === g.game_id ||
+                            deleteMutation.isPending
+                          }
+                          onClick={() => setConfirmId(g.game_id)}
+                          title={
+                            currentGameId === g.game_id
+                              ? "Cannot delete the current game"
+                              : "Delete game"
+                          }
+                        >
+                          <FaTrash />
+                        </IconButton>
+                      </HStack>
                     </Table.Cell>
                   </Table.Row>
                 ))}

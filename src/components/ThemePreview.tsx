@@ -1,14 +1,19 @@
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   Box,
   Button,
+  Card,
+  Collapsible,
   Heading,
   HStack,
+  Icon,
   SimpleGrid,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useTheme as useNextThemes } from "next-themes";
+import { FiChevronDown } from "react-icons/fi";
 
 function Swatch({ label, token }: { label: string; token: string }) {
   return (
@@ -112,85 +117,135 @@ function SemanticColorRow({ name, colorPalette }: SemanticColorRowProps) {
 export function ThemePreview() {
   const { resolvedTheme } = useNextThemes();
 
+  // persist open/closed state and default to collapsed
+  const [isOpen, setIsOpen] = useLocalStorage<boolean>(
+    "theme.preview.open",
+    false
+  );
+
   return (
-    <Box mt={6} p={4} borderWidth="1px" borderRadius="md" bg="bg.panel">
-      <Stack gap={4}>
-        <Heading size="sm">Theme Preview</Heading>
-        <Text fontSize="sm">
-          Current mode: <b>{resolvedTheme}</b>
-        </Text>
+    <Card.Root variant="outline" colorPalette="gray" mt={6}>
+      <Card.Body>
+        <Collapsible.Root open={isOpen} onOpenChange={(e) => setIsOpen(e.open)}>
+          <Collapsible.Trigger asChild>
+            <Button
+              size="sm"
+              variant="ghost"
+              colorPalette="gray"
+              justifyContent="space-between"
+              w="full"
+            >
+              <HStack gap={2} flex={1} justify="flex-start">
+                <Heading size="sm">Theme Preview</Heading>
+                <Text fontSize="sm" color="fg">
+                  Current mode: <b>{resolvedTheme}</b>
+                </Text>
+              </HStack>
+              <Icon
+                as={FiChevronDown}
+                transform={isOpen ? "rotate(180deg)" : "rotate(0deg)"}
+                transition="transform 0.2s"
+              />
+            </Button>
+          </Collapsible.Trigger>
 
-        <VStack gap={3} align="stretch">
-          <SemanticColorRow name="Flamingo Gold" colorPalette="flamingoGold" />
-          <SemanticColorRow name="Sapphire Wool" colorPalette="sapphireWool" />
-          <SemanticColorRow name="Soft Ochre" colorPalette="softOchre" />
-          <SemanticColorRow
-            name="Bold Tangerine"
-            colorPalette="boldTangerine"
-          />
-          <SemanticColorRow
-            name="Subdued Crystal"
-            colorPalette="subduedCrystal"
-          />
-        </VStack>
+          <Collapsible.Content>
+            <Box mt={3} p={0} bg="transparent">
+              <Stack gap={4}>
+                <VStack gap={3} align="stretch">
+                  <SemanticColorRow
+                    name="Flamingo Gold"
+                    colorPalette="flamingoGold"
+                  />
+                  <SemanticColorRow
+                    name="Sapphire Wool"
+                    colorPalette="sapphireWool"
+                  />
+                  <SemanticColorRow
+                    name="Soft Ochre"
+                    colorPalette="softOchre"
+                  />
+                  <SemanticColorRow
+                    name="Bold Tangerine"
+                    colorPalette="boldTangerine"
+                  />
+                  <SemanticColorRow
+                    name="Subdued Crystal"
+                    colorPalette="subduedCrystal"
+                  />
+                </VStack>
 
-        <Box>
-          <Text fontSize="sm" fontWeight="bold" mb={2} color="fg.emphasized">
-            Base Colors
-          </Text>
-          <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
-            <Swatch label="bg" token="bg" />
-            <Swatch label="bg.panel" token="bg.panel" />
-            <Swatch label="fg" token="fg" />
-            <Swatch label="border" token="border" />
-          </SimpleGrid>
-        </Box>
+                <Box>
+                  <Text
+                    fontSize="sm"
+                    fontWeight="bold"
+                    mb={2}
+                    color="fg.emphasized"
+                  >
+                    Base Colors
+                  </Text>
+                  <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
+                    <Swatch label="bg" token="bg" />
+                    <Swatch label="bg.panel" token="bg.panel" />
+                    <Swatch label="fg" token="fg" />
+                    <Swatch label="border" token="border" />
+                  </SimpleGrid>
+                </Box>
 
-        <Box>
-          <Text fontSize="sm" fontWeight="bold" mb={2} color="fg.emphasized">
-            Background Combinations
-          </Text>
-          <SimpleGrid columns={{ base: 2, md: 3, lg: 5 }} gap={3}>
-            <BgComboSwatch
-              label="bg"
-              bgToken="bg"
-              fgToken="fg"
-              borderToken="border"
-            />
-            <BgComboSwatch
-              label="bg.subtle"
-              bgToken="bg.subtle"
-              fgToken="fg"
-              borderToken="border.subtle"
-            />
-            <BgComboSwatch
-              label="bg.muted"
-              bgToken="bg.muted"
-              fgToken="fg.inverted"
-              borderToken="border.muted"
-            />
-            <BgComboSwatch
-              label="bg.emphasized"
-              bgToken="bg.emphasized"
-              fgToken="fg.inverted"
-              borderToken="border.emphasized"
-            />
-            <BgComboSwatch
-              label="bg.inverted"
-              bgToken="bg.inverted"
-              fgToken="fg.inverted"
-              borderToken="border.inverted"
-            />
-            <BgComboSwatch
-              label="bg.panel"
-              bgToken="bg.panel"
-              fgToken="fg"
-              borderToken="border"
-            />
-          </SimpleGrid>
-        </Box>
-      </Stack>
-    </Box>
+                <Box>
+                  <Text
+                    fontSize="sm"
+                    fontWeight="bold"
+                    mb={2}
+                    color="fg.emphasized"
+                  >
+                    Background Combinations
+                  </Text>
+                  <SimpleGrid columns={{ base: 2, md: 3, lg: 5 }} gap={3}>
+                    <BgComboSwatch
+                      label="bg"
+                      bgToken="bg"
+                      fgToken="fg"
+                      borderToken="border"
+                    />
+                    <BgComboSwatch
+                      label="bg.subtle"
+                      bgToken="bg.subtle"
+                      fgToken="fg"
+                      borderToken="border.subtle"
+                    />
+                    <BgComboSwatch
+                      label="bg.muted"
+                      bgToken="bg.muted"
+                      fgToken="fg.inverted"
+                      borderToken="border.muted"
+                    />
+                    <BgComboSwatch
+                      label="bg.emphasized"
+                      bgToken="bg.emphasized"
+                      fgToken="fg.inverted"
+                      borderToken="border.emphasized"
+                    />
+                    <BgComboSwatch
+                      label="bg.inverted"
+                      bgToken="bg.inverted"
+                      fgToken="fg.inverted"
+                      borderToken="border.inverted"
+                    />
+                    <BgComboSwatch
+                      label="bg.panel"
+                      bgToken="bg.panel"
+                      fgToken="fg"
+                      borderToken="border"
+                    />
+                  </SimpleGrid>
+                </Box>
+              </Stack>
+            </Box>
+          </Collapsible.Content>
+        </Collapsible.Root>
+      </Card.Body>
+    </Card.Root>
   );
 }
 
