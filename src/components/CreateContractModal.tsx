@@ -190,6 +190,9 @@ export function CreateContractModal({
   const partyA = players.find((p) => p.id === partyAId);
   const partyB = players.find((p) => p.id === partyBId);
 
+  // Disable all form controls until both parties are selected
+  const formDisabled = !partyAId || !partyBId;
+
   // Parse values for preview
   const evAToB = parseInt(evFromAToB) || 0;
   const evBToA = parseInt(evFromBToA) || 0;
@@ -289,6 +292,12 @@ export function CreateContractModal({
                   </VStack>
                 </Box>
 
+                {formDisabled && (
+                  <Text fontSize="sm" color="fg" mt={2}>
+                    Select both parties to enable the rest of the fields
+                  </Text>
+                )}
+
                 {/* EV Exchange */}
                 <Box>
                   <Heading size="sm" mb={2} color="fg.emphasized">
@@ -304,6 +313,7 @@ export function CreateContractModal({
                           type="text"
                           value={evFromAToB}
                           onChange={(e) => setEvFromAToB(e.target.value)}
+                          disabled={formDisabled}
                           placeholder="0"
                         />
                       </Field.Root>
@@ -315,6 +325,7 @@ export function CreateContractModal({
                           type="text"
                           value={evFromBToA}
                           onChange={(e) => setEvFromBToA(e.target.value)}
+                          disabled={formDisabled}
                           placeholder="0"
                         />
                       </Field.Root>
@@ -322,7 +333,17 @@ export function CreateContractModal({
                     <Field.Root>
                       <Field.Label>Payment Type</Field.Label>
 
-                      <RadioGroup.Root colorPalette="sapphireWool">
+                      <RadioGroup.Root
+                        colorPalette="sapphireWool"
+                        disabled={formDisabled}
+                        onValueChange={(details: ValueDetails) => {
+                          const val =
+                            typeof details === "string"
+                              ? details
+                              : details?.value ?? String(details);
+                          setEvIsPerRound(val === "per-round");
+                        }}
+                      >
                         <HStack gap={4} mt={2}>
                           <RadioGroup.Item key="one-time" value="one-time">
                             <RadioGroup.ItemHiddenInput />
@@ -357,7 +378,7 @@ export function CreateContractModal({
                   <Heading size="sm" mb={2} color="fg.emphasized">
                     Power Capacity Sharing
                   </Heading>
-                  <HStack gap={2}>
+                      <HStack gap={2}>
                     <Field.Root flex={1}>
                       <Field.Label>
                         From {partyA?.name || "A"} to {partyB?.name || "B"}
@@ -367,6 +388,7 @@ export function CreateContractModal({
                         value={powerFromAToB}
                         onChange={(e) => setPowerFromAToB(e.target.value)}
                         placeholder="0"
+                        disabled={formDisabled}
                       />
                     </Field.Root>
                     <Field.Root flex={1}>
@@ -378,6 +400,7 @@ export function CreateContractModal({
                         value={powerFromBToA}
                         onChange={(e) => setPowerFromBToA(e.target.value)}
                         placeholder="0"
+                        disabled={formDisabled}
                       />
                     </Field.Root>
                   </HStack>
@@ -388,7 +411,7 @@ export function CreateContractModal({
                   <Heading size="sm" mb={2} color="fg.emphasized">
                     Crew Capacity Sharing
                   </Heading>
-                  <HStack gap={2}>
+                    <HStack gap={2}>
                     <Field.Root flex={1}>
                       <Field.Label>
                         From {partyA?.name || "A"} to {partyB?.name || "B"}
@@ -398,6 +421,7 @@ export function CreateContractModal({
                         value={crewFromAToB}
                         onChange={(e) => setCrewFromAToB(e.target.value)}
                         placeholder="0"
+                        disabled={formDisabled}
                       />
                     </Field.Root>
                     <Field.Root flex={1}>
@@ -409,6 +433,7 @@ export function CreateContractModal({
                         value={crewFromBToA}
                         onChange={(e) => setCrewFromBToA(e.target.value)}
                         placeholder="0"
+                        disabled={formDisabled}
                       />
                     </Field.Root>
                   </HStack>
@@ -422,6 +447,7 @@ export function CreateContractModal({
                     value={durationRounds}
                     onChange={(e) => setDurationRounds(e.target.value)}
                     placeholder="Leave empty for permanent"
+                    disabled={formDisabled}
                   />
                   <Text fontSize="xs" color="fg" mt={1}>
                     Leave empty for a permanent contract
