@@ -24,13 +24,18 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import { FiArrowDown, FiArrowUp } from "react-icons/fi";
-import { useContracts, useEditPlayer } from "../hooks/useGameData";
+import {
+  useAddPlayer,
+  useContracts,
+  useEditPlayer,
+} from "../hooks/useGameData";
 import type {
   Contract,
   DashboardPlayer,
   Specialization,
 } from "../lib/database.types";
 import { useGameStore } from "../store/gameStore";
+import { AddPlayerModal } from "./AddPlayerModal";
 import { BuildInfrastructureModal } from "./BuildInfrastructureModal";
 import { EditPlayerModal } from "./EditPlayerModal";
 import { HelpModal } from "./HelpModal";
@@ -49,6 +54,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   const { data: allContracts } = useContracts();
   const currentRound = useGameStore((state) => state.currentRound);
   const currentPhase = useGameStore((state) => state.currentPhase);
+  const addPlayer = useAddPlayer();
 
   const getInfrastructureIcon = (type: string) => {
     if (type.includes("Habitat")) return <FaHome />;
@@ -200,6 +206,29 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
     }
   };
 
+  const handleAddPlayer = async (
+    name: string,
+    specialization: Specialization
+  ) => {
+    try {
+      await addPlayer.mutateAsync({ name, specialization });
+      toaster.create({
+        title: "Player Added",
+        description: `${name} joined as ${specialization}`,
+        type: "success",
+        duration: 3000,
+      });
+    } catch (error) {
+      toaster.create({
+        title: "Failed to Add Player",
+        description:
+          error instanceof Error ? error.message : "Failed to add player",
+        type: "error",
+        duration: 5000,
+      });
+    }
+  };
+
   const renderCapacityPanel = (
     label: string,
     icon: ReactElement,
@@ -306,14 +335,22 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
         <Heading size="lg" color="fg">
           Infrastructure Overview
         </Heading>
-        <Button
-          size="sm"
-          variant="outline"
-          colorPalette="sapphireWool"
-          onClick={() => setHelpOpen(true)}
-        >
-          Infrastructure Values
-        </Button>
+        <HStack gap={2}>
+          {currentPhase === "Setup" && (
+            <AddPlayerModal
+              onAddPlayer={handleAddPlayer}
+              isPending={addPlayer.isPending}
+            />
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            colorPalette="sapphireWool"
+            onClick={() => setHelpOpen(true)}
+          >
+            Infrastructure Values
+          </Button>
+        </HStack>
       </Flex>
       <HelpModal
         topic={"infrastructure-table"}

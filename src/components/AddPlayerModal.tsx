@@ -126,8 +126,9 @@ export function AddPlayerModal({
                 </Field.Label>
                 <Flex
                   mt={1}
-                  direction={{ base: "column", md: "row" }}
-                  gap={{ base: 3, md: 0 }}
+                  // keep the right column under the cards until large screens
+                  direction={{ base: "column", lg: "row" }}
+                  gap={{ base: 3, lg: 0 }}
                   alignItems="flex-start"
                 >
                   <Flex
@@ -135,9 +136,9 @@ export function AddPlayerModal({
                     role="radiogroup"
                     direction="row"
                     gap={3}
-                    wrap={{ base: "wrap", md: "nowrap" }}
+                    // allow wrapping so cards flow to multiple rows responsively
+                    wrap="wrap"
                     alignItems="flex-start"
-                    overflowX="auto"
                     pr={1}
                   >
                     {SPECIALIZATION_ORDER.map((spec) => {
@@ -229,15 +230,15 @@ export function AddPlayerModal({
                     })}
                   </Flex>
                   <Box
-                    flexBasis={{ md: "320px" }}
+                    flexBasis={{ lg: "320px" }}
                     flexGrow={1}
                     p={1}
                     borderWidth="1px"
                     borderColor="gray.200"
                     borderRadius="md"
                     bg="bg"
-                    w={{ base: "100%", md: "auto" }}
-                    maxW="35vw"
+                    w={{ base: "100%", lg: "auto" }}
+                    maxW={{ base: "100%", lg: "35vw" }}
                   >
                     <Heading size="sm" mb={2} color="fg.emphasized">
                       {SPECIALIZATION_DETAILS[specialization].title}

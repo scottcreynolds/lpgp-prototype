@@ -88,10 +88,11 @@ export function EditPlayerModal({
     <DialogRoot open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <IconButton
-          color="subduedCrystal.solid"
-          variant="ghost"
           size="md"
           aria-label="Edit player"
+          variant="ghost"
+          color="voidNavy.700"
+          _hover={{ color: "boldTangerine.100", bg: "voidNavy.700" }}
         >
           <FaEdit />
         </IconButton>

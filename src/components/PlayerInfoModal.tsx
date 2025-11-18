@@ -49,8 +49,9 @@ export function PlayerInfoModal({
           <IconButton
             aria-label="View player info"
             size="xs"
-            variant="ghost"
-            color="fg.muted"
+            variant="outline"
+            color="voidNavy.700"
+            _hover={{ color: "boldTangerine.100", bg: "voidNavy.700" }}
           >
             <FiInfo />
           </IconButton>
