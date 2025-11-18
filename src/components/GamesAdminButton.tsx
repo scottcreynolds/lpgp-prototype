@@ -128,13 +128,13 @@ export default function GamesAdminButton({
             <Text fontSize="sm">Loading…</Text>
           </HStack>
         ) : filtered.length === 0 ? (
-          <Text fontSize="sm" color="fg.muted">
+          <Text fontSize="sm" color="fg" fontStyle="italic">
             No games found
           </Text>
         ) : (
-          <Table.ScrollArea maxH="240px">
-            <Table.Root size="sm" variant="outline" width="full">
-              <Table.Header>
+          <Table.ScrollArea maxH="50vh">
+            <Table.Root size="md" variant="outline" width="full">
+              <Table.Header bg="bg.panel">
                 <Table.Row>
                   <Table.ColumnHeader>Updated</Table.ColumnHeader>
                   <Table.ColumnHeader>Round</Table.ColumnHeader>
@@ -143,9 +143,15 @@ export default function GamesAdminButton({
                   <Table.ColumnHeader></Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
-              <Table.Body>
+              <Table.Body
+                bg="flamingoGold.contrast"
+                colorPalette="flamingoGold"
+              >
                 {filtered.map((g) => (
-                  <Table.Row key={g.game_id}>
+                  <Table.Row
+                    key={g.game_id}
+                    bg={g.player_count === 0 ? "gray.100" : "green.100"}
+                  >
                     <Table.Cell>{formatDateTime(g.updated_at)}</Table.Cell>
                     <Table.Cell>
                       <HStack gap={2}>
@@ -162,7 +168,7 @@ export default function GamesAdminButton({
                             </Text>
                           ))
                         ) : (
-                          <Text fontSize="xs" color="fg">
+                          <Text fontSize="xs" color="fg" fontStyle="italic">
                             No players
                           </Text>
                         )}
@@ -170,7 +176,7 @@ export default function GamesAdminButton({
                     </Table.Cell>
                     <Table.Cell>
                       <HStack gap={2}>
-                        <Text fontFamily="mono" fontSize="10px">
+                        <Text fontFamily="mono" fontSize="sm">
                           {g.game_id}
                         </Text>
                         {currentGameId === g.game_id && (
