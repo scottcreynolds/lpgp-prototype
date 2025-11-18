@@ -7,11 +7,12 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
   Input,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { LuMoon } from "react-icons/lu";
+import { LuCopy, LuMoon } from "react-icons/lu";
 import { useEndGame } from "../hooks/useGameData";
 import { createNewGameAndNavigate, getShareUrl } from "../lib/gameSession";
 import { toaster } from "./ui/toasterInstance";
@@ -103,22 +104,27 @@ export function DashboardHeader() {
                 size="sm"
                 width={{ base: "220px", md: "360px" }}
               />
-              <Button
+              <IconButton
                 size="sm"
                 variant="outline"
                 onClick={handleCopyLink}
-                colorPalette="subduedCrystal"
+                colorPalette="sapphireBlue"
               >
+                <LuCopy />
                 Copy Link
-              </Button>
-              <Text display={{ base: "none", md: "block" }} color="fg">
+              </IconButton>
+              <Text
+                fontSize="xs"
+                display={{ base: "none", md: "block" }}
+                color="fg"
+              >
                 Share this link for others to join
               </Text>
             </HStack>
             {!gameEnded && (
               <Button
                 variant="outline"
-                colorPalette="subduedCrystal"
+                colorPalette="flamingoGold"
                 size="sm"
                 loading={endGame.isPending}
                 onClick={async () => {

@@ -378,7 +378,7 @@ export function CreateContractModal({
                   <Heading size="sm" mb={2} color="fg.emphasized">
                     Power Capacity Sharing
                   </Heading>
-                      <HStack gap={2}>
+                  <HStack gap={2}>
                     <Field.Root flex={1}>
                       <Field.Label>
                         From {partyA?.name || "A"} to {partyB?.name || "B"}
@@ -411,7 +411,7 @@ export function CreateContractModal({
                   <Heading size="sm" mb={2} color="fg.emphasized">
                     Crew Capacity Sharing
                   </Heading>
-                    <HStack gap={2}>
+                  <HStack gap={2}>
                     <Field.Root flex={1}>
                       <Field.Label>
                         From {partyA?.name || "A"} to {partyB?.name || "B"}

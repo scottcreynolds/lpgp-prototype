@@ -3,8 +3,8 @@
 // A zero threshold means that dimension is ignored.
 export const gameSettings = {
   win: {
-    evThreshold: 250, // Economic Value required
-    repThreshold: 0, // Reputation required (0 = ignore REP)
+    evThreshold: 100, // Economic Value required
+    repThreshold: 15, // Reputation required (0 = ignore REP)
     combinedThreshold: 250, // Combined EV + REP required
     autoWinEnabled: true,
   },
