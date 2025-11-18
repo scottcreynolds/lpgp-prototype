@@ -6,7 +6,11 @@ import {
   NativeSelect,
   Table,
   Text,
+  IconButton,
 } from "@chakra-ui/react";
+import { FaDownload } from "react-icons/fa";
+import { supabase } from "@/lib/supabase";
+import { getCurrentGameId } from "@/lib/gameSession";
 import { useState } from "react";
 import { useLedger } from "../hooks/useGameData";
 import type { DashboardPlayer, LedgerEntry } from "../lib/database.types";
@@ -49,6 +53,7 @@ const transactionTypeColors: Record<string, string> = {
 export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
   const [filterPlayerId, setFilterPlayerId] = useState<string>("all");
   const [filterRound, setFilterRound] = useState<string>("all");
+  const [exporting, setExporting] = useState(false);
 
   const { data: ledgerEntries, isLoading } = useLedger(
     filterPlayerId === "all" ? undefined : filterPlayerId,
@@ -142,6 +147,86 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
             <NativeSelect.Indicator />
           </NativeSelect.Root>
         </Box>
+        <HStack gap={2}>
+          <IconButton
+            aria-label="Export ledger CSV"
+            size="sm"
+            variant="subtle"
+            onClick={async () => {
+              setExporting(true);
+              try {
+                const gameId = getCurrentGameId();
+                const { data, error } = await supabase
+                  .from("ledger_entries")
+                  .select("*, players(name)")
+                  .eq("game_id", gameId as string)
+                  .order("created_at", { ascending: false });
+
+                if (error) throw error;
+                const rows = (data || []) as any[];
+
+                const cols = [
+                  "id",
+                  "round",
+                  "player_id",
+                  "player_name",
+                  "transaction_type",
+                  "ev_change",
+                  "rep_change",
+                  "reason",
+                  "processed",
+                  "infrastructure_id",
+                  "contract_id",
+                  "metadata",
+                  "created_at",
+                  "game_id",
+                ];
+
+                const escape = (v: any) => {
+                  if (v === null || v === undefined) return "";
+                  const s = typeof v === "string" ? v : JSON.stringify(v);
+                  return `"${s.replace(/"/g, '""')}"`;
+                };
+
+                const csv = [cols.join(",")]
+                  .concat(
+                    rows.map((r) =>
+                      cols
+                        .map((c) => {
+                          if (c === "player_name") {
+                            return escape(r.players?.name ?? r.player_name ?? "");
+                          }
+                          if (c === "metadata") return escape(r.metadata ?? "");
+                          return escape(r[c]);
+                        })
+                        .join(",")
+                    )
+                  )
+                  .join("\n");
+
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                const ts = new Date().toISOString().replace(/[:.]/g, "-");
+                a.download = `ledger-${gameId ?? "unknown"}-${ts}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+              } catch (e) {
+                console.error("Export failed", e);
+                // best-effort: ignore UI feedback here
+              } finally {
+                setExporting(false);
+              }
+            }}
+            loading={exporting}
+            title="Export full ledger as CSV"
+          >
+            <FaDownload />
+          </IconButton>
+        </HStack>
       </HStack>
 
       {/* Ledger Table */}

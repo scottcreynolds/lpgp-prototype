@@ -5,7 +5,7 @@ import ThemePreview from "./ThemePreview";
 
 export default function DeveloperPanel() {
   // Only show in development (regardless of backend)
-  if (!import.meta.env.DEV) return null;
+  // if (!import.meta.env.DEV) return null;
 
   return (
     <Box mt={10}>
