@@ -203,6 +203,7 @@ export default function GamesAdminButton({
                               window.open(u.toString(), "_blank");
                             } catch (e) {
                               // fallback
+                              console.error(e);
                               window.open(`/?game=${g.game_id}`, "_blank");
                             }
                           }}

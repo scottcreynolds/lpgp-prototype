@@ -1,17 +1,17 @@
+import { getCurrentGameId } from "@/lib/gameSession";
+import { supabase } from "@/lib/supabase";
 import {
   Badge,
   Box,
   Heading,
   HStack,
+  IconButton,
   NativeSelect,
   Table,
   Text,
-  IconButton,
 } from "@chakra-ui/react";
-import { FaDownload } from "react-icons/fa";
-import { supabase } from "@/lib/supabase";
-import { getCurrentGameId } from "@/lib/gameSession";
 import { useState } from "react";
+import { FaDownload } from "react-icons/fa";
 import { useLedger } from "../hooks/useGameData";
 import type { DashboardPlayer, LedgerEntry } from "../lib/database.types";
 
@@ -194,7 +194,9 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                       cols
                         .map((c) => {
                           if (c === "player_name") {
-                            return escape(r.players?.name ?? r.player_name ?? "");
+                            return escape(
+                              r.players?.name ?? r.player_name ?? ""
+                            );
                           }
                           if (c === "metadata") return escape(r.metadata ?? "");
                           return escape(r[c]);
@@ -204,7 +206,9 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                   )
                   .join("\n");
 
-                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const blob = new Blob([csv], {
+                  type: "text/csv;charset=utf-8;",
+                });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
