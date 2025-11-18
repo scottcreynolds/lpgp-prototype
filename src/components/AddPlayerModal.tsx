@@ -253,7 +253,7 @@ export function AddPlayerModal({
                         textTransform="uppercase"
                         letterSpacing="wide"
                       >
-                        Equipment
+                        Buildable Equipment
                       </Text>
                       <Box
                         as="ul"
