@@ -7,6 +7,7 @@ import {
   Grid,
   Heading,
   HStack,
+  IconButton,
   SimpleGrid,
   Text,
   VStack,
@@ -24,6 +25,7 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+import { LuPickaxe } from "react-icons/lu";
 import {
   useAddPlayer,
   useContracts,
@@ -43,6 +45,7 @@ import { PlayerInfoModal } from "./PlayerInfoModal";
 import { PlayerInventoryModal } from "./PlayerInventoryModal";
 import SpecializationIcon from "./SpecializationIcon";
 import { toaster } from "./ui/toasterInstance";
+import { Tooltip } from "./ui/tooltip";
 
 interface InfrastructureCardsProps {
   players: DashboardPlayer[];
@@ -457,14 +460,36 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                       />
                     </HStack>
                   </Box>
-                  <EditPlayerModal
-                    playerId={player.id}
-                    currentName={player.name}
-                    currentSpecialization={player.specialization}
-                    onEditPlayer={handleEditPlayer}
-                    isPending={editPlayer.isPending}
-                    currentRound={currentRound}
-                  />
+                  <HStack gap={2} align="center">
+                    <Tooltip
+                      content="Infrastructure Values"
+                      showArrow
+                      positioning={{ placement: "top" }}
+                    >
+                      <IconButton
+                        size="sm"
+                        aria-label={`Infrastructure Values for ${player.name}`}
+                        variant="ghost"
+                        onClick={() => setHelpOpen(true)}
+                        color="voidNavy.700"
+                        _hover={{
+                          color: "boldTangerine.100",
+                          bg: "voidNavy.700",
+                        }}
+                      >
+                        <LuPickaxe />
+                      </IconButton>
+                    </Tooltip>
+
+                    <EditPlayerModal
+                      playerId={player.id}
+                      currentName={player.name}
+                      currentSpecialization={player.specialization}
+                      onEditPlayer={handleEditPlayer}
+                      isPending={editPlayer.isPending}
+                      currentRound={currentRound}
+                    />
+                  </HStack>
                 </Flex>
 
                 {/* Infrastructure Counts */}

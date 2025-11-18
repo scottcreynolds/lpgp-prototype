@@ -27,6 +27,7 @@ import {
 import type { ReactNode } from "react";
 import { FiInfo } from "react-icons/fi";
 import SpecializationIcon from "./SpecializationIcon";
+import { Tooltip } from "./ui/tooltip";
 
 interface PlayerInfoModalProps {
   playerName: string;
@@ -44,19 +45,25 @@ export function PlayerInfoModal({
 
   return (
     <DialogRoot>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <IconButton
-            aria-label="View player info"
-            size="xs"
-            variant="outline"
-            color="voidNavy.700"
-            _hover={{ color: "boldTangerine.100", bg: "voidNavy.700" }}
-          >
-            <FiInfo />
-          </IconButton>
-        )}
-      </DialogTrigger>
+      <Tooltip
+        content="View Specialization Info"
+        showArrow
+        positioning={{ placement: "top" }}
+      >
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <IconButton
+              aria-label="View player info"
+              size="xs"
+              variant="outline"
+              color="voidNavy.700"
+              _hover={{ color: "boldTangerine.100", bg: "voidNavy.700" }}
+            >
+              <FiInfo />
+            </IconButton>
+          )}
+        </DialogTrigger>
+      </Tooltip>
       <Portal>
         <DialogBackdrop />
         <DialogContent
@@ -72,12 +79,7 @@ export function PlayerInfoModal({
           }}
         >
           <DialogHeader>
-            <DialogTitle>
-              Player Info
-              <Text fontSize="sm" color="fg.muted">
-                {playerName}
-              </Text>
-            </DialogTitle>
+            <DialogTitle>{playerName}</DialogTitle>
           </DialogHeader>
 
           <DialogBody>
