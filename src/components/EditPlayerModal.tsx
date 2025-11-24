@@ -21,7 +21,6 @@ import {
 import { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import type { Specialization } from "../lib/database.types";
-import { Tooltip } from "./ui/tooltip";
 
 interface EditPlayerModalProps {
   playerId: string;
@@ -88,21 +87,16 @@ export function EditPlayerModal({
   return (
     <DialogRoot open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Tooltip
-          content="Edit Player"
-          showArrow
-          positioning={{ placement: "top" }}
+        <IconButton
+          size="md"
+          aria-label="Edit player"
+          title="Edit Player"
+          variant="ghost"
+          color="voidNavy.700"
+          _hover={{ color: "boldTangerine.100", bg: "voidNavy.700" }}
         >
-          <IconButton
-            size="md"
-            aria-label="Edit player"
-            variant="ghost"
-            color="voidNavy.700"
-            _hover={{ color: "boldTangerine.100", bg: "voidNavy.700" }}
-          >
-            <FaEdit />
-          </IconButton>
-        </Tooltip>
+          <FaEdit />
+        </IconButton>
       </DialogTrigger>
 
       <Portal>

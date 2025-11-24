@@ -94,7 +94,7 @@ export function AddPlayerModal({
     <DialogRoot open={effectiveOpen} onOpenChange={handleOpenChange} size="xl">
       {!hideTrigger && (
         <DialogTrigger asChild>
-          <Button colorPalette="flamingoGold" variant="solid">
+          <Button colorPalette="flamingoGold" variant="outline">
             Add Player
           </Button>
         </DialogTrigger>
