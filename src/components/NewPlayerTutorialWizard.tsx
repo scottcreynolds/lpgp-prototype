@@ -28,6 +28,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
+import LocationPicker from "./LocationPicker";
 import SpecializationIcon from "./SpecializationIcon";
 import { toaster } from "./ui/toasterInstance";
 
@@ -45,7 +46,10 @@ export function NewPlayerTutorialWizard({
   const [companyName, setCompanyName] = useState("");
   const [specialization, setSpecialization] =
     useState<Specialization>("Resource Extractor");
-  const [infraLocation, setInfraLocation] = useState("");
+  const [infraLocationName, setInfraLocationName] = useState("");
+  const [infraLocationNumber, setInfraLocationNumber] = useState<
+    string | number
+  >("");
 
   const addPlayer = useAddPlayer();
   const setStarterLoc = useSetStarterInfraLocation();
@@ -64,7 +68,8 @@ export function NewPlayerTutorialWizard({
       setPlayerId(null);
       setCompanyName("");
       setSpecialization("Resource Extractor");
-      setInfraLocation("");
+      setInfraLocationName("");
+      setInfraLocationNumber("");
     }
   }, [open]);
 
@@ -103,16 +108,20 @@ export function NewPlayerTutorialWizard({
   const nextFromGovernanceSim = () => setStep(2);
 
   const finishWizard = async () => {
-    // If player exists and location provided, persist via RPC
-    if (playerId && infraLocation.trim()) {
+    // If player exists and location name provided, persist via RPC
+    if (playerId && infraLocationName.trim()) {
+      // combine name + optional number
+      const combinedLocation = `${infraLocationName}${
+        infraLocationNumber !== "" ? ` ${infraLocationNumber}` : ""
+      }`.trim();
       try {
         await setStarterLoc.mutateAsync({
           playerId,
-          location: infraLocation.trim(),
+          location: combinedLocation,
         });
         toaster.create({
           title: "Location Saved",
-          description: `Starter infrastructure placed at ${infraLocation.trim()}`,
+          description: `Starter infrastructure placed at ${combinedLocation}`,
           type: "success",
           duration: 3000,
         });
@@ -317,17 +326,15 @@ export function NewPlayerTutorialWizard({
                         and set location later.
                       </Text>
                     )}
-                    <Field.Root>
-                      <Field.Label>Starter Location (optional)</Field.Label>
-                      <Input
-                        placeholder="e.g. Sector A2"
-                        value={infraLocation}
-                        onChange={(e) => setInfraLocation(e.target.value)}
-                      />
-                      <Field.HelperText>
-                        Leave blank to set later.
-                      </Field.HelperText>
-                    </Field.Root>
+                    <LocationPicker
+                      valueName={infraLocationName}
+                      onNameChange={setInfraLocationName}
+                      valueNumber={infraLocationNumber}
+                      onNumberChange={setInfraLocationNumber}
+                      helperText={
+                        "Leave blank to set later. Choose a region and optional slot number."
+                      }
+                    />
                   </>
                 ) : (
                   <Box p={4} borderWidth="1px" borderRadius="md" bg="bg">

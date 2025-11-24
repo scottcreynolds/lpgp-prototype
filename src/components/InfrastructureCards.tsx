@@ -267,14 +267,28 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
         borderRadius="md"
         borderWidth={1}
         borderColor="border"
+        overflow="hidden"
       >
-        <HStack gap={2} mb={2} align="center">
-          <Box color="fg">{icon}</Box>
-          <Text fontSize="xs" fontWeight="bold" color="fg">
-            {label}
-          </Text>
+        <HStack gap={2} mb={2} align="center" justify="space-between">
+          <HStack gap={2} align="center" minW={0}>
+            <Box color="fg">{icon}</Box>
+            <Box
+              fontSize="xs"
+              fontWeight="bold"
+              color="fg"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              whiteSpace="nowrap"
+            >
+              {label}
+            </Box>
+          </HStack>
           {statusBadge && (
-            <Badge size="sm" colorPalette={statusBadge.palette}>
+            <Badge
+              size="sm"
+              colorPalette={statusBadge.palette}
+              whiteSpace="nowrap"
+            >
               {statusBadge.label}
             </Badge>
           )}
@@ -361,7 +375,14 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
         onOpenChange={setHelpOpen}
       />
 
-      <Grid templateColumns="repeat(auto-fit, minmax(300px, 1fr))" gap={4}>
+      <Grid
+        templateColumns={{
+          base: "repeat(1, 1fr)",
+          md: "repeat(2, 1fr)",
+          lg: "repeat(3, 1fr)",
+        }}
+        gap={4}
+      >
         {players.map((player) => {
           const { totals } = player;
           const infrastructureCounts = getInfrastructureCounts(player);
@@ -399,12 +420,20 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                 {/* Player Header */}
                 <Flex
                   justify="space-between"
-                  align="flex-start"
+                  align="center"
                   position="relative"
+                  gap={2}
                 >
-                  <Box>
-                    <HStack gap={2} align="center">
-                      <Text fontWeight="bold" fontSize="lg" color="fg">
+                  <Box minW={0} flex="1">
+                    <HStack gap={2} align="center" minW={0}>
+                      <Text
+                        fontWeight="bold"
+                        fontSize="lg"
+                        color="fg"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                      >
                         {player.name}
                       </Text>
                       <PlayerInfoModal
@@ -412,8 +441,14 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                         specialization={player.specialization}
                       />
                     </HStack>
-                    <HStack gap={2} align="center" mt={1}>
-                      <HStack gap={1} align="center">
+                    <HStack
+                      gap={2}
+                      align="center"
+                      mt={1}
+                      flexWrap="wrap"
+                      minW={0}
+                    >
+                      <HStack gap={1} align="center" flexWrap="wrap" minW={0}>
                         <SpecializationIcon
                           specialization={player.specialization}
                         />
@@ -426,11 +461,19 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                           {player.specialization}
                         </Badge>
                       </HStack>
-                      <HStack gap={2} align="center">
-                        <Badge size="sm" colorPalette="flamingoGold">
+                      <HStack gap={2} align="center" flexWrap="wrap" minW={0}>
+                        <Badge
+                          size="sm"
+                          colorPalette="flamingoGold"
+                          whiteSpace="nowrap"
+                        >
                           {player.ev} EV
                         </Badge>
-                        <Badge size="sm" colorPalette="purple">
+                        <Badge
+                          size="sm"
+                          colorPalette="purple"
+                          whiteSpace="nowrap"
+                        >
                           REP {player.rep}
                         </Badge>
                       </HStack>
@@ -468,7 +511,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                       />
                     </HStack>
                   </Box>
-                  <HStack gap={2} align="center">
+                  <HStack gap={2} align="center" flexShrink={0}>
                     <Tooltip
                       content="Infrastructure Values"
                       showArrow
@@ -505,7 +548,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   <Text fontSize="sm" fontWeight="semibold" mb={2} color="fg">
                     Infrastructure
                   </Text>
-                  <SimpleGrid columns={2} gap={2}>
+                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
                     {Object.entries(infrastructureCounts).map(
                       ([type, count]) => (
                         <HStack key={type} gap={2}>
@@ -522,7 +565,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                 </Box>
 
                 {/* Capacity Stats */}
-                <SimpleGrid columns={2} gap={3}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
                   {renderCapacityPanel(
                     "Power",
                     <FaBolt />,
@@ -542,7 +585,7 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                 </SimpleGrid>
 
                 {/* Financial Stats */}
-                <SimpleGrid columns={2} gap={3}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
                   <Box
                     p={3}
                     bg="bg"

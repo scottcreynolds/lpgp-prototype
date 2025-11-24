@@ -14,7 +14,6 @@ import {
   DialogTrigger,
   Field,
   HStack,
-  Input,
   NativeSelect,
   Portal,
   Text,
@@ -26,6 +25,7 @@ import {
   useInfrastructureDefinitions,
 } from "../hooks/useGameData";
 import type { DashboardPlayer } from "../lib/database.types";
+import LocationPicker from "./LocationPicker";
 import { toaster } from "./ui/toasterInstance";
 
 interface BuildInfrastructureModalProps {
@@ -48,7 +48,8 @@ export function BuildInfrastructureModal({
   const [open, setOpen] = useState(false);
   const [ownerId, setOwnerId] = useState(builderId);
   const [infrastructureType, setInfrastructureType] = useState("");
-  const [location, setLocation] = useState("");
+  const [locationName, setLocationName] = useState("");
+  const [locationNumber, setLocationNumber] = useState<string | number>("");
 
   const { data: infrastructure, isLoading: infrastructureLoading } =
     useInfrastructureDefinitions();
@@ -141,17 +142,22 @@ export function BuildInfrastructureModal({
     }
 
     try {
+      // Combine named location and number into single string to store
+      const combinedLocation = locationName
+        ? `${locationName}${locationNumber !== "" ? ` ${locationNumber}` : ""}`
+        : null;
+
       await buildInfrastructure.mutateAsync({
         builderId,
         ownerId,
         infrastructureType,
-        location: location.trim() || null,
+        location: combinedLocation ? combinedLocation.trim() : null,
       });
 
       toaster.create({
         title: "Infrastructure Built",
         description: `${infrastructureType} built successfully${
-          location ? ` at ${location}` : ""
+          combinedLocation ? ` at ${combinedLocation}` : ""
         }`,
         type: "success",
         duration: 3000,
@@ -160,7 +166,8 @@ export function BuildInfrastructureModal({
       // Reset form and close modal
       setOwnerId(builderId);
       setInfrastructureType("");
-      setLocation("");
+      setLocationName("");
+      setLocationNumber("");
       setOpen(false);
     } catch (error) {
       toaster.create({
@@ -185,7 +192,8 @@ export function BuildInfrastructureModal({
       // Reset form when modal closes
       setOwnerId(builderId);
       setInfrastructureType("");
-      setLocation("");
+      setLocationName("");
+      setLocationNumber("");
     }
   };
 
@@ -308,19 +316,15 @@ export function BuildInfrastructureModal({
                       </Field.HelperText>
                     </Field.Root>
 
-                    {/* Location */}
-                    <Field.Root>
-                      <Field.Label>Board Location</Field.Label>
-                      <Input
-                        placeholder="Enter board space (e.g., A-5, Crater Rim)"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                      />
-                      <Field.HelperText>
-                        Specify where on the board this infrastructure will be
-                        placed
-                      </Field.HelperText>
-                    </Field.Root>
+                    <LocationPicker
+                      valueName={locationName}
+                      onNameChange={setLocationName}
+                      valueNumber={locationNumber}
+                      onNumberChange={setLocationNumber}
+                      helperText={
+                        "Select a named region and optionally enter a slot number"
+                      }
+                    />
                   </VStack>
 
                   {/* Right side: Infrastructure Details */}

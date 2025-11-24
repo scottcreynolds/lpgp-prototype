@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 import { useToggleInfrastructureStatus } from "../hooks/useGameData";
 import type { PlayerInfrastructureItem } from "../lib/database.types";
+import EditInfrastructureLocationModal from "./EditInfrastructureLocationModal";
 import { toaster } from "./ui/toasterInstance";
 
 interface PlayerInventoryModalProps {
@@ -216,19 +217,34 @@ export function PlayerInventoryModal({
                           </Badge>
                         </Table.Cell>
                         <Table.Cell>
-                          {!item.is_starter && (
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              colorPalette={item.is_active ? "gray" : "green"}
-                              onClick={() =>
-                                handleToggle(item.id, item.is_active, item.type)
+                          <HStack gap={2}>
+                            <EditInfrastructureLocationModal
+                              infrastructure={item}
+                              trigger={
+                                <Button size="xs" variant="outline">
+                                  Edit
+                                </Button>
                               }
-                              loading={toggleStatus.isPending}
-                            >
-                              {item.is_active ? "Deactivate" : "Activate"}
-                            </Button>
-                          )}
+                            />
+
+                            {!item.is_starter && (
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                colorPalette={item.is_active ? "gray" : "green"}
+                                onClick={() =>
+                                  handleToggle(
+                                    item.id,
+                                    item.is_active,
+                                    item.type
+                                  )
+                                }
+                                loading={toggleStatus.isPending}
+                              >
+                                {item.is_active ? "Deactivate" : "Activate"}
+                              </Button>
+                            )}
+                          </HStack>
                         </Table.Cell>
                       </Table.Row>
                     ))}
