@@ -25,6 +25,7 @@ import type {
 } from "../lib/database.types";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { CreateContractModal } from "./CreateContractModal";
+import { NewPlayerTutorialWizard } from "./NewPlayerTutorialWizard";
 import { PhaseSummaryModal } from "./PhaseSummaryModal";
 import { PhaseTimer } from "./PhaseTimer";
 import { PhaseTipsPanel } from "./PhaseTipsPanel";
@@ -120,13 +121,14 @@ export function GameStateDisplay({
     specialization: Specialization
   ) => {
     try {
-      await addPlayer.mutateAsync({ name, specialization });
+      const result = await addPlayer.mutateAsync({ name, specialization });
       toaster.create({
         title: "Player Added",
         description: `${name} joined as ${specialization}`,
         type: "success",
         duration: 3000,
       });
+      return result.player_id;
     } catch (error) {
       toaster.create({
         title: "Failed to Add Player",
@@ -135,8 +137,11 @@ export function GameStateDisplay({
         type: "error",
         duration: 5000,
       });
+      return undefined;
     }
   };
+
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   return (
     <Box
@@ -298,11 +303,26 @@ export function GameStateDisplay({
             )}
 
             {/* Add Player Button (only during Setup) */}
+            {/* Walkthrough primary button & Add Player outline (only during Setup) */}
             {phase === "Setup" && !gameEnded && (
-              <AddPlayerModal
-                onAddPlayer={handleAddPlayer}
-                isPending={addPlayer.isPending}
-              />
+              <>
+                <Button
+                  colorPalette="flamingoGold"
+                  variant="solid"
+                  onClick={() => setWizardOpen(true)}
+                >
+                  New Player Walkthrough
+                </Button>
+                <AddPlayerModal
+                  onAddPlayer={handleAddPlayer}
+                  isPending={addPlayer.isPending}
+                  hideStarterLocation
+                />
+                <NewPlayerTutorialWizard
+                  open={wizardOpen}
+                  onClose={() => setWizardOpen(false)}
+                />
+              </>
             )}
 
             {/* Generate Turn Order (only during Operations and when none yet) */}

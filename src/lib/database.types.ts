@@ -318,6 +318,10 @@ export interface Database {
       };
     };
     Functions: {
+      set_starter_infrastructure_location: {
+        Args: { p_game_id: string; p_player_id: string; p_location: string };
+        Returns: { success: boolean; message: string }[];
+      };
       advance_round: {
         Args: { p_game_id: string; current_version: number };
         Returns: {

@@ -31,11 +31,16 @@ import type { Specialization } from "../lib/database.types";
 import SpecializationIcon from "./SpecializationIcon";
 
 interface AddPlayerModalProps {
-  onAddPlayer: (name: string, specialization: Specialization) => Promise<void>;
+  onAddPlayer: (
+    name: string,
+    specialization: Specialization
+  ) => Promise<string | void>; // return player id if available
   isPending?: boolean;
   externalOpen?: boolean; // controlled open state (optional)
   onExternalClose?: () => void; // callback when controlled modal requests close
   hideTrigger?: boolean; // hide built-in trigger button
+  onPlayerCreated?: (playerId: string) => void; // callback when player created
+  hideStarterLocation?: boolean; // tutorial can hide starter location field
 }
 
 export function AddPlayerModal({
@@ -44,11 +49,14 @@ export function AddPlayerModal({
   externalOpen,
   onExternalClose,
   hideTrigger,
+  onPlayerCreated,
+  hideStarterLocation,
 }: AddPlayerModalProps) {
   const [open, setOpen] = useState(false); // internal fallback state
   const [companyName, setCompanyName] = useState("");
   const [specialization, setSpecialization] =
     useState<Specialization>("Resource Extractor");
+  const [starterLocation, setStarterLocation] = useState("");
 
   const controlled = externalOpen !== undefined;
   const effectiveOpen = controlled ? externalOpen! : open;
@@ -58,11 +66,15 @@ export function AddPlayerModal({
       return;
     }
 
-    await onAddPlayer(companyName.trim(), specialization);
+    const createdId = await onAddPlayer(companyName.trim(), specialization);
+    if (createdId && onPlayerCreated) {
+      onPlayerCreated(createdId);
+    }
 
     // Reset form and close modal
     setCompanyName("");
     setSpecialization("Resource Extractor");
+    setStarterLocation("");
     if (controlled) {
       onExternalClose?.();
     } else {
@@ -303,6 +315,21 @@ export function AddPlayerModal({
                   </Box>
                 </Flex>
               </Field.Root>
+              {!hideStarterLocation && (
+                <Field.Root>
+                  <Field.Label>
+                    (Optional) Starter Infrastructure Location
+                  </Field.Label>
+                  <Input
+                    placeholder="e.g. Near Commons A2"
+                    value={starterLocation}
+                    onChange={(e) => setStarterLocation(e.target.value)}
+                  />
+                  <Field.HelperText>
+                    Leave blank to set this later in the walkthrough.
+                  </Field.HelperText>
+                </Field.Root>
+              )}
             </VStack>
           </DialogBody>
 
@@ -318,7 +345,7 @@ export function AddPlayerModal({
               loading={isPending}
               disabled={!companyName.trim()}
             >
-              Add Player
+              {hideStarterLocation ? "Add Player" : "Add Player"}
             </Button>
           </DialogFooter>
 

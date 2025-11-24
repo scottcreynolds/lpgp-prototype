@@ -1876,6 +1876,49 @@ export const mockSupabaseClient = {
     switch (functionName) {
       case "get_dashboard_summary":
         return rpcGetDashboardSummary();
+      case "set_starter_infrastructure_location": {
+        const gidLoc = getCurrentGameId();
+        const playerInfra = getPlayerInfrastructure();
+        const playerId = params?.p_player_id as string;
+        const locationRaw = (params?.p_location as string) || "";
+        const loc = locationRaw.trim();
+        let updated = false;
+        for (let i = 0; i < playerInfra.length; i++) {
+          const pi = playerInfra[i] as PlayerInfrastructure;
+          if (pi.player_id === playerId && pi.is_starter) {
+            playerInfra[i] = { ...pi, location: loc === "" ? null : loc };
+            updated = true;
+            break;
+          }
+        }
+        if (updated) {
+          const KEYSLoc = getKeys(gidLoc!);
+          localStorage.setItem(
+            KEYSLoc.PLAYER_INFRASTRUCTURE,
+            JSON.stringify(playerInfra)
+          );
+          notifySubscribers("player_infrastructure");
+          return Promise.resolve({
+            data: [
+              {
+                success: true,
+                message: "Starter infrastructure location updated",
+              },
+            ],
+            error: null,
+          });
+        } else {
+          return Promise.resolve({
+            data: [
+              {
+                success: false,
+                message: "Starter infrastructure not found for player",
+              },
+            ],
+            error: null,
+          });
+        }
+      }
       case "advance_phase":
         return rpcAdvancePhase(params?.current_version as number);
       case "advance_round":

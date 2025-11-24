@@ -87,11 +87,44 @@
 
 ## Up Next
 
-<!-- Narrative Panel implemented; moved to Completed ✅ -->
+As a new user I need a quick tutorial walkthrough of how to actually play the game, almost like a mock first round, when I set up my player. However, if I'm an experience player or if I'm facilitating the game on behalf of others, I should still have a path to simply creating players.
+
+A multi-step wizard-style walkthrough could be a good way to "play" a mock first round during the setup phase. It would allow a player to select a specialization, build their first piece of starter infrastructure and designate where it goes on the game board, and simulate a first contract for that starter equipment.
+
+Player creation should reuse the current [add player modal](../../src/components/AddPlayerModal.tsx), so we can just keep that part very simple.
+
+Then it should take them to a "Governance Phase" tutorial step, where they will get some text about what happens in the Governance phase and be asked to create a simulated contract to pay into the commons fund in order to power and crew their starter infrastructure. No actual contract will be made but we can lay it out similar to a subset of [create contract modal](../../src/components/CreateContractModal.tsx) where it shows "From Player {player company name}" "to Commons", "5 power and Crew in exchange for 5 EV" and it can be laid out to look like a form but the values aren't editable.
+
+Finally, it should take them to a screen to simulate Operations Phase where they get a little blurb about what happens in that phase and the opportunity to build and place their starter infrastructure, but the only selectable piece of infrastructure should be the one their specialization determines they start with, and also they input where the piece of infrastructure is placed on the board, similar to what already exists in the [Build Infrastructure modal](../../src/components/BuildInfrastructureModal.tsx). There should be instructions to go to the game board and decide where to place their piece, with the stipulation that it must be within 3 hex spaces of the commons infrastructure. This will be player enforced, we don't have to validate it.
+
+This should be a seamless flow from modal to modal, and each one should be at least 80vw width of the viewport and should scroll with overflow.
+
+The "Add Player" button on the game dashboard in the [game state](../../src/components/GameStateDisplay.tsx) should be de-emphasized and another button called "New Player Walkthrough" should be the primary action in setup phase.
+
+The existing [add player modal](../../src/components/AddPlayerModal.tsx) should be augmented to also have the input to set the starter infrastructure location but it should only be visible if it is not "new player tutorial" mode.
 
 ## High Priority
 
+- Round 0 tutorial mode (think about this)
+  - how to set up game board, place commons tokens, etc
+- display the win condition
 - persistent actions row in top instead of in panels
+- better example contracts
+- editable contracts
+- summary onboarding flow
+- "how to use the game board" help and link to game board (configurable)
+- facilitator prompts/tips?
+- point to the game board more
+- choosable infrastructure locations and check capacity
+- persist turn order to everyone and implement next player
+- High Rep Bonus randomize if tied
+- emphasize high rep bonus value
+- remove timer, add contract limit (make congigurable)
+- more contract and build clarity?
+- maybe contract types
+- why is specialty meaningful?
+- buy into commons
+- Labels in general could be more readable, tooltips on things like "build on behalf of"
 - additional tips (Setup tips exist, need more)
 - context-specific tooltips
 - move manual adjustment control

@@ -426,6 +426,14 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                           {player.specialization}
                         </Badge>
                       </HStack>
+                      <HStack gap={2} align="center">
+                        <Badge size="sm" colorPalette="flamingoGold">
+                          {player.ev} EV
+                        </Badge>
+                        <Badge size="sm" colorPalette="purple">
+                          REP {player.rep}
+                        </Badge>
+                      </HStack>
                       {inactiveCount > 0 && (
                         <Badge
                           size="sm"
