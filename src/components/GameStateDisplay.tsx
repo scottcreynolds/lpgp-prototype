@@ -337,7 +337,6 @@ export function GameStateDisplay({
                 <AddPlayerModal
                   onAddPlayer={handleAddPlayer}
                   isPending={addPlayer.isPending}
-                  hideStarterLocation
                 />
                 <NewPlayerTutorialWizard
                   open={wizardOpen}

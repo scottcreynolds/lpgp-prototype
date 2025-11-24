@@ -1,3 +1,4 @@
+import { useSetStarterInfraLocation } from "@/hooks/useSetStarterInfraLocation";
 import {
   Button,
   DialogActionTrigger,
@@ -17,7 +18,9 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import type { Specialization } from "../lib/database.types";
+import LocationPicker from "./LocationPicker";
 import SpecializationSelector from "./SpecializationSelector";
+import { toaster } from "./ui/toasterInstance";
 
 interface AddPlayerModalProps {
   onAddPlayer: (
@@ -29,7 +32,6 @@ interface AddPlayerModalProps {
   onExternalClose?: () => void; // callback when controlled modal requests close
   hideTrigger?: boolean; // hide built-in trigger button
   onPlayerCreated?: (playerId: string) => void; // callback when player created
-  hideStarterLocation?: boolean; // tutorial can hide starter location field
 }
 
 export function AddPlayerModal({
@@ -39,13 +41,14 @@ export function AddPlayerModal({
   onExternalClose,
   hideTrigger,
   onPlayerCreated,
-  hideStarterLocation,
 }: AddPlayerModalProps) {
   const [open, setOpen] = useState(false); // internal fallback state
   const [companyName, setCompanyName] = useState("");
   const [specialization, setSpecialization] =
     useState<Specialization>("Resource Extractor");
-  const [starterLocation, setStarterLocation] = useState("");
+  const [starterLocationName, setStarterLocationName] = useState("");
+  const [starterLocationNumber, setStarterLocationNumber] = useState("");
+  const setStarterLoc = useSetStarterInfraLocation();
 
   const controlled = externalOpen !== undefined;
   const effectiveOpen = controlled ? externalOpen! : open;
@@ -60,10 +63,38 @@ export function AddPlayerModal({
       onPlayerCreated(createdId);
     }
 
+    // Persist starter location to backend if provided
+    if (createdId && starterLocationName.trim()) {
+      const combinedLocation = `${starterLocationName}${
+        starterLocationNumber !== "" ? ` ${starterLocationNumber}` : ""
+      }`.trim();
+      try {
+        await setStarterLoc.mutateAsync({
+          playerId: createdId,
+          location: combinedLocation,
+        });
+        toaster.create({
+          title: "Starter Location Saved",
+          description: `Starter infrastructure placed at ${combinedLocation}`,
+          type: "success",
+          duration: 3000,
+        });
+      } catch (e) {
+        toaster.create({
+          title: "Failed to Save Starter Location",
+          description:
+            e instanceof Error ? e.message : "Failed to save location",
+          type: "error",
+          duration: 5000,
+        });
+      }
+    }
+
     // Reset form and close modal
     setCompanyName("");
     setSpecialization("Resource Extractor");
-    setStarterLocation("");
+    setStarterLocationName("");
+    setStarterLocationNumber("");
     if (controlled) {
       onExternalClose?.();
     } else {
@@ -130,21 +161,26 @@ export function AddPlayerModal({
                   onChange={(s) => setSpecialization(s)}
                 />
               </Field.Root>
-              {!hideStarterLocation && (
+              <>
                 <Field.Root>
-                  <Field.Label>
-                    (Optional) Starter Infrastructure Location
-                  </Field.Label>
-                  <Input
-                    placeholder="e.g. Near Commons A2"
-                    value={starterLocation}
-                    onChange={(e) => setStarterLocation(e.target.value)}
-                  />
-                  <Field.HelperText>
-                    Leave blank to set this later in the walkthrough.
+                  <Field.Label>Starter Infrastructure</Field.Label>
+                  <Field.HelperText color="fg">
+                    Look at the game board and choose a location for the
+                    player's starter infrastructure. This must be within 3
+                    spaces of the commons infrastructure and on a space that
+                    supports the infrastructure type.
                   </Field.HelperText>
                 </Field.Root>
-              )}
+
+                <LocationPicker
+                  valueName={starterLocationName}
+                  onNameChange={setStarterLocationName}
+                  valueNumber={starterLocationNumber}
+                  onNumberChange={(v) => setStarterLocationNumber(String(v))}
+                  label="Starter Infrastructure Location"
+                  helperText="Choose a board tile and number"
+                />
+              </>
             </VStack>
           </DialogBody>
 
@@ -160,7 +196,7 @@ export function AddPlayerModal({
               loading={isPending}
               disabled={!companyName.trim()}
             >
-              {hideStarterLocation ? "Add Player" : "Add Player"}
+              Add Player
             </Button>
           </DialogFooter>
 
