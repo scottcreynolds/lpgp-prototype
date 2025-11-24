@@ -1,3 +1,4 @@
+import { ensureDialogClosed } from "@/lib/ui";
 import {
   Badge,
   Box,
@@ -19,7 +20,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   useBuildInfrastructure,
   useInfrastructureDefinitions,
@@ -45,7 +46,10 @@ export function BuildInfrastructureModal({
   disabled = false,
   gameEnded = false,
 }: BuildInfrastructureModalProps) {
-  const [open, setOpen] = useState(false);
+  // Use uncontrolled open state for the dialog to avoid backdrop/stale
+  // overlay issues when closing after async operations. We still handle
+  // the `onOpenChange` callback to reset local form state when the
+  // dialog is closed.
   const [ownerId, setOwnerId] = useState(builderId);
   const [infrastructureType, setInfrastructureType] = useState("");
   const [locationName, setLocationName] = useState("");
@@ -168,7 +172,21 @@ export function BuildInfrastructureModal({
       setInfrastructureType("");
       setLocationName("");
       setLocationNumber("");
-      setOpen(false);
+      // Programmatically close the dialog by clicking the hidden close
+      // trigger (uncontrolled dialog mode). Delay to next tick so any
+      // pending state updates settle. Also dispatch an Escape key event
+      // as a fallback for implementations that listen for keyboard
+      // events to close dialogs. Finally call the global helper which
+      // performs a defensive overlay cleanup if needed.
+      setTimeout(() => {
+        closeTriggerRef.current?.click();
+        try {
+          window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        } catch (e) {
+          /* ignore */
+        }
+      }, 0);
+      setTimeout(() => ensureDialogClosed(), 250);
     } catch (error) {
       toaster.create({
         title: "Failed to Build Infrastructure",
@@ -184,10 +202,12 @@ export function BuildInfrastructureModal({
 
   const handleOpenChange = (details: boolean | { open: boolean }) => {
     // Radix/Chakra can pass either an object like { open: boolean }
-    // or sometimes a raw boolean. Handle both safely to avoid runtime
-    // errors that can leave the backdrop/scroll lock in place.
+    // or sometimes a raw boolean. Handle both safely. We only need the
+    // callback to detect when the dialog is closed so we can reset
+    // local form state; we intentionally do NOT control the open
+    // state here to avoid mismatches that can leave the backdrop
+    // mounted after async close operations.
     const isOpen = typeof details === "boolean" ? details : details.open;
-    setOpen(isOpen);
     if (!isOpen) {
       // Reset form when modal closes
       setOwnerId(builderId);
@@ -197,13 +217,10 @@ export function BuildInfrastructureModal({
     }
   };
 
+  const closeTriggerRef = useRef<HTMLButtonElement | null>(null);
+
   return (
-    <DialogRoot
-      open={open}
-      onOpenChange={handleOpenChange}
-      size="xl"
-      closeOnEscape
-    >
+    <DialogRoot onOpenChange={handleOpenChange} size="xl" closeOnEscape>
       <DialogTrigger asChild>
         <Button
           colorPalette="sapphireWool"
@@ -479,7 +496,14 @@ export function BuildInfrastructureModal({
             </Button>
           </DialogFooter>
 
-          <DialogCloseTrigger />
+          <DialogCloseTrigger asChild>
+            <button
+              ref={closeTriggerRef}
+              aria-hidden
+              style={{ display: "none" }}
+              tabIndex={-1}
+            />
+          </DialogCloseTrigger>
         </DialogContent>
       </Portal>
     </DialogRoot>

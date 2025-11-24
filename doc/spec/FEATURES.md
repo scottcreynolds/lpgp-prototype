@@ -105,13 +105,9 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 
 ## High Priority
 
-- Round 0 tutorial mode (think about this)
-  - how to set up game board, place commons tokens, etc
-- display the win condition
 - persistent actions row in top instead of in panels
 - better example contracts
 - editable contracts
-- summary onboarding flow
 - "how to use the game board" help and link to game board (configurable)
 - facilitator prompts/tips?
 - point to the game board more

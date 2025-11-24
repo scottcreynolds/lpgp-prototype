@@ -1,4 +1,5 @@
 import { useSetStarterInfraLocation } from "@/hooks/useSetStarterInfraLocation";
+import { ensureDialogClosed } from "@/lib/ui";
 import {
   Button,
   DialogActionTrigger,
@@ -97,8 +98,10 @@ export function AddPlayerModal({
     setStarterLocationNumber("");
     if (controlled) {
       onExternalClose?.();
+      setTimeout(() => ensureDialogClosed(), 0);
     } else {
       setOpen(false);
+      setTimeout(() => ensureDialogClosed(), 0);
     }
   };
 

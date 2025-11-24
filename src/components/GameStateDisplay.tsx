@@ -397,6 +397,11 @@ export function GameStateDisplay({
             bg="boldTangerine.contrast"
             fontSize="sm"
           >
+            {phase === "Operations" && (
+              <Text color="fg" fontSize="sm">
+                Go to the Player Dashboard to build your inventory!
+              </Text>
+            )}
             {warningMessage && (
               <Text color="fg" fontSize="sm">
                 {warningMessage}
