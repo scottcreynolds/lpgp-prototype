@@ -5,7 +5,7 @@ export const gameSettings = {
   win: {
     evThreshold: 100, // Economic Value required
     repThreshold: 15, // Reputation required (0 = ignore REP)
-    combinedThreshold: 250, // Combined EV + REP required
+    combinedThreshold: 100, // Combined EV + REP required
     autoWinEnabled: true,
   },
   // tieMode governs automatic threshold ties. "tiebreaker-ev-plus-rep" uses EV+REP first, then cooperative if still tied.

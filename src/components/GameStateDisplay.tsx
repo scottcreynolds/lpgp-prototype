@@ -1,3 +1,4 @@
+import { gameSettings } from "@/config/gameSettings";
 import { useGameStore } from "@/store/gameStore";
 import {
   Box,
@@ -212,6 +213,19 @@ export function GameStateDisplay({
                   </HStack>
                 )}
               </Heading>
+              {/* Win conditions subheader */}
+              <Text color="fg" fontSize="sm" mb={2}>
+                {(() => {
+                  const parts: string[] = [];
+                  const { evThreshold, repThreshold, combinedThreshold } =
+                    gameSettings.win;
+                  if (evThreshold && evThreshold > 0)
+                    parts.push(`EV ≥ ${evThreshold}`);
+                  if (repThreshold && repThreshold > 0)
+                    parts.push(`REP ≥ ${repThreshold}`);
+                  return `Win Conditions: ${parts.join("; ")}`;
+                })()}
+              </Text>
               {gameEnded && players && winnerIds.length > 0 && (
                 <Text color="fg" fontSize="sm" fontWeight="medium" mb={2}>
                   Winner{winnerIds.length > 1 ? "s" : ""}:{" "}
