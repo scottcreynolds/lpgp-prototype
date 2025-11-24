@@ -23,31 +23,28 @@ export const SPECIALIZATION_DETAILS: Record<
       "You excel at mining and acquiring lunar resources. Use raw materials to build infrastructure, trade, or sell for EV.",
     equipment: ["H20 Extractor", "Helium-3 Extractor", "Solar Array"],
     strategy: [
-      "Secure high-yield deposits before other factions",
-      "Partner with infrastructure providers to keep refineries online",
-      "Offer resource exports as leverage in alliances",
+      "Secure high-yield deposits before other players.",
+      "Partner with infrastructure providers and operations managers to keep refineries online.",
     ],
   },
   "Infrastructure Provider": {
     title: "Infrastructure Provider",
     description:
-      "You construct and maintain power and support systems. Other players rely on your ability to keep operations running.",
+      "You do a little of everything. You can extract water-ice for EV or construct and maintain power and support systems. Other players rely on your ability to keep operations running.",
     equipment: ["Solar Array", "Habitat", "H20 Extractor"],
     strategy: [
-      "Stabilize key corridors so extractors can move freely",
+      "Build key infrastructure near resource-rich loactions so extractors can move freely",
       "Trade infrastructure uptime for access to rare resources",
-      "Offer standby services to operations managers for shared growth",
     ],
   },
   "Operations Manager": {
-    title: "Operations Management",
+    title: "Operations Manager",
     description:
-      "You coordinate logistics and habitation. You keep crews healthy, housed, and connected, enabling steady growth.",
+      "Your facilities don't generate EV directly through resource extraction but you coordinate power, logistics and habitation. You keep crews healthy, housed, and connected, enabling steady growth.",
     equipment: ["Habitat", "Solar Array"],
     strategy: [
-      "Balance alliances between builders and miners",
-      "Sequence crew rotations to keep morale high",
-      "Broker shared missions that reward collaboration",
+      "Sell or lease excess power and crew capacity to other players for per-round EV gains.",
+      "Use contracts to your greatest advantage, brokering deals that are beneficial on both sides.",
     ],
   },
 };

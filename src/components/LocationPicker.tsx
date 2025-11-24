@@ -51,7 +51,9 @@ export default function LocationPicker({
           width="80px"
         />
       </HStack>
-      {helperText && <Field.HelperText>{helperText}</Field.HelperText>}
+      {helperText && (
+        <Field.HelperText color="fg">{helperText}</Field.HelperText>
+      )}
     </Field.Root>
   );
 }

@@ -1,12 +1,8 @@
-import { SPECIALIZATION_IMAGES } from "@/data/specializationAssets";
-import {
-  SPECIALIZATION_DETAILS,
-  SPECIALIZATION_ORDER,
-} from "@/data/specializations";
 import { useAddPlayer } from "@/hooks/useGameData";
 import { useSetStarterInfraLocation } from "@/hooks/useSetStarterInfraLocation";
 import type { Specialization } from "@/lib/database.types";
-import { getSpecializationColor } from "@/lib/specialization";
+import SpecializationSelector from "./SpecializationSelector";
+
 import { useGameStore } from "@/store/gameStore";
 import {
   Box,
@@ -21,7 +17,6 @@ import {
   DialogTitle,
   Field,
   Flex,
-  Heading,
   Input,
   Portal,
   Text,
@@ -29,7 +24,6 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import LocationPicker from "./LocationPicker";
-import SpecializationIcon from "./SpecializationIcon";
 import { toaster } from "./ui/toasterInstance";
 
 interface NewPlayerTutorialWizardProps {
@@ -170,13 +164,19 @@ export function NewPlayerTutorialWizard({
           <DialogHeader>
             <DialogTitle ref={headingRef} tabIndex={-1}>
               {step === 0 && "Step 1 of 3: Create Your Player"}
-              {step === 1 && "Step 2 of 3: Governance Contract Simulation"}
-              {step === 2 && "Step 3 of 3: Place Starter Infrastructure"}
+              {step === 1 && "Step 2 of 3: Governance Phase Simulation"}
+              {step === 2 && "Step 3 of 3: Operations Phase Simulation"}
             </DialogTitle>
           </DialogHeader>
           <DialogBody>
             {step === 0 && (
               <VStack align="stretch" gap={5}>
+                <Text fontSize="md">
+                  Welcome to the game! Let's get you started by creating your
+                  player. Choose a unique and fun company name and
+                  specialization to begin your journey. Click the cards below to
+                  see details about each specialization.
+                </Text>
                 <Field.Root>
                   <Field.Label>Company Name</Field.Label>
                   <Input
@@ -188,88 +188,35 @@ export function NewPlayerTutorialWizard({
                 </Field.Root>
                 <Field.Root>
                   <Field.Label>Select Specialization</Field.Label>
-                  <Flex wrap="wrap" gap={3} role="radiogroup">
-                    {SPECIALIZATION_ORDER.map((spec) => {
-                      const selected = specialization === spec;
-                      const colorKey = getSpecializationColor(spec);
-                      return (
-                        <Box
-                          key={spec}
-                          role="radio"
-                          aria-checked={selected}
-                          aria-label={spec}
-                          tabIndex={0}
-                          onClick={() => setSpecialization(spec)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              setSpecialization(spec);
-                            }
-                          }}
-                          cursor="pointer"
-                          borderWidth={selected ? "3px" : "1px"}
-                          borderColor={
-                            selected ? `${colorKey}.600` : "gray.300"
-                          }
-                          borderRadius="sm"
-                          p={0}
-                          transition="all 0.15s ease"
-                          _hover={{
-                            borderColor: selected
-                              ? `${colorKey}.700`
-                              : `${colorKey}.500`,
-                            transform: "translateY(-2px)",
-                            boxShadow: selected ? "lg" : "md",
-                          }}
-                          _focusVisible={{
-                            outline: "none",
-                            boxShadow: `0 0 0 3px var(--chakra-colors-${colorKey}-200)`,
-                          }}
-                          bg={selected ? `${colorKey}.50` : "gray.50"}
-                          opacity={selected ? 1 : 0.85}
-                        >
-                          <Box
-                            position="absolute"
-                            top={3}
-                            left={3}
-                            bg={
-                              selected ? `${colorKey}.600` : `${colorKey}.400`
-                            }
-                            color="white"
-                            borderRadius="full"
-                            p={2}
-                            boxShadow="sm"
-                          >
-                            <SpecializationIcon
-                              specialization={spec}
-                              size={2}
-                              color="white"
-                            />
-                          </Box>
-                          <img
-                            src={SPECIALIZATION_IMAGES[spec]}
-                            alt={`${spec} card`}
-                            style={{ width: "220px", display: "block" }}
-                          />
-                        </Box>
-                      );
-                    })}
-                  </Flex>
-                  <Box mt={4} p={3} borderWidth="1px" borderRadius="md" bg="bg">
-                    <Heading size="sm" mb={2}>
-                      {SPECIALIZATION_DETAILS[specialization].title}
-                    </Heading>
-                    <Text fontSize="sm" mb={2}>
-                      {SPECIALIZATION_DETAILS[specialization].description}
-                    </Text>
-                  </Box>
+                  <SpecializationSelector
+                    specialization={specialization}
+                    onChange={(s) => setSpecialization(s)}
+                  />
                 </Field.Root>
               </VStack>
             )}
             {step === 1 && (
               <VStack align="stretch" gap={4}>
                 <Text fontSize="md">
-                  Simulated Governance Contract (static preview)
+                  In the Governance Phase, players negotiate and establish
+                  contracts to support their operations. These might include
+                  permeanent or temporary leases of Power or Crew capacity in
+                  exchange for per-round EV, or an agreement to build a Helium-3
+                  extractor on behalf of a player whose specialization does not
+                  have the ability to do so.
+                </Text>
+                <Text fontSize="md">
+                  Contracts between players not only allow you to share and
+                  exchange resources, they also grant you reputation, for as
+                  long as both players uphold the agreement. Below is a
+                  simulated contract preview to illustrate how your player might
+                  engage in this phase.
+                </Text>
+                <Text fontSize="md">
+                  Below is a simulated contract preview to illustrate how your
+                  player might engage in this phase. In it, you agree to pay per
+                  round for the right to use the starting commons
+                  infrastructure.
                 </Text>
                 <Box p={4} borderWidth="1px" borderRadius="md" bg="bg">
                   <Text>
@@ -283,24 +230,53 @@ export function NewPlayerTutorialWizard({
                     <strong>Values:</strong>
                   </Text>
                   <Text fontSize="sm">
-                    Crew: 5 | Power: 5 | EV: 10 | Duration: Open
-                  </Text>
-                  <Text mt={2} fontSize="sm">
-                    This step is illustrative only. No data is persisted.
+                    Crew: 5 | Power: 5 | EV: 10 (per-round) | Duration: Open
                   </Text>
                 </Box>
+                <Text fontSize="sm" color="fg">
+                  Contracts can only be entered into during the Governance
+                  Phase, so plan ahead!
+                </Text>
               </VStack>
             )}
             {step === 2 && (
               <VStack align="stretch" gap={4}>
+                <Text fontSize="md">
+                  In the Operations Phase, players build and place their
+                  infrastructure on the game board. You need the right amoung of
+                  EV to build it, and you need the available crew and power
+                  capacity to operate it and gain from its resource yield, so
+                  make sure you make deals with other players to get that
+                  capacity when you need it.
+                </Text>
+                <Text fontSize="md">
+                  Reference the game board to decide where to build. You can
+                  build only on the locations with icons that match your type,
+                  and each space can only support a maximum of three
+                  installations.
+                </Text>
+                <Text fontSize="md">
+                  Some spaces support multiple types of infrastructure, so
+                  choose wisely based on your strategy and specialization. And
+                  if there is space available, you can even move in on someone
+                  else's territory, since you can't own land on the moon!
+                </Text>
                 {playerId ? (
                   <>
                     <Text>
-                      Place your starter infrastructure. Choose a board location
-                      within 3 spaces of the commons.
+                      Place your starter infrastructure. Look at the game board
+                      and choose a location that will support the type of
+                      infrastructure you're building. Your spot must be within
+                      three spaces of the commons infrastructure on Astra-3/4/6.
                     </Text>
                     {starterInfra ? (
                       <Box p={4} borderWidth="1px" borderRadius="md" bg="bg">
+                        <Text mb={2} fontWeight="semibold">
+                          You have starter infrastructure based on your chosen
+                          specialization, but now you need to decide where to
+                          place it. Look at the game board, choose a spot, and
+                          place your infrastructure token when you're done.
+                        </Text>
                         <Text>
                           <strong>Type:</strong> {starterInfra.type}
                         </Text>
@@ -331,9 +307,7 @@ export function NewPlayerTutorialWizard({
                       onNameChange={setInfraLocationName}
                       valueNumber={infraLocationNumber}
                       onNumberChange={setInfraLocationNumber}
-                      helperText={
-                        "Leave blank to set later. Choose a region and optional slot number."
-                      }
+                      helperText={"Choose a region and slot number."}
                     />
                   </>
                 ) : (
@@ -345,6 +319,10 @@ export function NewPlayerTutorialWizard({
                     </Text>
                   </Box>
                 )}
+                <Text fontSize="sm" color="fg">
+                  Don't forget to always place your specific infrastructure
+                  token on the game board once you've chosen a location!
+                </Text>
               </VStack>
             )}
           </DialogBody>
