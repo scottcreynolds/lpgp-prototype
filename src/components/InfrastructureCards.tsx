@@ -13,7 +13,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import type { ReactElement } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaAtom,
   FaBolt,
@@ -24,7 +24,12 @@ import {
   FaTint,
   FaUsers,
 } from "react-icons/fa";
-import { FiArrowDown, FiArrowUp } from "react-icons/fi";
+import {
+  FiArrowDown,
+  FiArrowUp,
+  FiChevronDown,
+  FiChevronUp,
+} from "react-icons/fi";
 import { LuPickaxe } from "react-icons/lu";
 import {
   useAddPlayer,
@@ -58,6 +63,29 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
   const currentRound = useGameStore((state) => state.currentRound);
   const currentPhase = useGameStore((state) => state.currentPhase);
   const addPlayer = useAddPlayer();
+
+  // Persisted collapse state per player card (remember across sessions)
+  const [collapsedMap, setCollapsedMap] = useState<Record<string, boolean>>(
+    () => {
+      try {
+        const raw = localStorage.getItem("infraCardCollapsedMap");
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    }
+  );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "infraCardCollapsedMap",
+        JSON.stringify(collapsedMap)
+      );
+    } catch {
+      // ignore
+    }
+  }, [collapsedMap]);
 
   const getInfrastructureIcon = (type: string) => {
     if (type.includes("Habitat")) return <FaHome />;
@@ -394,6 +422,12 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
           const inactiveCount = player.infrastructure.filter(
             (i) => !i.is_active
           ).length;
+          const isCollapsed = collapsedMap[player.id] ?? false;
+          const toggleCollapsed = () =>
+            setCollapsedMap((prev) => ({
+              ...prev,
+              [player.id]: !prev[player.id],
+            }));
 
           return (
             <Box
@@ -512,6 +546,19 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                     </HStack>
                   </Box>
                   <HStack gap={2} align="center" flexShrink={0}>
+                    <IconButton
+                      size="sm"
+                      variant="ghost"
+                      aria-label={
+                        isCollapsed
+                          ? `Expand ${player.name}`
+                          : `Collapse ${player.name}`
+                      }
+                      onClick={toggleCollapsed}
+                      color="voidNavy.700"
+                    >
+                      {isCollapsed ? <FiChevronDown /> : <FiChevronUp />}
+                    </IconButton>
                     <Tooltip
                       content="Infrastructure Values"
                       showArrow
@@ -543,138 +590,140 @@ export function InfrastructureCards({ players }: InfrastructureCardsProps) {
                   </HStack>
                 </Flex>
 
-                {/* Infrastructure Counts */}
-                <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={2} color="fg">
-                    Infrastructure
-                  </Text>
-                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
-                    {Object.entries(infrastructureCounts).map(
-                      ([type, count]) => (
-                        <HStack key={type} gap={2}>
-                          <Box color="fg" fontSize="sm" bg="bg.panel">
-                            {getInfrastructureIcon(type)}
-                          </Box>
-                          <Text fontSize="sm" color="fg">
-                            {type}: {count}
-                          </Text>
-                        </HStack>
-                      )
+                <Box display={isCollapsed ? "none" : "block"}>
+                  {/* Infrastructure Counts */}
+                  <Box>
+                    <Text fontSize="sm" fontWeight="semibold" mb={2} color="fg">
+                      Infrastructure
+                    </Text>
+                    <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
+                      {Object.entries(infrastructureCounts).map(
+                        ([type, count]) => (
+                          <HStack key={type} gap={2}>
+                            <Box color="fg" fontSize="sm" bg="bg.panel">
+                              {getInfrastructureIcon(type)}
+                            </Box>
+                            <Text fontSize="sm" color="fg">
+                              {type}: {count}
+                            </Text>
+                          </HStack>
+                        )
+                      )}
+                    </SimpleGrid>
+                  </Box>
+
+                  {/* Capacity Stats */}
+                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
+                    {renderCapacityPanel(
+                      "Power",
+                      <FaBolt />,
+                      totals.total_power_used,
+                      totals.net_power_capacity,
+                      contractCapacity.powerIn,
+                      contractCapacity.powerOut
+                    )}
+                    {renderCapacityPanel(
+                      "Crew",
+                      <FaUsers />,
+                      totals.total_crew_used,
+                      totals.net_crew_capacity,
+                      contractCapacity.crewIn,
+                      contractCapacity.crewOut
                     )}
                   </SimpleGrid>
-                </Box>
 
-                {/* Capacity Stats */}
-                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
-                  {renderCapacityPanel(
-                    "Power",
-                    <FaBolt />,
-                    totals.total_power_used,
-                    totals.net_power_capacity,
-                    contractCapacity.powerIn,
-                    contractCapacity.powerOut
-                  )}
-                  {renderCapacityPanel(
-                    "Crew",
-                    <FaUsers />,
-                    totals.total_crew_used,
-                    totals.net_crew_capacity,
-                    contractCapacity.crewIn,
-                    contractCapacity.crewOut
-                  )}
-                </SimpleGrid>
-
-                {/* Financial Stats */}
-                <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
-                  <Box
-                    p={3}
-                    bg="bg"
-                    borderRadius="md"
-                    borderWidth={1}
-                    borderColor="border"
-                  >
-                    <HStack gap={2} mb={1}>
-                      <Box color="fg">
-                        <FaCoins />
-                      </Box>
-                      <Text fontSize="xs" fontWeight="bold" color="fg">
-                        Maintenance
-                      </Text>
-                    </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="fg">
-                      {totals.total_maintenance_cost} EV
-                    </Text>
-                  </Box>
-
-                  <Box
-                    p={3}
-                    bg={totals.total_yield > 0 ? "bg.success.subtle" : "bg"}
-                    borderRadius="md"
-                    borderWidth={1}
-                    borderColor="border"
-                  >
-                    <HStack gap={2} mb={1}>
-                      <Box color="fg">
-                        <FaChartLine />
-                      </Box>
-                      <Text fontSize="xs" fontWeight="bold" color="fg">
-                        Yield
-                      </Text>
-                    </HStack>
-                    <Text fontSize="lg" fontWeight="bold" color="fg">
-                      +{totals.total_yield} EV
-                    </Text>
-                  </Box>
-                </SimpleGrid>
-
-                {/* Net Income */}
-                <Box
-                  p={3}
-                  bg={
-                    totalNetEV > 0
-                      ? "bg.success.subtle"
-                      : totalNetEV < 0
-                      ? "bg.error.subtle"
-                      : "boldTangerine.contrast"
-                  }
-                  borderRadius="md"
-                >
-                  <Text
-                    fontSize="xs"
-                    color="fg"
-                    mb={2}
-                    fontWeight="bold"
-                    textAlign="center"
-                  >
-                    Net EV Per Round
-                  </Text>
-                  <Text
-                    fontSize="xl"
-                    fontWeight="bold"
-                    color="fg"
-                    textAlign="center"
-                  >
-                    {totalNetEV > 0 ? "+" : ""}
-                    {totalNetEV} EV
-                  </Text>
-                  <VStack gap={1} mt={2} align="stretch">
-                    <HStack justify="space-between" fontSize="xs">
-                      <Text color="fg.muted">Infrastructure:</Text>
-                      <Text color="fg" fontWeight="medium">
-                        {infrastructureNetEV > 0 ? "+" : ""}
-                        {infrastructureNetEV} EV
-                      </Text>
-                    </HStack>
-                    {contractEV !== 0 && (
-                      <HStack justify="space-between" fontSize="xs">
-                        <Text color="fg.muted">Contracts:</Text>
-                        <Text color="fg" fontWeight="medium">
-                          {contractEV > 0 ? "+" : ""}
-                          {contractEV} EV
+                  {/* Financial Stats */}
+                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
+                    <Box
+                      p={3}
+                      bg="bg"
+                      borderRadius="md"
+                      borderWidth={1}
+                      borderColor="border"
+                    >
+                      <HStack gap={2} mb={1}>
+                        <Box color="fg">
+                          <FaCoins />
+                        </Box>
+                        <Text fontSize="xs" fontWeight="bold" color="fg">
+                          Maintenance
                         </Text>
                       </HStack>
-                    )}
-                  </VStack>
+                      <Text fontSize="lg" fontWeight="bold" color="fg">
+                        {totals.total_maintenance_cost} EV
+                      </Text>
+                    </Box>
+
+                    <Box
+                      p={3}
+                      bg={totals.total_yield > 0 ? "bg.success.subtle" : "bg"}
+                      borderRadius="md"
+                      borderWidth={1}
+                      borderColor="border"
+                    >
+                      <HStack gap={2} mb={1}>
+                        <Box color="fg">
+                          <FaChartLine />
+                        </Box>
+                        <Text fontSize="xs" fontWeight="bold" color="fg">
+                          Yield
+                        </Text>
+                      </HStack>
+                      <Text fontSize="lg" fontWeight="bold" color="fg">
+                        +{totals.total_yield} EV
+                      </Text>
+                    </Box>
+                  </SimpleGrid>
+
+                  {/* Net Income */}
+                  <Box
+                    p={3}
+                    bg={
+                      totalNetEV > 0
+                        ? "bg.success.subtle"
+                        : totalNetEV < 0
+                        ? "bg.error.subtle"
+                        : "boldTangerine.contrast"
+                    }
+                    borderRadius="md"
+                  >
+                    <Text
+                      fontSize="xs"
+                      color="fg"
+                      mb={2}
+                      fontWeight="bold"
+                      textAlign="center"
+                    >
+                      Net EV Per Round
+                    </Text>
+                    <Text
+                      fontSize="xl"
+                      fontWeight="bold"
+                      color="fg"
+                      textAlign="center"
+                    >
+                      {totalNetEV > 0 ? "+" : ""}
+                      {totalNetEV} EV
+                    </Text>
+                    <VStack gap={1} mt={2} align="stretch">
+                      <HStack justify="space-between" fontSize="xs">
+                        <Text color="fg.muted">Infrastructure:</Text>
+                        <Text color="fg" fontWeight="medium">
+                          {infrastructureNetEV > 0 ? "+" : ""}
+                          {infrastructureNetEV} EV
+                        </Text>
+                      </HStack>
+                      {contractEV !== 0 && (
+                        <HStack justify="space-between" fontSize="xs">
+                          <Text color="fg.muted">Contracts:</Text>
+                          <Text color="fg" fontWeight="medium">
+                            {contractEV > 0 ? "+" : ""}
+                            {contractEV} EV
+                          </Text>
+                        </HStack>
+                      )}
+                    </VStack>
+                  </Box>
                 </Box>
               </VStack>
             </Box>
