@@ -279,17 +279,22 @@ export function GameStateDisplay({
                       game state and keep time.
                     </Box>
                     <Box as="li">
-                      Place the initial resource tokens on the board.
+                      Look at the game board. Take note of the commons
+                      infrastructure in Astra-3/4/6. You'll need to place your
+                      starter infrastructure nearby.
                     </Box>
                     <Box as="li">
                       Choose your player name and specialization with the ADD
-                      PLAYER button.
+                      PLAYER button. Or, if this is your first time, use the NEW
+                      PLAYER WALKTHROUGH button to be guided through the setup
+                      steps and a description of the gameplay.
                     </Box>
                     <Box as="li">
-                      Place your starter infrastructure on the board.
+                      Place your starter infrastructure tokens on the board.
                     </Box>
                     <Box as="li">
                       Review your player card and start planning your strategy.
+                      What will you build? Who will you need to trade with?
                     </Box>
                   </Box>
                   <Text mt={2}>
