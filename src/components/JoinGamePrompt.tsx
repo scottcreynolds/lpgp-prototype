@@ -17,6 +17,7 @@ import { useAddPlayer } from "../hooks/useGameData";
 import type { GamePhase, Specialization } from "../lib/database.types";
 import { getSession, setSession } from "../lib/gameSession";
 import { AddPlayerModal } from "./AddPlayerModal";
+import { NewPlayerTutorialWizard } from "./NewPlayerTutorialWizard";
 import { toaster } from "./ui/toasterInstance";
 
 interface JoinGamePromptProps {
@@ -26,6 +27,7 @@ interface JoinGamePromptProps {
 export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
   const [open, setOpen] = useState(false);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const addPlayer = useAddPlayer();
 
   // Open only if no session yet
@@ -48,6 +50,20 @@ export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
     }
     setOpen(false);
     setShowAddPlayer(true);
+  };
+
+  const handleOpenWizard = () => {
+    if (!canJoinAsPlayer) {
+      toaster.create({
+        title: "Cannot open walkthrough",
+        description: "Walkthrough is only available during Setup.",
+        type: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+    setOpen(false);
+    setWizardOpen(true);
   };
 
   const handleObserve = () => {
@@ -122,6 +138,13 @@ export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
                 Facilitate/Observe
               </Button>
               <Button
+                colorPalette="flamingoGold"
+                onClick={handleOpenWizard}
+                disabled={!canJoinAsPlayer}
+              >
+                New Player Walkthrough
+              </Button>
+              <Button
                 colorPalette="green"
                 onClick={handleSelectPlayerPath}
                 disabled={!canJoinAsPlayer}
@@ -142,6 +165,10 @@ export function JoinGamePrompt({ phase }: JoinGamePromptProps) {
           isPending={addPlayer.isPending}
         />
       )}
+      <NewPlayerTutorialWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+      />
     </>
   );
 }
