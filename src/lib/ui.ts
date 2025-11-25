@@ -6,7 +6,7 @@ export function ensureDialogClosed() {
     // close on keyboard events.
     try {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -21,9 +21,8 @@ export function ensureDialogClosed() {
       const els = document.querySelectorAll(sel);
       els.forEach((el) => el.remove());
     });
-  } catch (e) {
+  } catch (err) {
     // best-effort cleanup; do not throw
-    // eslint-disable-next-line no-console
-    console.warn("ensureDialogClosed failed:", e);
+    console.warn("ensureDialogClosed failed:", err);
   }
 }

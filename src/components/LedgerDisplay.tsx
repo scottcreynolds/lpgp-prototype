@@ -163,7 +163,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                   .order("created_at", { ascending: false });
 
                 if (error) throw error;
-                const rows = (data || []) as any[];
+                const rows = (data || []) as Record<string, unknown>[];
 
                 const cols = [
                   "id",
@@ -182,7 +182,7 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
                   "game_id",
                 ];
 
-                const escape = (v: any) => {
+                const escape = (v: unknown) => {
                   if (v === null || v === undefined) return "";
                   const s = typeof v === "string" ? v : JSON.stringify(v);
                   return `"${s.replace(/"/g, '""')}"`;
@@ -190,19 +190,24 @@ export function LedgerDisplay({ players, currentRound }: LedgerDisplayProps) {
 
                 const csv = [cols.join(",")]
                   .concat(
-                    rows.map((r) =>
-                      cols
+                    rows.map((r) => {
+                      const row = r as Record<string, unknown>;
+                      return cols
                         .map((c) => {
                           if (c === "player_name") {
+                            const playersObj = row.players as
+                              | Record<string, unknown>
+                              | undefined;
                             return escape(
-                              r.players?.name ?? r.player_name ?? ""
+                              playersObj?.name ?? row.player_name ?? ""
                             );
                           }
-                          if (c === "metadata") return escape(r.metadata ?? "");
-                          return escape(r[c]);
+                          if (c === "metadata")
+                            return escape(row.metadata ?? "");
+                          return escape(row[c]);
                         })
-                        .join(",")
-                    )
+                        .join(",");
+                    })
                   )
                   .join("\n");
 

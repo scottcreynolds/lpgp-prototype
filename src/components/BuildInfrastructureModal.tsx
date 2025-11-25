@@ -182,7 +182,7 @@ export function BuildInfrastructureModal({
         closeTriggerRef.current?.click();
         try {
           window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       }, 0);
