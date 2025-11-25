@@ -105,14 +105,12 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 
 ## High Priority
 
-- editable contracts
 - "how to use the game board" help and link to game board (configurable)
 - facilitator prompts/tips?
 - point to the game board more
 - Location Capacity Checking
 - High Rep Bonus randomize if tied
 - emphasize high rep bonus value
-- remove timer, add contract limit (make congigurable)
 - assign user to player when they create it
 - icons on infrastructure
 - pop up tokens/icons reference guide
@@ -123,6 +121,7 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 
 ## Future
 
+- editable contracts
 - events and event cards
 - buy into commons
 - contract templates "build on behalf, lease power or habitat, etc"
@@ -132,6 +131,8 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 - event card import
 - values editor
 - assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces) (may not need)
+
+- remove timer, add contract limit (make congigurable)
 
 - editable infrastructure values
 - editable win condition
