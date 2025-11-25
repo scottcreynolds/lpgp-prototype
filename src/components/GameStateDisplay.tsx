@@ -217,19 +217,14 @@ export function GameStateDisplay({
               <Text color="fg" fontSize="sm" mb={2}>
                 {(() => {
                   const parts: string[] = [];
-                  const {
-                    evThreshold,
-                    repThreshold,
-                    combinedThreshold,
-                    autoWinEnabled,
-                  } = gameSettings.win;
+                  const { evThreshold, repThreshold, combinedThreshold } =
+                    gameSettings.win;
                   if (evThreshold && evThreshold > 0)
                     parts.push(`EV ≥ ${evThreshold}`);
                   if (repThreshold && repThreshold > 0)
                     parts.push(`REP ≥ ${repThreshold}`);
                   if (combinedThreshold && combinedThreshold > 0)
                     parts.push(`EV+REP ≥ ${combinedThreshold}`);
-                  parts.push(`Auto-win: ${autoWinEnabled ? "On" : "Off"}`);
                   return `Win Conditions: ${parts.join("; ")}`;
                 })()}
               </Text>
