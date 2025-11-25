@@ -105,38 +105,26 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 
 ## High Priority
 
-- better example contracts
 - editable contracts
 - "how to use the game board" help and link to game board (configurable)
 - facilitator prompts/tips?
 - point to the game board more
-- choosable infrastructure locations and check capacity
-- persist turn order to everyone and implement next player
+- Location Capacity Checking
 - High Rep Bonus randomize if tied
 - emphasize high rep bonus value
 - remove timer, add contract limit (make congigurable)
-- more contract and build clarity?
-- maybe contract types
-- why is specialty meaningful?
-- buy into commons
-- Labels in general could be more readable, tooltips on things like "build on behalf of"
-- additional tips (Setup tips exist, need more)
-- context-specific tooltips
-- move manual adjustment control
 - assign user to player when they create it
-- events and event cards
 - icons on infrastructure
-- pop up infrastructure reference table
 - pop up tokens/icons reference guide
 - turn order persistence & cross-client visibility (backend)
-- editable infrastructure values
-- editable win condition
 - editable rep per contract/turn off system
 - add tips to modals like build infrastrucuture/create contracts
 - add texxt to manual adjustment
 
 ## Future
 
+- events and event cards
+- buy into commons
 - contract templates "build on behalf, lease power or habitat, etc"
 - turn planner
 - skill tree
@@ -144,3 +132,6 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 - event card import
 - values editor
 - assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces) (may not need)
+
+- editable infrastructure values
+- editable win condition

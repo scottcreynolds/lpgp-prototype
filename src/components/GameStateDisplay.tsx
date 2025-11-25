@@ -39,6 +39,7 @@ export function GameStateDisplay({
   const gameEnded = useGameStore((s) => s.gameEnded);
   const victoryType = useGameStore((s) => s.victoryType);
   const winnerIds = useGameStore((s) => s.winnerIds);
+  const useTimer = useGameStore((s) => s.usePhaseTimer);
 
   const [phaseSummaryOpen, setPhaseSummaryOpen] = useState(false);
 
@@ -171,7 +172,7 @@ export function GameStateDisplay({
             />
 
             <Box flexShrink={0}>
-              {phase !== "Setup" && !gameEnded && (
+              {useTimer && phase !== "Setup" && !gameEnded && (
                 <PhaseTimer round={round} phase={phase} />
               )}
             </Box>

@@ -41,6 +41,7 @@ interface GameStore {
   clearOperationsTurnOrder: (round: number) => void;
 
   // Timer actions
+  usePhaseTimer?: boolean;
   ensureTimer: (round: number, phase: GamePhase) => void;
   setTimerMinutes: (round: number, phase: GamePhase, minutes: number) => void;
   startTimer: (round: number, phase: GamePhase) => void;
@@ -59,6 +60,7 @@ const initialState = {
   dashboardData: null,
   timers: {} as Record<PhaseKey, PhaseTimerState>,
   operationsTurnOrder: {} as Record<number, string[]>,
+  usePhaseTimer: false,
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({

@@ -328,8 +328,8 @@ export function BuildInfrastructureModal({
                         </NativeSelect.Field>
                         <NativeSelect.Indicator />
                       </NativeSelect.Root>
-                      <Field.HelperText>
-                        You can build infrastructure for another player
+                      <Field.HelperText color="fg">
+                        TIP: You can build infrastructure for another player
                       </Field.HelperText>
                     </Field.Root>
 
