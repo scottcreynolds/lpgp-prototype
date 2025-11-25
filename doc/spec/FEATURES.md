@@ -105,7 +105,6 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 
 ## High Priority
 
-- persistent actions row in top instead of in panels
 - better example contracts
 - editable contracts
 - "how to use the game board" help and link to game board (configurable)
@@ -136,14 +135,12 @@ The existing [add player modal](../../src/components/AddPlayerModal.tsx) should 
 - add tips to modals like build infrastrucuture/create contracts
 - add texxt to manual adjustment
 
-## Maybe
+## Future
 
 - contract templates "build on behalf, lease power or habitat, etc"
-- next player button for moving through operations?
 - turn planner
 - skill tree
 - scenario import
 - event card import
 - values editor
-- player turns
 - assigning power/crew to specific infrastructure (currently contracts share capacity but don't assign to specific pieces) (may not need)

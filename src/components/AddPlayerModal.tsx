@@ -148,6 +148,7 @@ export function AddPlayerModal({
                   Company Name (Choose a unique name for your company)
                 </Field.Label>
                 <Input
+                  _placeholder={{ color: "inherit" }}
                   placeholder="Enter company name"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}

@@ -315,6 +315,7 @@ export function CreateContractModal({
                           onChange={(e) => setEvFromAToB(e.target.value)}
                           disabled={formDisabled}
                           placeholder="0"
+                          _placeholder={{ color: "inherit" }}
                         />
                       </Field.Root>
                       <Field.Root flex={1}>
@@ -327,6 +328,7 @@ export function CreateContractModal({
                           onChange={(e) => setEvFromBToA(e.target.value)}
                           disabled={formDisabled}
                           placeholder="0"
+                          _placeholder={{ color: "inherit" }}
                         />
                       </Field.Root>
                     </HStack>
@@ -388,6 +390,7 @@ export function CreateContractModal({
                         value={powerFromAToB}
                         onChange={(e) => setPowerFromAToB(e.target.value)}
                         placeholder="0"
+                        _placeholder={{ color: "inherit" }}
                         disabled={formDisabled}
                       />
                     </Field.Root>
@@ -400,6 +403,7 @@ export function CreateContractModal({
                         value={powerFromBToA}
                         onChange={(e) => setPowerFromBToA(e.target.value)}
                         placeholder="0"
+                        _placeholder={{ color: "inherit" }}
                         disabled={formDisabled}
                       />
                     </Field.Root>
@@ -421,6 +425,7 @@ export function CreateContractModal({
                         value={crewFromAToB}
                         onChange={(e) => setCrewFromAToB(e.target.value)}
                         placeholder="0"
+                        _placeholder={{ color: "inherit" }}
                         disabled={formDisabled}
                       />
                     </Field.Root>
@@ -433,6 +438,7 @@ export function CreateContractModal({
                         value={crewFromBToA}
                         onChange={(e) => setCrewFromBToA(e.target.value)}
                         placeholder="0"
+                        _placeholder={{ color: "inherit" }}
                         disabled={formDisabled}
                       />
                     </Field.Root>
@@ -447,6 +453,7 @@ export function CreateContractModal({
                     value={durationRounds}
                     onChange={(e) => setDurationRounds(e.target.value)}
                     placeholder="Leave empty for permanent"
+                    _placeholder={{ color: "inherit" }}
                     disabled={formDisabled}
                   />
                   <Text fontSize="xs" color="fg" mt={1}>

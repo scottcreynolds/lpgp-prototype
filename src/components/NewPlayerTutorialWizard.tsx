@@ -181,6 +181,7 @@ export function NewPlayerTutorialWizard({
                   <Field.Label>Company Name</Field.Label>
                   <Input
                     placeholder="Enter company name"
+                    _placeholder={{ color: "inherit" }}
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     autoFocus

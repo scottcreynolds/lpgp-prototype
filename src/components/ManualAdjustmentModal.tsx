@@ -128,7 +128,7 @@ export function ManualAdjustmentModal({
         <DialogContent
           css={{
             position: "fixed",
-            top: "50%",
+            top: "40%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             maxHeight: "90vh",
@@ -181,6 +181,7 @@ export function ManualAdjustmentModal({
                 <Input
                   type="number"
                   placeholder="0"
+                  _placeholder={{ color: "inherit" }}
                   value={evChange === 0 ? "" : evChange}
                   onChange={(e) => {
                     const value =
@@ -188,7 +189,7 @@ export function ManualAdjustmentModal({
                     setEvChange(value);
                   }}
                 />
-                <Field.HelperText>
+                <Field.HelperText color="fg">
                   Positive values add EV, negative values subtract
                 </Field.HelperText>
               </Field.Root>
@@ -199,6 +200,7 @@ export function ManualAdjustmentModal({
                 <Input
                   type="number"
                   placeholder="0"
+                  _placeholder={{ color: "inherit" }}
                   value={repChange === 0 ? "" : repChange}
                   onChange={(e) => {
                     const value =
@@ -206,7 +208,7 @@ export function ManualAdjustmentModal({
                     setRepChange(value);
                   }}
                 />
-                <Field.HelperText>
+                <Field.HelperText color="fg">
                   Positive values add REP, negative values subtract
                 </Field.HelperText>
               </Field.Root>
@@ -258,11 +260,12 @@ export function ManualAdjustmentModal({
                 <Field.Label>Reason (Required)</Field.Label>
                 <Textarea
                   placeholder="Explain why this adjustment is being made..."
+                  _placeholder={{ color: "inherit" }}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
                 />
-                <Field.HelperText>
+                <Field.HelperText color="fg">
                   This will be logged in the ledger for research purposes
                 </Field.HelperText>
               </Field.Root>

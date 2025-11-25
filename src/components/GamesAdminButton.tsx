@@ -105,6 +105,7 @@ export default function GamesAdminButton({
               <Input
                 size="xs"
                 placeholder="Filter games..."
+                _placeholder={{ color: "inherit" }}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 width="160px"

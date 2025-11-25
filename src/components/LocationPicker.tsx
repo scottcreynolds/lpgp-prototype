@@ -46,6 +46,7 @@ export default function LocationPicker({
           type="number"
           min={0}
           placeholder="#"
+          _placeholder={{ color: "inherit" }}
           value={valueNumber}
           onChange={handleNumberChange}
           width="80px"
