@@ -60,7 +60,7 @@ const initialState = {
   dashboardData: null,
   timers: {} as Record<PhaseKey, PhaseTimerState>,
   operationsTurnOrder: {} as Record<number, string[]>,
-  usePhaseTimer: false,
+  usePhaseTimer: true,
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({

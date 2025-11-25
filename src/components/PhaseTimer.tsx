@@ -119,7 +119,7 @@ export function PhaseTimer({ round, phase }: PhaseTimerProps) {
       borderColor="border"
     >
       <Text fontSize="sm" color="fg" mb={1} fontWeight="semibold">
-        Timer
+        Phase Timer
       </Text>
       <HStack gap={2} align="center">
         <Text
