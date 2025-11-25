@@ -152,11 +152,11 @@ export function NewPlayerTutorialWizard({
         <DialogContent
           css={{
             position: "fixed",
-            top: "50%",
+            top: "40%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "80vw",
-            maxWidth: "1200px",
+            width: "90vw",
+            maxWidth: "90vw",
             maxHeight: "90vh",
             overflow: "auto",
           }}

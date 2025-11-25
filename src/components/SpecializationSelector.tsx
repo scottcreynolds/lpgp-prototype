@@ -146,7 +146,7 @@ export default function SpecializationSelector({
                 outline: "none",
                 boxShadow: `0 0 0 3px var(--chakra-colors-${colorKey}-200)`,
               }}
-              bg={selected ? `${colorKey}.50` : "gray.50"}
+              bg={selected ? `${colorKey}.200` : "bg"}
               filter={selected ? "none" : "grayscale(0.4) brightness(0.95)"}
               opacity={selected ? 1 : 0.85}
               _active={{ transform: "scale(0.98)" }}
@@ -175,7 +175,7 @@ export default function SpecializationSelector({
                 src={SPECIALIZATION_IMAGES[spec]}
                 alt={`${spec} card`}
                 objectFit="contain"
-                width="220px"
+                width="300px"
                 height="auto"
                 display="block"
                 style={{

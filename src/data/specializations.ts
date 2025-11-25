@@ -10,7 +10,6 @@ export interface SpecializationDetails {
 export const SPECIALIZATION_ORDER: Specialization[] = [
   "Resource Extractor",
   "Infrastructure Provider",
-  "Operations Manager",
 ];
 
 export const SPECIALIZATION_DETAILS: Record<
