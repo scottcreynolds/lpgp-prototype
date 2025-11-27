@@ -3,6 +3,7 @@ import {
   Badge,
   Box,
   Button,
+  CloseButton,
   DialogActionTrigger,
   DialogBackdrop,
   DialogBody,
@@ -237,7 +238,7 @@ export function BuildInfrastructureModal({
         <DialogContent
           css={{
             position: "fixed",
-            top: "50%",
+            top: "40%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             maxHeight: "90vh",
@@ -497,7 +498,7 @@ export function BuildInfrastructureModal({
           </DialogFooter>
 
           <DialogCloseTrigger asChild>
-            <button
+            <CloseButton
               ref={closeTriggerRef}
               aria-hidden
               style={{ display: "none" }}
