@@ -6,52 +6,124 @@ This guide will walk you through setting up the Lunar Policy Gaming Platform das
 
 - Node.js 18+ installed
 - pnpm package manager
-- A Supabase account (free tier works fine)
+- Optional: A Supabase account (free tier works fine)
 
-## Step 1: Supabase Setup
+## Backend Modes
+
+- Mock mode (default): If `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are missing, the app uses a localStorage-backed mock client and logs: "🎭 Using mock data...".
+- Real Supabase: Add `.env.local` with those vars. See [database/README.md](../database/README.md).
+
+## Step 1: Supabase Setup (Optional)
+
+Only needed if you want real-time multi-user via Supabase instead of mock mode.
 
 ### 1.1 Create a Supabase Project
 
-1. Go to [supabase.com](https://supabase.com) and sign in/create an account
-2. Click "New Project"
-3. Fill in the project details:
+1. Go to <https://supabase.com> and create/sign in.
+2. Click "New Project".
+3. Fill in details:
    - Project name: `lpgp-prototype` (or your choice)
-   - Database password: Save this somewhere safe
-   - Region: Choose closest to you
-4. Click "Create new project" and wait for it to initialize (~2 minutes)
+   - Database password: Save it
+   - Region: Closest to you
+4. Wait for initialization (~2 minutes).
 
-### 1.2 Run Database Migrations
+### 1.2 Run Database Migrations (production-ready)
 
-1. In your Supabase project, go to the **SQL Editor** (left sidebar)
-2. Run the migration files in order by copying and pasting each file's contents:
-   - First: `database/migrations/001_initial_schema.sql`
-   - Second: `database/migrations/002_seed_data.sql`
-   - Third: `database/migrations/003_rpc_functions.sql`
-3. After each file, click "Run" and verify there are no errors
+For full feature parity and fixes, run ALL files in `database/migrations` sequentially (numeric order). Use the Supabase SQL Editor (paste contents per file) or Supabase CLI against your project. Verify no errors after each file.
+
+Complete order (as of repo state):
+
+1. `001_initial_schema.sql`
+2. `002_seed_data.sql`
+3. `003_rpc_functions.sql`
+4. `004_setup_phase.sql` — adds Setup phase (round 0)
+5. `005_reset_game_setup.sql` — reset starts in Setup
+6. `006_infrastructure_and_contracts.sql`
+7. `007_infrastructure_and_contract_rpcs.sql`
+8. `008_round_end_processing.sql`
+9. `009_update_dashboard_summary.sql`
+10. `010_advance_round.sql`
+11. `011_fix_starter_infrastructure.sql`
+12. `012_multigame_support.sql` — adds game_id scoping
+13. `013_null_round_defaults.sql`
+14. `014_round_coalesce_safety.sql`
+15. `015_add_player_uuid_retry.sql`
+16. `016_fix_game_state_multi_game.sql`
+17. `017_fix_game_state_multi_game_retry.sql`
+18. `018_game_state_unique_game_id.sql`
+19. `019_auto_activation_and_round_end_deactivation.sql`
+20. `020_generic_round_end_auto_deactivate.sql`
+21. `021_build_permissions.sql`
+22. `022_game_admin_functions.sql`
+23. `023_starter_infra_always_active.sql`
+24. `024_auto_activate_extractors.sql`
+25. `025_game_end_state.sql`
+26. `026_fix_evaluate_end_game_ambiguity.sql`
+27. `027_fix_evaluate_end_game_force_path.sql`
+28. `028_fix_evaluate_end_game_uuid_array.sql`
+29. `029_contract_rep_bonus.sql`
+30. `030_contract_lifecycle_rep.sql`
+31. `031_set_starter_infra_location.sql`
+
+Notes:
+
+- Multi-game: RPCs accept `p_game_id` and data is scoped by `game_id`. The app will add `?game=<uuid>` to the URL if missing.
+- Realtime publication must include relevant tables (see examples in [database/README.md](../database/README.md)).
+- Some files are corrective or retry patches; they are required for parity.
+
+Utility (optional) — zsh helpers for ordering and previewing:
+
+```zsh
+# List migrations in run order
+ls -1 database/migrations/*.sql | sort
+
+# Preview a single file before running (replace filename)
+bat -n database/migrations/012_multigame_support.sql  # or: sed -n '1,120p' ...
+
+# Generate a concatenated preview bundle (do NOT paste blindly; review first)
+ls -1 database/migrations/*.sql | sort | xargs cat > /tmp/lpgp_migrations_bundle.sql
+open /tmp/lpgp_migrations_bundle.sql
+```
+
+Supabase CLI (optional): If you prefer CLI over the SQL Editor, authenticate and target your project, then apply files one-by-one to preserve visibility of errors:
+
+```zsh
+# Install CLI if needed
+npm install -g supabase
+
+# Login and link your project
+supabase login
+supabase link --project-ref <your-project-ref>
+
+# Apply each migration in numeric order for clear error handling
+for f in $(ls -1 database/migrations/*.sql | sort); do
+  echo "Applying $f" && supabase db execute --file "$f" || { echo "Error on $f"; break; }
+done
+```
 
 ### 1.3 Get Your API Credentials
 
-1. Go to **Project Settings** → **API** (in left sidebar)
-2. Find and copy these two values:
-   - **Project URL** (looks like `https://xxxxx.supabase.co`)
-   - **anon public** key (under "Project API keys")
+Project Settings → API:
+
+- Project URL (e.g. `https://xxxxx.supabase.co`)
+- anon public key (under "Project API keys")
 
 ## Step 2: Local Environment Setup
 
-### 2.1 Create Environment File
-
-Create a `.env.local` file in the project root:
+### 2.1 Create Environment File (only for real Supabase)
 
 ```bash
 cp .env.example .env.local
 ```
 
-Then edit `.env.local` and add your Supabase credentials:
+Edit `.env.local`:
 
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ```
+
+If you omit `.env.local`, the app will run in mock mode automatically.
 
 ### 2.2 Install Dependencies
 
@@ -67,104 +139,115 @@ pnpm install
 pnpm dev
 ```
 
-The app should now be running at `http://localhost:5173`
+- App runs at `http://localhost:5173`
+- Mock mode shows: "🎭 Using mock data..."
 
 ### 3.2 Initialize the Game
 
-1. Open the application in your browser
-2. Click the **"Start New Game"** button in the header
-3. Confirm the action
-4. You should see:
-   - 4 players with 50 EV and 10 REP each
-   - Round 1 - Governance Phase
-   - Infrastructure cards showing starter equipment
+- The app URL will include `?game=<uuid>` automatically if missing.
+- In Setup phase (round 0), use the header controls:
+  - Start New Game: initializes the selected game instance
+  - Advance Phase: from Setup → Round 1 Governance
+
+You should see:
+
+- 1 default player (mock and SQL may differ based on current migrations)
+- Round 0 – Setup (then Round 1 – Governance after advancing)
+- Starter infrastructure active for the starter player
 
 ## Step 4: Test the Dashboard
 
 ### 4.1 Test Phase Advancement
 
-1. Click **"Next Phase"** button
-2. Verify it advances to "Round 1 - Operations Phase"
-3. Click again to advance to "Round 2 - Governance Phase"
+1. Click "Begin Round 1" (from Setup) or "Next Phase" as appropriate.
+2. Verify transitions:
+   - Setup → Round 1 Governance
+   - Governance → Operations
+   - Operations → Round 2 Governance
 
-### 4.2 Test Real-Time Updates
+### 4.2 Test Real-Time Updates (Supabase only)
 
-1. Open the Supabase SQL Editor
-2. Manually update a player's EV:
+1. Open Supabase SQL Editor and update a player’s EV:
+
    ```sql
-   UPDATE players SET ev = 100 WHERE name = 'Player 1';
+   UPDATE players SET ev = 100 WHERE name = 'Luna Corp';
    ```
-3. The dashboard should update within ~5 seconds
-4. Try opening the app in multiple browser tabs and clicking "Next Phase" - both should update
+
+2. The dashboard should update via React Query invalidations.
 
 ### 4.3 Test Concurrent Update Protection
 
-1. Open the app in two browser windows side-by-side
-2. Click "Next Phase" in both windows **quickly** (within 1 second)
-3. Only one should succeed; the other should show an error about version mismatch
-4. Refresh the failed window - it should now show the correct phase
+- Open two browser windows for the same `?game=<uuid>`
+- Click "Next Phase" in both quickly
+- One succeeds; the other shows a version mismatch (optimistic locking)
+- Retry using the updated version or refresh
 
 ## Troubleshooting
 
-### "Failed to fetch dashboard" Error
+### "Failed to fetch dashboard"
 
-- **Check environment variables**: Make sure `.env.local` has correct values
-- **Verify migrations**: Ensure all 3 migration files ran without errors in Supabase
-- **Check browser console**: Look for network errors or 401/403 responses
+- Check `.env.local` values (real backend only)
+- Verify migrations ran without errors
+- Inspect browser console/network for 401/403
 
-### "Version mismatch" Errors
+### "Version mismatch"
 
-This is actually **expected behavior** when two users try to advance the phase simultaneously. The optimistic locking is working correctly. Simply refresh and try again.
+Expected when two clients advance simultaneously. Optimistic locking is working. Refresh and try again.
 
 ### No Data Showing
 
-1. Make sure you clicked "Start New Game" to initialize data
-2. Check Supabase SQL Editor:
-   ```sql
-   SELECT * FROM players;
-   SELECT * FROM game_state;
-   ```
-3. If tables are empty, re-run the `reset_game()` function:
-   ```sql
-   SELECT * FROM reset_game();
-   ```
+- Ensure you initialized via "Start New Game" in header
+- In Supabase:
+
+  ```sql
+  SELECT * FROM players;
+  SELECT * FROM game_state;
+  ```
+
+- If empty, run:
+
+  ```sql
+  SELECT * FROM reset_game('your-game-uuid');
+  ```
+
+Or use CLI with a param:
+
+```zsh
+supabase db query "SELECT * FROM reset_game('your-game-uuid');"
+```
 
 ## Architecture Overview
 
+- Single data-access facade: [`src/lib/supabase.ts`](../src/lib/supabase.ts)
+- Server state via TanStack Query; UI state via Zustand. See hooks in [`src/hooks/useGameData.ts`](../src/hooks/useGameData.ts) and store in [`src/store/gameStore.ts`](../src/store/gameStore.ts).
+- Mock vs real is automatically selected; do not check env vars elsewhere.
+
 ### Data Flow
 
-1. **Dashboard** component fetches data via `useDashboardData()` hook
-2. Hook calls Supabase RPC function `get_dashboard_summary()`
-3. Data is cached in TanStack Query and synced to Zustand store
-4. Real-time subscriptions listen for database changes
-5. On change, queries are invalidated and refetched automatically
+1. Dashboard fetches via `useDashboardData()` → `get_dashboard_summary(p_game_id)`
+2. React Query caches and syncs to Zustand
+3. Supabase realtime invalidates the correct query keys
 
 ### Race Condition Protection
 
-The `advance_phase()` RPC function uses **optimistic locking**:
-- Takes current `version` as parameter
-- Only updates if database version matches
-- Returns error if versions don't match (someone else updated first)
-- Increments version on successful update
+`advance_phase(p_game_id, current_version)` uses optimistic locking:
 
-### Key Technologies
+- Compares provided version to DB
+- Updates only on match, then increments
 
-- **React 19** - UI framework
-- **Chakra UI v3** - Component library
-- **TanStack Query** - Server state management
-- **Zustand** - Client state management
-- **Supabase** - Backend (Postgres + real-time subscriptions)
-- **TypeScript** - Type safety
+## Development
+
+- Build: `pnpm build`
+- Type check: `pnpm exec tsc --noEmit`
+- Lint: `pnpm lint`
 
 ## Next Steps
 
-Now that the basic dashboard is working, you can:
+- Player name editing
+- Governance phase timer
+- Manual EV/REP adjustments
+- Infrastructure building UI
+- Contracts system
+- Territory claiming
 
-1. Add player name editing functionality
-2. Implement the timer for Governance phase
-3. Add manual EV/REP adjustment controls
-4. Create infrastructure building interface
-5. Implement contracts system
-6. Add territory claiming functionality
-
-See the [PRD](/doc/PRD.md) and [Rules](/doc/rules.md) for full feature specifications.
+See PRD: [doc/PRD.md](./PRD.md) and Rules: [doc/rules.md](./rules.md) for specifications.

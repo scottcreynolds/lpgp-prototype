@@ -11,14 +11,73 @@ This directory contains SQL migrations for the Lunar Policy Gaming Platform data
 
 ## Setup Instructions
 
-### 1. Run Migrations
+### 1. Run Migrations (production-ready)
 
-In your Supabase project, navigate to the SQL Editor and run the migration files in order:
+Run ALL files in `database/migrations` sequentially (numeric order) for full parity and to include corrective patches. Use the Supabase SQL Editor (paste contents per file) or Supabase CLI. Verify no errors after each file.
 
-1. `001_initial_schema.sql` - Creates tables and indexes
-2. `002_seed_data.sql` - Populates infrastructure definitions
-3. `003_rpc_functions.sql` - Creates RPC functions
-4. `012_multigame_support.sql` - Adds multi-game scoping (game_id) and updates RPCs
+Complete order (as of repo state):
+
+1. `001_initial_schema.sql`
+2. `002_seed_data.sql`
+3. `003_rpc_functions.sql`
+4. `004_setup_phase.sql`
+5. `005_reset_game_setup.sql`
+6. `006_infrastructure_and_contracts.sql`
+7. `007_infrastructure_and_contract_rpcs.sql`
+8. `008_round_end_processing.sql`
+9. `009_update_dashboard_summary.sql`
+10. `010_advance_round.sql`
+11. `011_fix_starter_infrastructure.sql`
+12. `012_multigame_support.sql`
+13. `013_null_round_defaults.sql`
+14. `014_round_coalesce_safety.sql`
+15. `015_add_player_uuid_retry.sql`
+16. `016_fix_game_state_multi_game.sql`
+17. `017_fix_game_state_multi_game_retry.sql`
+18. `018_game_state_unique_game_id.sql`
+19. `019_auto_activation_and_round_end_deactivation.sql`
+20. `020_generic_round_end_auto_deactivate.sql`
+21. `021_build_permissions.sql`
+22. `022_game_admin_functions.sql`
+23. `023_starter_infra_always_active.sql`
+24. `024_auto_activate_extractors.sql`
+25. `025_game_end_state.sql`
+26. `026_fix_evaluate_end_game_ambiguity.sql`
+27. `027_fix_evaluate_end_game_force_path.sql`
+28. `028_fix_evaluate_end_game_uuid_array.sql`
+29. `029_contract_rep_bonus.sql`
+30. `030_contract_lifecycle_rep.sql`
+31. `031_set_starter_infra_location.sql`
+
+Utilities (zsh):
+
+```zsh
+# List migrations in run order
+ls -1 database/migrations/*.sql | sort
+
+# Preview a specific file (replace filename)
+bat -n database/migrations/012_multigame_support.sql  # or: sed -n '1,120p' ...
+
+# Build a preview bundle (review before applying)
+ls -1 database/migrations/*.sql | sort | xargs cat > /tmp/lpgp_migrations_bundle.sql
+open /tmp/lpgp_migrations_bundle.sql
+```
+
+Supabase CLI (optional):
+
+```zsh
+# Install CLI
+npm install -g supabase
+
+# Authenticate and link your project
+supabase login
+supabase link --project-ref <your-project-ref>
+
+# Apply migrations sequentially with error stop
+for f in $(ls -1 database/migrations/*.sql | sort); do
+ echo "Applying $f" && supabase db execute --file "$f" || { echo "Error on $f"; break; }
+done
+```
 
 ### 2. Configure Environment Variables
 
@@ -32,6 +91,25 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 ### 3. Initialize Game State
 
 The app passes a game id via the URL (`?game=<uuid>`). On first load or when creating a new game, the client calls `ensure_game(p_game_id uuid)` and uses scoped RPCs. Clicking "Start New Game" in the header navigates to a new `?game=` and resets just that game's data via `reset_game(p_game_id uuid)`.
+
+Quick checks:
+
+```sql
+SELECT * FROM players;
+SELECT * FROM game_state;
+```
+
+If empty, initialize/reset a specific game id:
+
+```sql
+SELECT * FROM reset_game('your-game-uuid');
+```
+
+CLI example:
+
+```zsh
+supabase db query "SELECT * FROM reset_game('your-game-uuid');"
+```
 
 ## Database Schema
 
