@@ -131,7 +131,6 @@ Game state changes trigger automatic refetches across all connected clients (or 
 - If you see a version mismatch on phase advance, another user was faster; refresh and retry (optimistic locking working as intended).
 - Keep an eye on EV/REP deltas in the ledger for transparency; every manual adjustment should have a rationale.
 - Infrastructure auto-activation/deactivation at round end can change strategy—remind players before Operations concludes.
-- For desync or inconsistent data, run `reset_game('<uuid>')` (Supabase) or “Start New Game” (mock) and reapply intended state.
 - Record notable decisions or narrative events separately if used for research (ledger captures quantitative changes only).
 - When testing new rules, isolate with a new `game_id` so existing sessions remain unaffected.
 - Use `doc/instructions.md` for player guidance and `doc/ORIENTATION.md` for deeper system context during facilitation.
